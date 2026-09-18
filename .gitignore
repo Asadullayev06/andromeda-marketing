@@ -1,0 +1,24 @@
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Python / backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/venv/
+*.pyc
+
+# Secrets & env
+.env
+.env.*
+!.env.example
+backend/.env
+!backend/.env.example
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
