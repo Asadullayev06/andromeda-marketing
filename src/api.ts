@@ -4,7 +4,11 @@
 
 import { authHeaders, clearAuth } from './auth';
 
-const BASE = '/api';
+// In production the frontend and backend are separate Coolify services on
+// different domains, so point the client at the backend via a build-time env
+// var (e.g. VITE_API_BASE_URL=https://api-marketing.andromeda-ai.uz). In dev
+// this is unset and we fall back to '/api', which Vite proxies to :8010.
+const BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;
