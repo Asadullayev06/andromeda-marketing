@@ -131,6 +131,8 @@ export async function fetchLookups(): Promise<Lookups> {
 export interface CompanyStockRow {
   productId: string; name: string; manufacturerLabel: string | null;
   projectName: string | null; catalogCategory: string | null; qty: number;
+  customsQty: number; orderQty: number; avgSales: number;
+  warehouseQty: number; coverageMonths: number | null;
 }
 export interface CompanyStockPage extends Page<CompanyStockRow> { productsInStock: number; }
 
@@ -145,12 +147,33 @@ export async function listCompanyStock(params: {
     items: r.items.map((x: any) => ({
       productId: x.product_id, name: x.name, manufacturerLabel: x.manufacturer_label,
       projectName: x.project_name, catalogCategory: x.catalog_category, qty: x.qty,
+      customsQty: x.customs_qty, orderQty: x.order_qty, avgSales: x.avg_sales,
+      warehouseQty: x.warehouse_qty, coverageMonths: x.coverage_months,
     })),
   };
 }
 
 export async function setCompanyStock(productId: string, qty: number): Promise<void> {
   await request(`/company-stock/${productId}`, { method: 'PUT', body: JSON.stringify({ qty }) });
+}
+
+export interface WarehouseBreakdownRow {
+  warehouseId: string; warehouseName: string; warehouseCode: string | null; quantity: number;
+}
+export interface WarehouseBreakdown {
+  productId: string; productName: string; productGroup: string | null;
+  totalStock: number; warehouses: WarehouseBreakdownRow[];
+}
+export async function warehouseBreakdown(productId: string): Promise<WarehouseBreakdown> {
+  const r = await request<any>(`/company-stock/${productId}/warehouse-breakdown`);
+  return {
+    productId: r.product_id, productName: r.product_name, productGroup: r.product_group,
+    totalStock: r.total_stock,
+    warehouses: r.warehouses.map((w: any) => ({
+      warehouseId: w.warehouse_id, warehouseName: w.warehouse_name,
+      warehouseCode: w.warehouse_code, quantity: w.quantity,
+    })),
+  };
 }
 
 // ── Warehouses ────────────────────────────────────────────────────────────────

@@ -418,6 +418,73 @@ table.data tbody tr.expandable { cursor: pointer; }
 }
 .series-chip b { color: var(--primary-strong); }
 
+/* ── Category chip inline with product name ──────────────────────────────── */
+.prod-cell { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.prod-cell .name { font-weight: 700; }
+.cat-chip {
+  display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 7px;
+  font-size: 11px; font-weight: 800; letter-spacing: .3px; text-transform: uppercase;
+  background: var(--slate-soft); color: var(--text-soft);
+}
+.cat-chip.ls { background: #e7efff; color: var(--primary-strong); }
+.cat-chip.cosmetic { background: #fdeaf3; color: #be1e6a; }
+.cat-chip.bad { background: #fff1dc; color: #b45309; }
+.cat-chip.device { background: #e7f7ee; color: #12813c; }
+
+/* Order (+qty) pill */
+.order-pill { color: #12813c; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Coverage / forecast value */
+.cov { font-weight: 800; font-variant-numeric: tabular-nums; }
+.cov.healthy { color: var(--green); }
+.cov.risk { color: var(--amber); }
+.cov.none { color: var(--text-muted); }
+.cov .u { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-left: 3px; }
+
+/* Clickable stock number */
+.stock-link {
+  background: none; border: 0; cursor: pointer; font: inherit;
+  font-variant-numeric: tabular-nums; font-weight: 800; font-size: 16px;
+  color: var(--primary-strong); display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 4px; border-radius: 8px;
+}
+.stock-link:hover { background: #e7efff; }
+.stock-link.zero { color: var(--text-muted); }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-scrim {
+  position: fixed; inset: 0; background: rgba(12, 22, 48, .5);
+  display: grid; place-items: center; z-index: 100; padding: 20px;
+  animation: fade .12s ease-out;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto;
+  background: var(--surface); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift); padding: 26px 28px;
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.modal-head .mh-title { display: flex; align-items: center; gap: 11px; font-size: 19px; font-weight: 800; }
+.modal-head .mh-title .mi { color: var(--green); }
+.modal-close { background: none; border: 0; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 8px; }
+.modal-close:hover { background: var(--surface-2); color: var(--text); }
+.modal-prod { font-size: 20px; font-weight: 800; margin: 6px 0 2px; }
+.modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 18px; }
+.modal-total {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 18px;
+}
+.modal-total .mt-label { font-size: 14px; font-weight: 700; color: var(--text-soft); }
+.modal-total .mt-value { font-size: 26px; font-weight: 800; color: #12a06a; font-variant-numeric: tabular-nums; }
+.code-chip {
+  display: inline-flex; padding: 4px 10px; border-radius: 8px;
+  background: #e7f7f1; color: #0f8a5f; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.modal-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+.modal-foot a { color: var(--primary-strong); font-weight: 700; cursor: pointer; }
+tr.row-highlight td { background: #eafaf2 !important; }
+
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
 .hamburger { display: none; background: none; border: 0; color: var(--text); cursor: pointer; }
 .scrim { display: none; }
