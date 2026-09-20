@@ -268,6 +268,9 @@ select.field option { background: #fff; color: var(--text); }
   overflow: hidden;
 }
 .table-scroll { overflow-x: auto; }
+/* Frozen header: the table body scrolls within a bounded height so the
+   gradient header row (position: sticky; top: 0) stays pinned. */
+.table-scroll.frozen { max-height: calc(100vh - 250px); overflow: auto; }
 table.data { width: 100%; border-collapse: collapse; font-size: 15px; }
 table.data thead th {
   background: var(--header-grad); color: #fff;
@@ -431,24 +434,18 @@ table.data tbody tr.expandable { cursor: pointer; }
 .cat-chip.bad { background: #fff1dc; color: #b45309; }
 .cat-chip.device { background: #e7f7ee; color: #12813c; }
 
-/* Incoming (+qty) — goods on the way, shown like ANDROMEDA in amber */
-.incoming-pill { color: var(--amber); font-weight: 800; font-variant-numeric: tabular-nums; }
+/* Orders cell — open orders (plain) with incoming goods as an orange +N below */
+.orders-cell { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.order-main { font-weight: 800; font-variant-numeric: tabular-nums; }
+.incoming-pill { color: var(--amber); font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
 
-/* Coverage / forecast — solid colored, clickable pill */
+/* Coverage / forecast — solid colored pill (display only, not clickable) */
 .cov-pill {
-  background: none; border: 0; cursor: pointer; font: inherit;
-  font-weight: 800; font-variant-numeric: tabular-nums; font-size: 15px;
-  padding: 6px 15px; border-radius: 10px; color: #fff;
-  text-decoration: underline; text-underline-offset: 3px;
-  text-decoration-color: rgba(255, 255, 255, .6); text-decoration-thickness: 2px;
+  display: inline-block; font-weight: 800; font-variant-numeric: tabular-nums;
+  font-size: 15px; padding: 6px 15px; border-radius: 10px; color: #fff;
 }
 .cov-pill.healthy { background: var(--green); }
 .cov-pill.risk { background: var(--red); }
-.cov-pill:hover { filter: brightness(1.06); }
-.cov-pill.none {
-  background: var(--slate-soft); color: var(--text-muted);
-  cursor: default; text-decoration: none;
-}
 
 /* Clickable stock number — underline signals it opens the breakdown */
 .stock-link {

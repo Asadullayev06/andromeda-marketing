@@ -25,7 +25,9 @@ from sqlalchemy.orm import Session, selectinload
 from ..db import get_db
 from ..models import (
     AnalyticsFactSales,
+    AnalyticsOrders,
     AnalyticsProduct,
+    AnalyticsReceived,
     AnalyticsSales,
     AnalyticsStockCompany,
     CustomsWarehouseProduct,
@@ -39,9 +41,10 @@ router = APIRouter(prefix="/company-stock", tags=["company-stock"])
 # COVERAGE_WINDOW). Coverage above this many months is considered healthy.
 COVERAGE_WINDOW = 3
 COVERAGE_THRESHOLD = 4
+ORDER_CLOSE_THRESHOLD = 0.9
 # Regimes matched to catalog products by name (like ANDROMEDA analytics_full).
 CUSTOMS_REGIMES = ("IM-74", "TR-80")   # real customs stock
-INCOMING_REGIMES = ("INCOMING",)       # goods on the way → shown as +qty
+INCOMING_REGIMES = ("INCOMING",)       # goods on the way → shown as orange +qty
 
 
 def _month_first(d: date) -> date:
@@ -61,7 +64,8 @@ class CompanyStockRow(BaseModel):
     catalog_category: Optional[str] = None
     qty: float                 # company stock (analytics_stock_company)
     customs_qty: float         # customs warehouse stock (IM-74 / TR-80)
-    incoming_qty: float        # goods on the way (INCOMING regime) → +qty
+    order_qty: float           # open orders, current+future months (plain)
+    incoming_qty: float        # goods on the way (INCOMING regime) → orange +qty
     avg_sales: float
     warehouse_qty: float       # total across warehouses
     coverage_months: Optional[float] = None  # warehouse_qty / avg_sales
@@ -154,6 +158,7 @@ def list_company_stock(
     warehouse_total: dict = {}
     avg_ot: dict = {}
     avg_fs: dict = {}
+    open_future: dict = {}
 
     if ids:
         # Warehouse totals per product.
@@ -188,10 +193,35 @@ def list_company_stock(
         incoming_by_name = customs_qty_by_name(INCOMING_REGIMES)
 
         # Average sales over the trailing window ending the previous full month.
-        window_end = _add_months(_month_first(date.today()), -1)
+        current_first = _month_first(date.today())
+        window_end = _add_months(current_first, -1)
         window_start = _add_months(window_end, -(COVERAGE_WINDOW - 1))
         avg_ot = _series_avg(db, AnalyticsSales, ids, window_start, window_end)
         avg_fs = _series_avg(db, AnalyticsFactSales, ids, window_start, window_end)
+
+        # Open orders in current+future months (received < 90% of ordered) —
+        # the plain "Orders" number (ANDROMEDA openOrdersFuture).
+        order_rows = db.execute(
+            select(AnalyticsOrders.analytics_product_id, AnalyticsOrders.month, func.coalesce(func.sum(AnalyticsOrders.qty), 0))
+            .where(AnalyticsOrders.analytics_product_id.in_(ids), AnalyticsOrders.month >= current_first)
+            .group_by(AnalyticsOrders.analytics_product_id, AnalyticsOrders.month)
+        ).all()
+        recv_rows = db.execute(
+            select(AnalyticsReceived.analytics_product_id, AnalyticsReceived.month, func.coalesce(func.sum(AnalyticsReceived.qty), 0))
+            .where(AnalyticsReceived.analytics_product_id.in_(ids), AnalyticsReceived.month >= current_first)
+            .group_by(AnalyticsReceived.analytics_product_id, AnalyticsReceived.month)
+        ).all()
+        recv_map = {(pid, m): float(qty or 0) for pid, m, qty in recv_rows}
+        for pid, m, oq in order_rows:
+            ordered = float(oq or 0)
+            if ordered <= 0:
+                continue
+            received = recv_map.get((pid, m), 0.0)
+            if received >= ordered * ORDER_CLOSE_THRESHOLD:  # order closed
+                continue
+            open_qty = ordered - received
+            if open_qty > 0:
+                open_future[pid] = open_future.get(pid, 0.0) + open_qty
 
     items: list[CompanyStockRow] = []
     for p in products:
@@ -209,6 +239,7 @@ def list_company_stock(
                 catalog_category=p.catalog_category,
                 qty=company_qty.get(p.id, 0.0),
                 customs_qty=customs_by_name.get(p.name.lower(), 0.0),
+                order_qty=open_future.get(p.id, 0.0),
                 incoming_qty=incoming_by_name.get(p.name.lower(), 0.0),
                 avg_sales=avg_sales,
                 warehouse_qty=wh,
@@ -306,6 +337,7 @@ def set_company_stock(
         catalog_category=product.catalog_category,
         qty=float(qty),
         customs_qty=0.0,
+        order_qty=0.0,
         incoming_qty=0.0,
         avg_sales=0.0,
         warehouse_qty=0.0,

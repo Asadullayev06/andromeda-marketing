@@ -85,7 +85,7 @@ export default function CompanyStockPage() {
         <div className="table-wrap"><EmptyState title={t('common.none')} /></div>
       ) : (
         <div className="table-wrap">
-          <div className="table-scroll">
+          <div className="table-scroll frozen">
             <table className="data">
               <thead>
                 <tr>
@@ -172,15 +172,18 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
         )}
       </td>
       <td className="num">{row.customsQty > 0 ? <span className="qty-strong" style={{ fontSize: 15 }}>{fmtNum(row.customsQty)}</span> : '—'}</td>
-      <td className="num">{row.incomingQty > 0 ? <span className="incoming-pill">+{fmtNum(row.incomingQty)}</span> : '—'}</td>
+      <td className="num">
+        {row.orderQty > 0 || row.incomingQty > 0 ? (
+          <span className="orders-cell">
+            {row.orderQty > 0 && <span className="order-main">{fmtNum(row.orderQty)}</span>}
+            {row.incomingQty > 0 && <span className="incoming-pill">+{fmtNum(row.incomingQty)}</span>}
+          </span>
+        ) : '—'}
+      </td>
       <td className="num">{row.avgSales > 0 ? fmtNum(row.avgSales) : '—'}</td>
       <td className="num">
-        {row.coverageMonths == null ? (
-          <span className="cov-pill none">—</span>
-        ) : (
-          <button className={`cov-pill ${tone}`} onClick={onOpen} title="Warehouse breakdown">
-            {row.coverageMonths.toFixed(1)}
-          </button>
+        {row.coverageMonths == null ? '—' : (
+          <span className={`cov-pill ${tone}`}>{row.coverageMonths.toFixed(1)}</span>
         )}
       </td>
     </tr>
