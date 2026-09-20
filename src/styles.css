@@ -431,25 +431,36 @@ table.data tbody tr.expandable { cursor: pointer; }
 .cat-chip.bad { background: #fff1dc; color: #b45309; }
 .cat-chip.device { background: #e7f7ee; color: #12813c; }
 
-/* Order (+qty) pill */
-.order-pill { color: #12813c; font-weight: 800; font-variant-numeric: tabular-nums; }
+/* Incoming (+qty) — goods on the way, shown like ANDROMEDA in amber */
+.incoming-pill { color: var(--amber); font-weight: 800; font-variant-numeric: tabular-nums; }
 
-/* Coverage / forecast value */
-.cov { font-weight: 800; font-variant-numeric: tabular-nums; }
-.cov.healthy { color: var(--green); }
-.cov.risk { color: var(--amber); }
-.cov.none { color: var(--text-muted); }
-.cov .u { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-left: 3px; }
+/* Coverage / forecast — solid colored, clickable pill */
+.cov-pill {
+  background: none; border: 0; cursor: pointer; font: inherit;
+  font-weight: 800; font-variant-numeric: tabular-nums; font-size: 15px;
+  padding: 6px 15px; border-radius: 10px; color: #fff;
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, .6); text-decoration-thickness: 2px;
+}
+.cov-pill.healthy { background: var(--green); }
+.cov-pill.risk { background: var(--red); }
+.cov-pill:hover { filter: brightness(1.06); }
+.cov-pill.none {
+  background: var(--slate-soft); color: var(--text-muted);
+  cursor: default; text-decoration: none;
+}
 
-/* Clickable stock number */
+/* Clickable stock number — underline signals it opens the breakdown */
 .stock-link {
   background: none; border: 0; cursor: pointer; font: inherit;
   font-variant-numeric: tabular-nums; font-weight: 800; font-size: 16px;
   color: var(--primary-strong); display: inline-flex; align-items: center; gap: 6px;
-  padding: 2px 4px; border-radius: 8px;
+  padding: 2px 2px;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px;
+  text-decoration-color: rgba(47, 107, 255, .45);
 }
-.stock-link:hover { background: #e7efff; }
-.stock-link.zero { color: var(--text-muted); }
+.stock-link:hover { text-decoration-color: var(--primary); }
+.stock-link.zero { color: var(--text-muted); text-decoration-color: var(--border-strong); }
 
 /* ── Modal ───────────────────────────────────────────────────────────────── */
 .modal-scrim {

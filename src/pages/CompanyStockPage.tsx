@@ -91,11 +91,11 @@ export default function CompanyStockPage() {
                 <tr>
                   <th>{t('common.product')}</th>
                   <th>{t('common.project')}</th>
+                  <th className="num">{t('common.qty')}</th>
                   <th className="num">{t('company.customs')}</th>
                   <th className="num">{t('company.order')}</th>
                   <th className="num">{t('company.avgSales')}</th>
                   <th className="num">{t('company.forecast')}</th>
-                  <th className="num">{t('common.qty')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,7 +122,6 @@ export default function CompanyStockPage() {
 function StockRow({ row, canWrite, onSaved, onOpen }: {
   row: api.CompanyStockRow; canWrite: boolean; onSaved: () => void; onOpen: () => void;
 }) {
-  const { t } = useLang();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(row.qty));
   const [saving, setSaving] = useState(false);
@@ -151,14 +150,6 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
         </div>
       </td>
       <td>{row.projectName || '—'}</td>
-      <td className="num">{row.customsQty > 0 ? <span className="qty-strong" style={{ fontSize: 15 }}>{fmtNum(row.customsQty)}</span> : '—'}</td>
-      <td className="num">{row.orderQty > 0 ? <span className="order-pill">+{fmtNum(row.orderQty)}</span> : '—'}</td>
-      <td className="num">{row.avgSales > 0 ? fmtNum(row.avgSales) : '—'}</td>
-      <td className="num">
-        {row.coverageMonths == null ? '—' : (
-          <span className={`cov ${tone}`}>{row.coverageMonths.toFixed(1)}<span className="u">{t('company.months')}</span></span>
-        )}
-      </td>
       <td className="num">
         {editing ? (
           <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
@@ -178,6 +169,18 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
               </button>
             )}
           </span>
+        )}
+      </td>
+      <td className="num">{row.customsQty > 0 ? <span className="qty-strong" style={{ fontSize: 15 }}>{fmtNum(row.customsQty)}</span> : '—'}</td>
+      <td className="num">{row.incomingQty > 0 ? <span className="incoming-pill">+{fmtNum(row.incomingQty)}</span> : '—'}</td>
+      <td className="num">{row.avgSales > 0 ? fmtNum(row.avgSales) : '—'}</td>
+      <td className="num">
+        {row.coverageMonths == null ? (
+          <span className="cov-pill none">—</span>
+        ) : (
+          <button className={`cov-pill ${tone}`} onClick={onOpen} title="Warehouse breakdown">
+            {row.coverageMonths.toFixed(1)}
+          </button>
         )}
       </td>
     </tr>

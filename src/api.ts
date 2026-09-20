@@ -131,7 +131,7 @@ export async function fetchLookups(): Promise<Lookups> {
 export interface CompanyStockRow {
   productId: string; name: string; manufacturerLabel: string | null;
   projectName: string | null; catalogCategory: string | null; qty: number;
-  customsQty: number; orderQty: number; avgSales: number;
+  customsQty: number; incomingQty: number; avgSales: number;
   warehouseQty: number; coverageMonths: number | null;
 }
 export interface CompanyStockPage extends Page<CompanyStockRow> { productsInStock: number; }
@@ -147,7 +147,7 @@ export async function listCompanyStock(params: {
     items: r.items.map((x: any) => ({
       productId: x.product_id, name: x.name, manufacturerLabel: x.manufacturer_label,
       projectName: x.project_name, catalogCategory: x.catalog_category, qty: x.qty,
-      customsQty: x.customs_qty, orderQty: x.order_qty, avgSales: x.avg_sales,
+      customsQty: x.customs_qty, incomingQty: x.incoming_qty, avgSales: x.avg_sales,
       warehouseQty: x.warehouse_qty, coverageMonths: x.coverage_months,
     })),
   };
