@@ -4,12 +4,11 @@ import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Stat, Chip, type ChipTone, fmtNum, fmtDate } from '../components';
 
+function isIncoming(regime: string): boolean {
+  return regime.toUpperCase().includes('INCOMING');
+}
 function regimeTone(regime: string): ChipTone {
-  const r = regime.toUpperCase();
-  if (r.includes('INCOMING')) return 'amber';
-  if (r.includes('IM-74') || r.includes('74')) return 'green';
-  if (r.includes('TR-80') || r.includes('80')) return 'blue';
-  return 'slate';
+  return isIncoming(regime) ? 'amber' : 'green';
 }
 
 function certTone(status: string): ChipTone {
@@ -24,6 +23,7 @@ export default function CustomsPage() {
   const [data, setData] = useState<api.CustomsList | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [certError, setCertError] = useState('');
   const debounce = useRef<number | undefined>(undefined);
 
   const load = useMemo(() => async () => {
@@ -48,11 +48,14 @@ export default function CustomsPage() {
   }
 
   async function openCertificate(invoiceId: string) {
+    setCertError('');
     try {
       const url = await api.customsCertificateUrl(invoiceId);
       window.open(url, '_blank', 'noopener');
-    } catch {
-      /* no certificate / storage unavailable */
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : '';
+      setCertError(detail || t('cert.failed'));
+      window.setTimeout(() => setCertError(''), 6000);
     }
   }
 
@@ -72,6 +75,8 @@ export default function CustomsPage() {
           <input placeholder={t('action.search')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
       </div>
+
+      {certError && <div className="login-error" style={{ marginBottom: 14 }}>{certError}</div>}
 
       {loading && !data ? (
         <Spinner label={t('common.loading')} />
@@ -107,7 +112,7 @@ export default function CustomsPage() {
                             <span className="qty-strong">{fmtNum(p.qty)}</span>
                           )}
                         </td>
-                        <td><Chip tone={regimeTone(p.regime)}>{p.regime}</Chip></td>
+                        <td><Chip tone={regimeTone(p.regime)}>{isIncoming(p.regime) ? t('regime.transit') : t('regime.customs')}</Chip></td>
                         <td>
                           {p.hasCertificate ? (
                             <button className="cert-btn" onClick={() => openCertificate(p.invoiceId)}>

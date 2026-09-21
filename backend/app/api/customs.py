@@ -74,7 +74,7 @@ def list_customs_products(
         stmt = stmt.where(CustomsWarehouseProduct.regime == regime)
 
     products = db.scalars(stmt).all()
-    items = [
+    rows = [
         CustomsProductRow(
             id=str(p.id),
             invoice_id=str(p.invoice_id),
@@ -89,6 +89,11 @@ def list_customs_products(
         )
         for p in products
     ]
+    # Incoming ("on the way") rows first, then customs-warehouse rows; each A→Z.
+    items = sorted(
+        rows,
+        key=lambda i: (0 if i.regime.upper() == "INCOMING" else 1, i.product_name.lower()),
+    )
     return CustomsProductList(
         items=items,
         total_invoices=len({p.invoice_id for p in products}),
