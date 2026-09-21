@@ -221,41 +221,31 @@ export async function setWarehouseStock(warehouseId: string, productId: string, 
   await request(`/warehouses/${warehouseId}/stock/${productId}`, { method: 'PUT', body: JSON.stringify({ quantity }) });
 }
 
-// ── Customs ───────────────────────────────────────────────────────────────────
+// ── Customs (flat product-level) ─────────────────────────────────────────────
 export interface CustomsSeries { id: string; batch: string; qty: number; }
 export interface CustomsProduct {
-  id: string; productName: string; regime: string; category: string; qty: number;
-  invoiceSum: number; currency: string; productExpiry: string | null;
-  bruttoKg: number | null; nettoKg: number | null; series: CustomsSeries[];
+  id: string; invoiceId: string; productName: string; regime: string; category: string;
+  qty: number; productExpiry: string | null; certificateStatus: string;
+  hasCertificate: boolean; series: CustomsSeries[];
 }
-export interface CustomsInvoice {
-  id: string; name: string; supplierLabel: string; regimeExpiry: string | null;
-  invoiceCost: number; invoiceCurrency: string; logisticCost: number; currency: string;
-  certificateStatus: string; totalQty: number; productCount: number; products: CustomsProduct[];
-}
-export interface CustomsList { items: CustomsInvoice[]; totalInvoices: number; totalProducts: number; totalQty: number; }
+export interface CustomsList { items: CustomsProduct[]; totalInvoices: number; totalProducts: number; totalQty: number; }
 
-function mapCustomsInvoice(inv: any): CustomsInvoice {
+export async function listCustoms(params: { q?: string; regime?: string }): Promise<CustomsList> {
+  const r = await request<any>(`/customs/products${qs({ q: params.q, regime: params.regime })}`);
   return {
-    id: inv.id, name: inv.name, supplierLabel: inv.supplier_label, regimeExpiry: inv.regime_expiry,
-    invoiceCost: inv.invoice_cost, invoiceCurrency: inv.invoice_currency, logisticCost: inv.logistic_cost,
-    currency: inv.currency, certificateStatus: inv.certificate_status, totalQty: inv.total_qty,
-    productCount: inv.product_count,
-    products: (inv.products || []).map((p: any) => ({
-      id: p.id, productName: p.product_name, regime: p.regime, category: p.category, qty: p.qty,
-      invoiceSum: p.invoice_sum, currency: p.currency, productExpiry: p.product_expiry,
-      bruttoKg: p.brutto_kg, nettoKg: p.netto_kg,
+    totalInvoices: r.total_invoices, totalProducts: r.total_products, totalQty: r.total_qty,
+    items: r.items.map((p: any) => ({
+      id: p.id, invoiceId: p.invoice_id, productName: p.product_name, regime: p.regime,
+      category: p.category, qty: p.qty, productExpiry: p.product_expiry,
+      certificateStatus: p.certificate_status, hasCertificate: p.has_certificate,
       series: (p.series || []).map((s: any) => ({ id: s.id, batch: s.batch, qty: s.qty })),
     })),
   };
 }
 
-export async function listCustoms(params: { q?: string; regime?: string }): Promise<CustomsList> {
-  const r = await request<any>(`/customs${qs({ q: params.q, regime: params.regime })}`);
-  return {
-    totalInvoices: r.total_invoices, totalProducts: r.total_products, totalQty: r.total_qty,
-    items: r.items.map(mapCustomsInvoice),
-  };
+export async function customsCertificateUrl(invoiceId: string): Promise<string> {
+  const r = await request<{ url: string }>(`/customs/invoices/${invoiceId}/certificate-url`);
+  return r.url;
 }
 
 // ── Sales ─────────────────────────────────────────────────────────────────────

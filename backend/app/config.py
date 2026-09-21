@@ -54,6 +54,16 @@ class Settings(BaseSettings):
     auth_secret_key: str = "dev-secret-change-me-in-production"
     auth_token_ttl_seconds: int = 60 * 60 * 12  # 12h
 
+    # Cloudflare R2 (read-only here) — used to hand out short-lived presigned
+    # download URLs for customs certificate PDFs. Use the SAME values as
+    # ANDROMEDA. Empty → the certificate-url endpoint returns 503.
+    r2_account_id: str = ""
+    r2_access_key_id: str = ""
+    r2_secret_access_key: str = ""
+    r2_bucket: str = ""
+    r2_endpoint_url: str = ""
+    r2_presigned_ttl_seconds: int = 300
+
     def __init__(self, **values: object) -> None:
         super().__init__(**values)
         if not self.neon_database_url:

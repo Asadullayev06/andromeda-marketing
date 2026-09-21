@@ -1,14 +1,20 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { ShieldCheck, Search, ChevronRight, ChevronDown, FileText } from 'lucide-react';
+import { ShieldCheck, Search, FileText, FileCheck2 } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
-import { PageHead, Spinner, EmptyState, Stat, Chip, fmtNum, fmtDate } from '../components';
+import { PageHead, Spinner, EmptyState, Stat, Chip, type ChipTone, fmtNum, fmtDate } from '../components';
 
-function regimeTone(regime: string): 'green' | 'amber' | 'blue' | 'slate' {
+function regimeTone(regime: string): ChipTone {
   const r = regime.toUpperCase();
   if (r.includes('INCOMING')) return 'amber';
-  if (r.includes('IM') || r.includes('40')) return 'green';
-  if (r.includes('TR') || r.includes('80')) return 'blue';
+  if (r.includes('IM-74') || r.includes('74')) return 'green';
+  if (r.includes('TR-80') || r.includes('80')) return 'blue';
+  return 'slate';
+}
+
+function certTone(status: string): ChipTone {
+  if (status === 'available') return 'green';
+  if (status === 'applied') return 'blue';
   return 'slate';
 }
 
@@ -35,6 +41,21 @@ export default function CustomsPage() {
     return () => window.clearTimeout(debounce.current);
   }, [load]);
 
+  function certLabel(status: string): string {
+    if (status === 'available') return t('cert.available');
+    if (status === 'applied') return t('cert.applied');
+    return t('cert.none');
+  }
+
+  async function openCertificate(invoiceId: string) {
+    try {
+      const url = await api.customsCertificateUrl(invoiceId);
+      window.open(url, '_blank', 'noopener');
+    } catch {
+      /* no certificate / storage unavailable */
+    }
+  }
+
   return (
     <>
       <PageHead icon={<ShieldCheck size={24} />} title={t('customs.title')} sub={t('customs.sub')} />
@@ -58,68 +79,54 @@ export default function CustomsPage() {
         <div className="table-wrap"><EmptyState title={t('common.none')} /></div>
       ) : (
         <div className="table-wrap">
-          <div className="table-scroll">
+          <div className="table-scroll frozen">
             <table className="data">
               <thead>
                 <tr>
-                  <th style={{ width: 40 }}></th>
-                  <th>{t('customs.invoices')}</th>
-                  <th>{t('customs.supplier')}</th>
+                  <th>{t('common.product')}</th>
                   <th>{t('customs.expiry')}</th>
-                  <th className="num">{t('customs.positions')}</th>
                   <th className="num">{t('common.qty')}</th>
+                  <th>{t('customs.regime')}</th>
+                  <th>{t('customs.certificate')}</th>
                 </tr>
               </thead>
               <tbody>
-                {data?.items.map((inv) => {
-                  const isOpen = !!open[inv.id];
+                {data?.items.map((p) => {
+                  const isOpen = !!open[p.id];
                   return (
-                    <Fragment key={inv.id}>
-                      <tr className="expandable" onClick={() => setOpen((o) => ({ ...o, [inv.id]: !o[inv.id] }))}>
-                        <td>{isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}</td>
-                        <td><div className="cell-strong">{inv.name}</div></td>
-                        <td>{inv.supplierLabel || '—'}</td>
-                        <td>{inv.regimeExpiry ? <Chip tone="amber">{fmtDate(inv.regimeExpiry)}</Chip> : '—'}</td>
-                        <td className="num">{fmtNum(inv.productCount)}</td>
-                        <td className="num"><span className="qty-strong" style={{ color: 'var(--primary-strong)' }}>{fmtNum(inv.totalQty)}</span></td>
+                    <Fragment key={p.id}>
+                      <tr>
+                        <td><div className="cell-strong">{p.productName}</div></td>
+                        <td>{p.productExpiry ? fmtDate(p.productExpiry) : '—'}</td>
+                        <td className="num">
+                          {p.series.length > 0 ? (
+                            <button className="stock-link" onClick={() => setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))} title="Series">
+                              {fmtNum(p.qty)}
+                            </button>
+                          ) : (
+                            <span className="qty-strong">{fmtNum(p.qty)}</span>
+                          )}
+                        </td>
+                        <td><Chip tone={regimeTone(p.regime)}>{p.regime}</Chip></td>
+                        <td>
+                          {p.hasCertificate ? (
+                            <button className="cert-btn" onClick={() => openCertificate(p.invoiceId)}>
+                              <FileCheck2 size={15} /> {certLabel(p.certificateStatus)}
+                            </button>
+                          ) : (
+                            <Chip tone={certTone(p.certificateStatus)}>{certLabel(p.certificateStatus)}</Chip>
+                          )}
+                        </td>
                       </tr>
-                      {isOpen && (
+                      {isOpen && p.series.length > 0 && (
                         <tr className="subtable">
-                          <td colSpan={6}>
+                          <td colSpan={5}>
                             <div className="subtable-inner">
-                              <table className="data" style={{ boxShadow: 'none' }}>
-                                <thead>
-                                  <tr>
-                                    <th>{t('common.product')}</th>
-                                    <th>{t('customs.regime')}</th>
-                                    <th>{t('common.category')}</th>
-                                    <th className="num">{t('common.qty')}</th>
-                                    <th>{t('customs.batches')}</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {inv.products.map((p) => (
-                                    <tr key={p.id}>
-                                      <td>
-                                        <div className="cell-strong">{p.productName}</div>
-                                        {p.productExpiry && <div className="cell-sub">exp. {fmtDate(p.productExpiry)}</div>}
-                                      </td>
-                                      <td><Chip tone={regimeTone(p.regime)}>{p.regime}</Chip></td>
-                                      <td>{p.category || '—'}</td>
-                                      <td className="num"><span className="qty-strong">{fmtNum(p.qty)}</span></td>
-                                      <td>
-                                        {p.series.length === 0 ? '—' : (
-                                          <div className="series-chips">
-                                            {p.series.map((s) => (
-                                              <span key={s.id} className="series-chip">{s.batch} · <b>{fmtNum(s.qty)}</b></span>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                              <div className="series-chips">
+                                {p.series.map((s) => (
+                                  <span key={s.id} className="series-chip">{s.batch} · <b>{fmtNum(s.qty)}</b></span>
+                                ))}
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -131,7 +138,7 @@ export default function CustomsPage() {
             </table>
           </div>
           <div className="table-foot">
-            <span>{fmtNum(data?.totalInvoices ?? 0)} {t('customs.invoices')}</span>
+            <span>{fmtNum(data?.totalProducts ?? 0)} {t('customs.positions')}</span>
           </div>
         </div>
       )}

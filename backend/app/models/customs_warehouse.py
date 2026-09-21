@@ -12,7 +12,7 @@ from typing import Optional
 
 from sqlalchemy import Date, ForeignKey, Numeric, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship  # noqa: F401
 
 from .base import Base, TimestampMixin, UUIDPKMixin
 
@@ -28,6 +28,9 @@ class CustomsWarehouseInvoice(UUIDPKMixin, TimestampMixin, Base):
     logistic_cost: Mapped[Decimal] = mapped_column(Numeric(14, 2), server_default="0")
     currency: Mapped[str] = mapped_column(Text, server_default="USD")
     certificate_status: Mapped[str] = mapped_column(Text, server_default="not_available")
+    certificate_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    certificate_storage_path: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    certificate_mime_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     products: Mapped[list["CustomsWarehouseProduct"]] = relationship(
         back_populates="invoice",
