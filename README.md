@@ -79,3 +79,16 @@ Deploy as two services (a Coolify/Railway pair, same model as ANDROMEDA):
 - User-facing dates are `dd.mm.yyyy`; API/DB dates stay ISO.
 - Manufacturers come from canonical `suppliers` rows (`supplier_kind =
   Manufacturer`), not free-text product labels.
+
+### Shared UI components
+
+Common actions, inputs, status badges, login fields/alerts, and the warehouse
+breakdown dialog use shadcn/ui (Base UI), with source in `src/components/ui`.
+`components.json` configures the registry and `@/` aliases. Add components with
+`pnpm dlx shadcn@latest add <component>` and keep utility imports pointed at
+`@/lib/utils`.
+
+Tailwind v4 utilities are enabled through Vite without its global preflight
+reset. Semantic colors in `src/styles.css` map to the existing Sales palette;
+keep those mappings when adding components. Specialized data tables, charts,
+and navigation retain their existing layout.

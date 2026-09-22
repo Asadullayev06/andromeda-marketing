@@ -1,3 +1,7 @@
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rocket } from 'lucide-react';
@@ -34,19 +38,23 @@ export default function LoginPage() {
         <h1>{t('login.title')}</h1>
         <p className="login-sub">{t('login.sub')}</p>
 
-        <label className="form-label" htmlFor="u">{t('login.username')}</label>
-        <input id="u" className="form-input" autoFocus autoComplete="username"
-          value={username} onChange={(e) => setUsername(e.target.value)} />
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="u">{t('login.username')}</FieldLabel>
+            <Input id="u" autoFocus autoComplete="username"
+              value={username} onChange={(e) => setUsername(e.target.value)} />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="p">{t('login.password')}</FieldLabel>
+            <Input id="p" type="password" autoComplete="current-password"
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+          </Field>
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+        </FieldGroup>
 
-        <label className="form-label" htmlFor="p">{t('login.password')}</label>
-        <input id="p" className="form-input" type="password" autoComplete="current-password"
-          value={password} onChange={(e) => setPassword(e.target.value)} />
-
-        {error && <div className="login-error">{error}</div>}
-
-        <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+        <Button variant="default" className="mt-5 w-full" type="submit" disabled={busy}>
           {busy ? '…' : t('login.submit')}
-        </button>
+        </Button>
       </form>
     </div>
   );

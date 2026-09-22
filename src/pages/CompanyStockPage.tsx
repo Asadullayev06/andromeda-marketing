@@ -1,5 +1,8 @@
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Boxes, Search, Check, Pencil, Warehouse, X, ArrowRight } from 'lucide-react';
+import { Boxes, Search, Check, Pencil, X, ArrowRight } from 'lucide-react';
 import * as api from '../api';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../i18n';
@@ -67,7 +70,7 @@ export default function CompanyStockPage() {
       <div className="toolbar">
         <div className="search">
           <Search size={18} />
-          <input placeholder={t('action.search')} value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
+          <Input placeholder={t('action.search')} value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
         </div>
         <select className="field" value={manufacturer} onChange={(e) => { setManufacturer(e.target.value); setPage(1); }}>
           <option value="">{t('common.manufacturer')}: {t('action.all')}</option>
@@ -122,6 +125,7 @@ export default function CompanyStockPage() {
 function StockRow({ row, canWrite, onSaved, onOpen }: {
   row: api.CompanyStockRow; canWrite: boolean; onSaved: () => void; onOpen: () => void;
 }) {
+  const { t } = useLang();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(row.qty));
   const [saving, setSaving] = useState(false);
@@ -153,10 +157,10 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
       <td className="num">
         {editing ? (
           <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-            <input className="inline-edit" value={value} autoFocus
+            <Input aria-label={t('common.qty')} className="inline-edit" value={value} autoFocus
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }} />
-            <button className="btn btn-primary btn-sm" onClick={save} disabled={saving}><Check size={15} /></button>
+            <Button variant="default" size="sm" aria-label={t('action.save')} onClick={save} disabled={saving}><Check data-icon="inline-start" /></Button>
           </span>
         ) : (
           <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -164,9 +168,9 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
               {fmtNum(row.qty)}
             </button>
             {canWrite && (
-              <button className="btn btn-ghost btn-sm" onClick={() => { setValue(String(row.qty)); setEditing(true); }}>
-                <Pencil size={14} />
-              </button>
+              <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => { setValue(String(row.qty)); setEditing(true); }}>
+                <Pencil data-icon="inline-start" />
+              </Button>
             )}
           </span>
         )}
@@ -204,20 +208,16 @@ function WarehouseBreakdownModal({ row, onClose }: { row: api.CompanyStockRow; o
     return () => { alive = false; };
   }, [row.productId]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   return (
-    <div className="modal-scrim" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          <div className="mh-title"><Warehouse size={22} className="mi" /> {t('modal.title')}</div>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="modal-prod">{row.name}</div>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-[640px]" showCloseButton={false}>
+        <DialogHeader>
+          <div className="flex items-center justify-between gap-3">
+            <DialogTitle>{t('modal.title')}</DialogTitle>
+            <DialogClose render={<Button variant="ghost" size="icon-sm" aria-label={t('modal.close')} />}><X /></DialogClose>
+          </div>
+          <DialogDescription>{row.name}</DialogDescription>
+        </DialogHeader>
         <div className="modal-sub">
           {data?.productGroup ? `${t('modal.group')}: ${data.productGroup}` : (row.projectName ? `${t('modal.group')}: ${row.projectName}` : '')}
         </div>
@@ -259,10 +259,10 @@ function WarehouseBreakdownModal({ row, onClose }: { row: api.CompanyStockRow; o
 
         <div className="modal-foot">
           <a href="/warehouses">{t('modal.open')} <ArrowRight size={14} style={{ verticalAlign: 'middle' }} /></a>
-          <button className="btn btn-ghost" onClick={onClose}>{t('modal.close')}</button>
+          <Button variant="ghost" onClick={onClose}>{t('modal.close')}</Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -271,9 +271,9 @@ export function Pager({ page, total, pageSize, onPage }: { page: number; total: 
   if (pages <= 1) return null;
   return (
     <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-      <button className="btn btn-ghost btn-sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>‹</button>
+      <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>‹</Button>
       <span>{page} / {pages}</span>
-      <button className="btn btn-ghost btn-sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>›</button>
+      <Button variant="ghost" size="sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>›</Button>
     </span>
   );
 }

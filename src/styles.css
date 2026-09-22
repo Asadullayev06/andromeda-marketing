@@ -1,3 +1,37 @@
+/* Tailwind utilities only: keep the existing application reset and palette. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: var(--surface);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-foreground: var(--text);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--surface);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text-soft);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--text-soft);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-border: var(--border);
+  --color-input: var(--border-strong);
+  --color-ring: var(--primary);
+  --color-destructive: var(--red);
+  --color-success: #12813c;
+  --color-success-soft: var(--green-soft);
+  --color-warning: #b45309;
+  --color-warning-soft: var(--amber-soft);
+  --color-danger: #b91c1c;
+  --color-danger-soft: var(--red-soft);
+  --color-info: var(--primary-strong);
+  --color-info-soft: #e7efff;
+  --color-neutral-soft: var(--slate-soft);
+}
+
 /* ============================================================================
    ANDROMEDA Sales — design system
    A deliberately large, box-forward, high-clarity UI for the Sales department.
@@ -336,7 +370,7 @@ table.data tbody tr.expandable { cursor: pointer; }
 
 /* ── Two-column dashboard grid ───────────────────────────────────────────── */
 
-.grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); gap: 20px; align-items: stretch; }
 @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
 
 /* ── Project tabs (warehouse matrix) ─────────────────────────────────────── */
@@ -387,9 +421,40 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 
 /* ── Chart ───────────────────────────────────────────────────────────────── */
 
-.chart-legend { display: flex; gap: 18px; margin-bottom: 8px; }
+.grouped-bars { min-width: 0; }
+.chart-legend { display: flex; gap: 22px; margin-bottom: 10px; }
 .chart-legend .lg { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--text-soft); }
 .chart-legend .sw { width: 14px; height: 14px; border-radius: 4px; }
+.chart-scroll { min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+.chart-stage { position: relative; width: 100%; min-width: 620px; }
+.chart-canvas { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-group { outline: none; }
+.chart-hit-area { fill: transparent; }
+.chart-group rect:not(.chart-hit-area) { transition: filter .15s ease, opacity .15s ease; }
+.chart-group.active rect:not(.chart-hit-area) { filter: brightness(.96); }
+.chart-indicator { stroke: var(--primary); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .65; pointer-events: none; }
+.chart-tooltip {
+  position: absolute; top: 4px; min-width: 180px; transform: translateX(-50%);
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  background: var(--surface); box-shadow: var(--shadow-lift); color: var(--text);
+  pointer-events: none;
+}
+.chart-tooltip-label { margin-bottom: 7px; font-size: 13px; font-weight: 800; }
+.chart-tooltip-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 12.5px; color: var(--text-soft); }
+.chart-tooltip-row + .chart-tooltip-row { margin-top: 5px; }
+.chart-tooltip-row span { display: inline-flex; align-items: center; gap: 7px; }
+.chart-tooltip-row i { width: 8px; height: 8px; border-radius: 3px; }
+.chart-tooltip-row strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* Dashboard analytics: shadcn Card structure with the existing Sales palette. */
+.dashboard-card { min-width: 0; height: 100%; }
+.chart-card-content { display: flex; flex: 1; align-items: center; }
+.chart-card-content .grouped-bars { width: 100%; }
+.top-products-list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.top-product-row { display: flex; align-items: center; gap: 16px; min-height: 54px; padding: 7px 0; }
+.top-product-copy { flex: 1; min-width: 0; }
+.top-product-name { overflow: hidden; color: var(--text); font-size: 15px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.top-product-manufacturer { overflow: hidden; margin-top: 3px; color: var(--text-muted); font-size: 12.5px; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Login ───────────────────────────────────────────────────────────────── */
 
@@ -542,3 +607,19 @@ tr.row-highlight td { background: #eafaf2 !important; }
   .content { padding: 18px; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* Shared component defaults retain the Sales design system. */
+[data-slot="button"] { cursor: pointer; border-style: solid; }
+[data-slot="button"][data-variant="default"] { background: var(--primary-grad); box-shadow: var(--shadow-sm); }
+[data-slot="button"]:disabled { cursor: default; }
+[data-slot="input"] { border-style: solid; font-family: inherit; }
+[data-slot="dialog-overlay"] { background: rgba(12, 22, 48, .5); }
+[data-slot="dialog-content"] { border-radius: var(--radius-lg); box-shadow: var(--shadow-lift); }
+[data-slot="dialog-title"], [data-slot="dialog-description"] { margin: 0; }
+[data-slot="card"] { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+[data-slot="card-title"] { color: var(--text); font-size: 17px; font-weight: 800; }
+.search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(47,107,255,.15); }
+.search [data-slot="input"] { height: auto; padding: 0; box-shadow: none; }
+
+.login-card [data-slot="input"] { height: 48px; background: var(--bg-soft); border-radius: 12px; }
+[data-slot="alert"][data-variant="destructive"] { background: var(--red-soft); }

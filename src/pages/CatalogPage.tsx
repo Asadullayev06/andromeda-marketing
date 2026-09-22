@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Search } from 'lucide-react';
 import * as api from '../api';
@@ -40,7 +41,7 @@ export default function CatalogPage() {
       <div className="toolbar">
         <div className="search">
           <Search size={18} />
-          <input placeholder={t('action.search')} value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
+          <Input placeholder={t('action.search')} value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
         </div>
         <select className="field" value={manufacturer} onChange={(e) => { setManufacturer(e.target.value); setPage(1); }}>
           <option value="">{t('common.manufacturer')}: {t('action.all')}</option>

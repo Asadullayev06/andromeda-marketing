@@ -3,6 +3,7 @@ import { LayoutDashboard, Boxes, Warehouse, ShieldCheck, Send } from 'lucide-rea
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Stat, Spinner, Stepper, GroupedBars, fmtNum, fmtMonth, Chip } from '../components';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function DashboardPage() {
   const { t } = useLang();
@@ -65,38 +66,46 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid-2">
-        <div className="card">
-          <div className="card-title">{t('dash.salesTrend')}</div>
-          {overview && overview.months.length > 0 ? (
-            <GroupedBars
-              data={overview.months.map((m) => ({ label: fmtMonth(m.month), a: m.dispatched, b: m.sold }))}
-              labels={[t('sales.dispatched'), t('sales.sold')]}
-              colorA="#2f6bff"
-              colorB="#22c55e"
-            />
-          ) : (
-            <div className="empty"><h3>{t('common.none')}</h3></div>
-          )}
-        </div>
+        <Card className="dashboard-card chart-card">
+          <CardHeader>
+            <CardTitle>{t('dash.salesTrend')}</CardTitle>
+          </CardHeader>
+          <CardContent className="chart-card-content">
+            {overview && overview.months.length > 0 ? (
+              <GroupedBars
+                data={overview.months.map((m) => ({ label: fmtMonth(m.month), a: m.dispatched, b: m.sold }))}
+                labels={[t('sales.dispatched'), t('sales.sold')]}
+                colorA="#2f6bff"
+                colorB="#22c55e"
+              />
+            ) : (
+              <div className="empty"><h3>{t('common.none')}</h3></div>
+            )}
+          </CardContent>
+        </Card>
 
-        <div className="card">
-          <div className="card-title">{t('dash.topProducts')}</div>
-          {top.length === 0 ? (
-            <div className="empty"><h3>{t('common.none')}</h3></div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {top.map((p) => (
-                <div key={p.productId} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="cell-strong" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
-                    <div className="cell-sub">{p.manufacturerLabel || '—'}</div>
-                  </div>
-                  <Chip tone="blue">{fmtNum(p.dispatched)}</Chip>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <Card className="dashboard-card top-products-card">
+          <CardHeader>
+            <CardTitle>{t('dash.topProducts')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {top.length === 0 ? (
+              <div className="empty"><h3>{t('common.none')}</h3></div>
+            ) : (
+              <ol className="top-products-list">
+                {top.map((p) => (
+                  <li key={p.productId} className="top-product-row">
+                    <div className="top-product-copy">
+                      <div className="top-product-name">{p.name}</div>
+                      <div className="top-product-manufacturer">{p.manufacturerLabel || '—'}</div>
+                    </div>
+                    <Chip tone="blue">{fmtNum(p.dispatched)}</Chip>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );

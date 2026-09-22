@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { ShieldCheck, Search, FileText, FileCheck2 } from 'lucide-react';
 import * as api from '../api';
@@ -72,7 +73,7 @@ export default function CustomsPage() {
       <div className="toolbar">
         <div className="search">
           <Search size={18} />
-          <input placeholder={t('action.search')} value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input placeholder={t('action.search')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
       </div>
 
