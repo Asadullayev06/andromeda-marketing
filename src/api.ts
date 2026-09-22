@@ -221,6 +221,25 @@ export async function setWarehouseStock(warehouseId: string, productId: string, 
   await request(`/warehouses/${warehouseId}/stock/${productId}`, { method: 'PUT', body: JSON.stringify({ quantity }) });
 }
 
+// ── Product × warehouse matrix ───────────────────────────────────────────────
+export interface MatrixWarehouse { id: string; name: string; code: string | null; project: string | null; }
+export interface MatrixProduct {
+  productId: string; productName: string; productGroup: string | null;
+  project: string | null; warehouseStocks: Record<string, number>;
+}
+export interface WarehouseMatrix { warehouses: MatrixWarehouse[]; products: MatrixProduct[]; }
+
+export async function warehouseMatrix(): Promise<WarehouseMatrix> {
+  const r = await request<any>('/warehouses/matrix');
+  return {
+    warehouses: r.warehouses.map((w: any) => ({ id: w.id, name: w.name, code: w.code, project: w.project })),
+    products: r.products.map((p: any) => ({
+      productId: p.product_id, productName: p.product_name, productGroup: p.product_group,
+      project: p.project, warehouseStocks: p.warehouse_stocks || {},
+    })),
+  };
+}
+
 // ── Customs (flat product-level) ─────────────────────────────────────────────
 export interface CustomsSeries { id: string; batch: string; qty: number; }
 export interface CustomsProduct {

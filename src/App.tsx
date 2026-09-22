@@ -6,8 +6,7 @@ import AppShell from './AppShell';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CompanyStockPage from './pages/CompanyStockPage';
-import WarehousesPage from './pages/WarehousesPage';
-import WarehouseStockPage from './pages/WarehouseStockPage';
+import WarehouseMatrixPage from './pages/WarehouseMatrixPage';
 import CustomsPage from './pages/CustomsPage';
 import CatalogPage from './pages/CatalogPage';
 import SalesPage from './pages/SalesPage';
@@ -37,8 +36,7 @@ export default function App() {
             >
               <Route index element={<DashboardPage />} />
               <Route path="company-stock" element={<CompanyStockPage />} />
-              <Route path="warehouses" element={<WarehousesPage />} />
-              <Route path="warehouses/:id" element={<WarehouseStockPage />} />
+              <Route path="warehouses" element={<WarehouseMatrixPage />} />
               <Route path="customs" element={<CustomsPage />} />
               <Route path="catalog" element={<CatalogPage />} />
               <Route path="sales" element={<SalesPage />} />

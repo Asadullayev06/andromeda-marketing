@@ -15,6 +15,72 @@ from ..models import AnalyticsProduct, Warehouse, WarehouseStock
 router = APIRouter(prefix="/warehouses", tags=["warehouses"])
 
 
+# ── Product × warehouse matrix (grouped by project) ──────────────────────────
+class MatrixWarehouse(BaseModel):
+    id: str
+    name: str
+    code: Optional[str] = None
+    project: Optional[str] = None
+
+
+class MatrixProduct(BaseModel):
+    product_id: str
+    product_name: str
+    product_group: Optional[str] = None
+    project: Optional[str] = None
+    warehouse_stocks: dict[str, float]
+
+
+class WarehouseMatrix(BaseModel):
+    warehouses: list[MatrixWarehouse]
+    products: list[MatrixProduct]
+
+
+@router.get("/matrix", response_model=WarehouseMatrix)
+def warehouse_matrix(db: Session = Depends(get_db)) -> WarehouseMatrix:
+    """Every active warehouse and every catalog product with its per-warehouse
+    stock (nonzero cells only). The frontend groups warehouses by project and
+    renders the pivot. Mirrors ANDROMEDA's /stocks/product-summary."""
+    warehouses = db.scalars(
+        select(Warehouse)
+        .where(Warehouse.is_active.is_(True))
+        .options(selectinload(Warehouse.project_rel))
+        .order_by(Warehouse.name.asc())
+    ).all()
+    products = db.scalars(
+        select(AnalyticsProduct)
+        .options(selectinload(AnalyticsProduct.project_rel))
+        .order_by(AnalyticsProduct.name.asc())
+    ).all()
+    stock_rows = db.execute(
+        select(WarehouseStock.product_id, WarehouseStock.warehouse_id, WarehouseStock.quantity)
+    ).all()
+
+    by_product: dict = {}
+    for pid, wid, qty in stock_rows:
+        q = float(qty or 0)
+        if q == 0:
+            continue
+        by_product.setdefault(pid, {})[str(wid)] = q
+
+    return WarehouseMatrix(
+        warehouses=[
+            MatrixWarehouse(id=str(w.id), name=w.name, code=w.code, project=w.project_name)
+            for w in warehouses
+        ],
+        products=[
+            MatrixProduct(
+                product_id=str(p.id),
+                product_name=p.name,
+                product_group=p.product_group,
+                project=p.project_name,
+                warehouse_stocks=by_product.get(p.id, {}),
+            )
+            for p in products
+        ],
+    )
+
+
 class WarehouseRow(BaseModel):
     id: str
     name: str
