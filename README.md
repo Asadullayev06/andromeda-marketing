@@ -15,7 +15,7 @@ logistics, or registration workflows.
 | Route | Module | Source tables |
 |-------|--------|---------------|
 | `/` | Dashboard | aggregates of the below |
-| `/company-stock` | Company stock (company ostatok) | `analytics_stock_company` |
+| `/company-stock` | Company stock (company ostatok) + expiry snapshot | `analytics_stock_company` + marketing-only Smartup export |
 | `/warehouses`, `/warehouses/:id` | Per-warehouse stock | `warehouses`, `warehouse_stocks` |
 | `/customs` | Customs warehouse (customs ostatok) | `customs_warehouse_invoices/products/series` |
 | `/catalog` | Product catalog | `analytics_products` |

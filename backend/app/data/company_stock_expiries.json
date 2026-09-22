@@ -1,0 +1,2400 @@
+{
+  "source": "Smartup stock detail export",
+  "imported_at": "2026-09-22",
+  "items": [
+    {
+      "product_code": "5415561",
+      "product_name": "ADIKAN IN'EKTSIYA UCHUN ERITMA 500 MG 2 ML \u21161",
+      "expiry_date": "2027-12-01",
+      "batch_number": "250050",
+      "quantity": 53525.0
+    },
+    {
+      "product_code": "1751470",
+      "product_name": "Alfaretin 10 ml",
+      "expiry_date": "2025-12-01",
+      "batch_number": "BF96812",
+      "quantity": 222.0
+    },
+    {
+      "product_code": "1751470",
+      "product_name": "Alfaretin 10 ml",
+      "expiry_date": "2025-12-31",
+      "batch_number": "BF96812",
+      "quantity": 123.0
+    },
+    {
+      "product_code": "4737414",
+      "product_name": "Alzmer tab  \u211630",
+      "expiry_date": "2028-08-01",
+      "batch_number": "250030",
+      "quantity": 7.0
+    },
+    {
+      "product_code": "4737414",
+      "product_name": "Alzmer tab  \u211630",
+      "expiry_date": "2028-08-25",
+      "batch_number": "250030",
+      "quantity": 4774.0
+    },
+    {
+      "product_code": "1558969",
+      "product_name": "Amaredetrim 15 ml",
+      "expiry_date": "2029-01-01",
+      "batch_number": "978004",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "1558969",
+      "product_name": "Amaredetrim 15 ml",
+      "expiry_date": "2028-02-01",
+      "batch_number": "978003",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1558969",
+      "product_name": "Amaredetrim 15 ml",
+      "expiry_date": "2029-07-01",
+      "batch_number": "978004",
+      "quantity": 3129.0
+    },
+    {
+      "product_code": "1558969",
+      "product_name": "Amaredetrim 15 ml",
+      "expiry_date": "2027-11-01",
+      "batch_number": "978002",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "1558969",
+      "product_name": "Amaredetrim 15 ml",
+      "expiry_date": "2028-11-01",
+      "batch_number": "978003",
+      "quantity": 14.0
+    },
+    {
+      "product_code": "1017722",
+      "product_name": "Amareyod 20 ml",
+      "expiry_date": "2029-01-01",
+      "batch_number": "1014004",
+      "quantity": 9362.0
+    },
+    {
+      "product_code": "1017722",
+      "product_name": "Amareyod 20 ml",
+      "expiry_date": "2028-11-01",
+      "batch_number": "1014003",
+      "quantity": 32.0
+    },
+    {
+      "product_code": "1157697",
+      "product_name": "Amarezink 30 ml",
+      "expiry_date": "2027-02-01",
+      "batch_number": "4027",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1157697",
+      "product_name": "Amarezink 30 ml",
+      "expiry_date": "2029-04-01",
+      "batch_number": "6243",
+      "quantity": 19325.0
+    },
+    {
+      "product_code": "1157697",
+      "product_name": "Amarezink 30 ml",
+      "expiry_date": "2026-11-01",
+      "batch_number": "3847",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "3234524",
+      "product_name": "Amarosal sirop 125 ml",
+      "expiry_date": "2028-01-01",
+      "batch_number": "010125",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "3234524",
+      "product_name": "Amarosal sirop 125 ml",
+      "expiry_date": "2028-08-01",
+      "batch_number": "010825",
+      "quantity": 17093.0
+    },
+    {
+      "product_code": "3234524",
+      "product_name": "Amarosal sirop 125 ml",
+      "expiry_date": "2028-01-31",
+      "batch_number": "010125",
+      "quantity": 29.0
+    },
+    {
+      "product_code": "3234524",
+      "product_name": "Amarosal sirop 125 ml",
+      "expiry_date": "2028-01-31",
+      "batch_number": "B0125A",
+      "quantity": 676.0
+    },
+    {
+      "product_code": "5139393",
+      "product_name": "ANDROSITOL PLUS 14 SACHES BOX",
+      "expiry_date": "2028-04-01",
+      "batch_number": "LIN 6008",
+      "quantity": 2996.0
+    },
+    {
+      "product_code": "5139393",
+      "product_name": "ANDROSITOL PLUS 14 SACHES BOX",
+      "expiry_date": "2028-04-01",
+      "batch_number": "LIN6008",
+      "quantity": 5261.0
+    },
+    {
+      "product_code": "5139322",
+      "product_name": "Antidot gel banan",
+      "expiry_date": "2028-04-01",
+      "batch_number": "L010426",
+      "quantity": 7994.0
+    },
+    {
+      "product_code": "5139323",
+      "product_name": "Antidot gel klubnika",
+      "expiry_date": "2028-04-01",
+      "batch_number": "L010426",
+      "quantity": 3043.0
+    },
+    {
+      "product_code": "4919409",
+      "product_name": "Arteksim \u0440\u0430\u0441\u0442\u0432\u043e\u0440 \u0434\u043b\u044f \u0432/\u043c 15\u043c\u0433/1,5\u043c\u043b, 1,5\u043c\u043b \u21163",
+      "expiry_date": "2028-02-01",
+      "batch_number": "040226",
+      "quantity": 2959.0
+    },
+    {
+      "product_code": "4777993",
+      "product_name": "BIORELA AB Baby 20 sticks",
+      "expiry_date": "2028-02-01",
+      "batch_number": "L0226002",
+      "quantity": 17947.0
+    },
+    {
+      "product_code": "4777984",
+      "product_name": "BIORELA AB \u211620 capsula",
+      "expiry_date": "2028-01-01",
+      "batch_number": "L0126009",
+      "quantity": 22242.0
+    },
+    {
+      "product_code": "4737412",
+      "product_name": "Cerenade tab \u211630",
+      "expiry_date": "2028-10-01",
+      "batch_number": "250090",
+      "quantity": 19.0
+    },
+    {
+      "product_code": "4737412",
+      "product_name": "Cerenade tab \u211630",
+      "expiry_date": "2028-10-19",
+      "batch_number": "250090",
+      "quantity": 15516.0
+    },
+    {
+      "product_code": "3280754",
+      "product_name": "Cetraxal plus 10 ml ear drops",
+      "expiry_date": "2028-01-01",
+      "batch_number": "26004",
+      "quantity": 1415.0
+    },
+    {
+      "product_code": "3280754",
+      "product_name": "Cetraxal plus 10 ml ear drops",
+      "expiry_date": "2026-04-01",
+      "batch_number": "V148",
+      "quantity": 190.0
+    },
+    {
+      "product_code": "3280754",
+      "product_name": "Cetraxal plus 10 ml ear drops",
+      "expiry_date": "2026-04-30",
+      "batch_number": "V148",
+      "quantity": 384.0
+    },
+    {
+      "product_code": "3280754",
+      "product_name": "Cetraxal plus 10 ml ear drops",
+      "expiry_date": "2028-01-31",
+      "batch_number": "26005",
+      "quantity": 10898.0
+    },
+    {
+      "product_code": "4801944",
+      "product_name": "Cholready 1 \u043c\u043b \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250070",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "4801944",
+      "product_name": "Cholready 1 \u043c\u043b \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250080",
+      "quantity": 16655.0
+    },
+    {
+      "product_code": "4801944",
+      "product_name": "Cholready 1 \u043c\u043b \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f",
+      "expiry_date": "2028-11-05",
+      "batch_number": "250070",
+      "quantity": 1231.0
+    },
+    {
+      "product_code": "5387034",
+      "product_name": "COLCHICINA LIRCA",
+      "expiry_date": "2031-01-31",
+      "batch_number": "6C2079A",
+      "quantity": 4824.0
+    },
+    {
+      "product_code": "4737413",
+      "product_name": "Depro 10 mg Tab \u211630",
+      "expiry_date": "2028-10-01",
+      "batch_number": "250050",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "4737413",
+      "product_name": "Depro 10 mg Tab \u211630",
+      "expiry_date": "2028-10-15",
+      "batch_number": "250050",
+      "quantity": 9176.0
+    },
+    {
+      "product_code": "4737413",
+      "product_name": "Depro 10 mg Tab \u211630",
+      "expiry_date": "2028-10-15",
+      "batch_number": "250060",
+      "quantity": 16384.0
+    },
+    {
+      "product_code": "1065561",
+      "product_name": "Detrisin D3 vitamin N8 Tablet",
+      "expiry_date": "2028-02-01",
+      "batch_number": "514002",
+      "quantity": 120.0
+    },
+    {
+      "product_code": "1065561",
+      "product_name": "Detrisin D3 vitamin N8 Tablet",
+      "expiry_date": "2029-03-01",
+      "batch_number": "514004",
+      "quantity": 8724.0
+    },
+    {
+      "product_code": "2757432",
+      "product_name": "Diasens N30 Tab",
+      "expiry_date": "2029-01-01",
+      "batch_number": "555002",
+      "quantity": 12497.0
+    },
+    {
+      "product_code": "2757432",
+      "product_name": "Diasens N30 Tab",
+      "expiry_date": "2027-10-01",
+      "batch_number": "554001",
+      "quantity": 526.0
+    },
+    {
+      "product_code": "2181284",
+      "product_name": "Dispepsinol N30 Tablet",
+      "expiry_date": "2027-10-01",
+      "batch_number": "552",
+      "quantity": 4.0
+    },
+    {
+      "product_code": "2181284",
+      "product_name": "Dispepsinol N30 Tablet",
+      "expiry_date": "2027-10-01",
+      "batch_number": "552001",
+      "quantity": 3473.0
+    },
+    {
+      "product_code": "1019966",
+      "product_name": "Dolmasto 50 ML",
+      "expiry_date": null,
+      "batch_number": null,
+      "quantity": 11.0
+    },
+    {
+      "product_code": "1019966",
+      "product_name": "Dolmasto 50 ML",
+      "expiry_date": "2029-03-01",
+      "batch_number": "314006",
+      "quantity": 1978.0
+    },
+    {
+      "product_code": "1019966",
+      "product_name": "Dolmasto 50 ML",
+      "expiry_date": "2029-04-01",
+      "batch_number": "314006",
+      "quantity": 30271.0
+    },
+    {
+      "product_code": "1019966",
+      "product_name": "Dolmasto 50 ML",
+      "expiry_date": "2028-05-01",
+      "batch_number": "314005",
+      "quantity": 130.0
+    },
+    {
+      "product_code": "1019966",
+      "product_name": "Dolmasto 50 ML",
+      "expiry_date": "2027-09-01",
+      "batch_number": "314003",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": null,
+      "batch_number": "01.09.2025",
+      "quantity": 38.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2029-01-01",
+      "batch_number": "E006026",
+      "quantity": 900.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2029-05-01",
+      "batch_number": "01026",
+      "quantity": 23232.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-01",
+      "batch_number": "011322/C",
+      "quantity": 75.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-01",
+      "batch_number": "013 22/c",
+      "quantity": 18.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-01",
+      "batch_number": "01322/C",
+      "quantity": 245.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-01",
+      "batch_number": "01322/c",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-04",
+      "batch_number": "013 22/C",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-30",
+      "batch_number": "013 22/C",
+      "quantity": 50.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-30",
+      "batch_number": "013 22/\u0421",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2025-09-30",
+      "batch_number": "01322/C",
+      "quantity": 4.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2027-09-30",
+      "batch_number": "012 24/A",
+      "quantity": 36.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2027-09-30",
+      "batch_number": "E111024",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "1933676",
+      "product_name": "Drop Therapeutic",
+      "expiry_date": "2026-12-31",
+      "batch_number": "01024",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019967",
+      "product_name": "Endosin \u2116 30",
+      "expiry_date": "2028-05-01",
+      "batch_number": "5337",
+      "quantity": 3727.0
+    },
+    {
+      "product_code": "1019967",
+      "product_name": "Endosin \u2116 30",
+      "expiry_date": "2028-11-01",
+      "batch_number": "5538",
+      "quantity": 19335.0
+    },
+    {
+      "product_code": "1019967",
+      "product_name": "Endosin \u2116 30",
+      "expiry_date": "2026-06-30",
+      "batch_number": "3338",
+      "quantity": 11.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2029-03-01",
+      "batch_number": "6288",
+      "quantity": 2664.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-09-01",
+      "batch_number": "51722",
+      "quantity": 1326.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-10-01",
+      "batch_number": "54561",
+      "quantity": 5968.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-12-01",
+      "batch_number": "54565",
+      "quantity": 141.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-12-01",
+      "batch_number": "54566",
+      "quantity": 574.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-12-01",
+      "batch_number": "54567",
+      "quantity": 628.0
+    },
+    {
+      "product_code": "1019968",
+      "product_name": "Eraton Kids 50  ml",
+      "expiry_date": "2028-12-01",
+      "batch_number": "54568",
+      "quantity": 2625.0
+    },
+    {
+      "product_code": "1019969",
+      "product_name": "Eraton Tablet 30",
+      "expiry_date": "2026-06-01",
+      "batch_number": "311",
+      "quantity": 132.0
+    },
+    {
+      "product_code": "1019969",
+      "product_name": "Eraton Tablet 30",
+      "expiry_date": "2027-10-01",
+      "batch_number": "314004",
+      "quantity": 293.0
+    },
+    {
+      "product_code": "1019969",
+      "product_name": "Eraton Tablet 30",
+      "expiry_date": "2028-11-01",
+      "batch_number": "314006",
+      "quantity": 13030.0
+    },
+    {
+      "product_code": "1019970",
+      "product_name": "Feramin Kids 50 ML",
+      "expiry_date": "2029-03-01",
+      "batch_number": "61591",
+      "quantity": 24378.0
+    },
+    {
+      "product_code": "1019970",
+      "product_name": "Feramin Kids 50 ML",
+      "expiry_date": "2029-03-01",
+      "batch_number": "61592",
+      "quantity": 30672.0
+    },
+    {
+      "product_code": "1019970",
+      "product_name": "Feramin Kids 50 ML",
+      "expiry_date": "2028-06-01",
+      "batch_number": "52062",
+      "quantity": 93.0
+    },
+    {
+      "product_code": "1019970",
+      "product_name": "Feramin Kids 50 ML",
+      "expiry_date": "2027-11-01",
+      "batch_number": "4652",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019970",
+      "product_name": "Feramin Kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "57022",
+      "quantity": 3499.0
+    },
+    {
+      "product_code": "1019971",
+      "product_name": "Feramin Tablet 30",
+      "expiry_date": "2028-04-01",
+      "batch_number": "5250",
+      "quantity": 524.0
+    },
+    {
+      "product_code": "1019971",
+      "product_name": "Feramin Tablet 30",
+      "expiry_date": "2028-04-01",
+      "batch_number": "5251",
+      "quantity": 243.0
+    },
+    {
+      "product_code": "1019971",
+      "product_name": "Feramin Tablet 30",
+      "expiry_date": "2028-10-01",
+      "batch_number": "54541",
+      "quantity": 4081.0
+    },
+    {
+      "product_code": "1019971",
+      "product_name": "Feramin Tablet 30",
+      "expiry_date": "2028-10-01",
+      "batch_number": "54542",
+      "quantity": 3511.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2027-03-01",
+      "batch_number": "4034",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2028-03-01",
+      "batch_number": "5031",
+      "quantity": 384.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "3450",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2028-06-01",
+      "batch_number": "51701",
+      "quantity": 3974.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2028-06-01",
+      "batch_number": "51702",
+      "quantity": 20738.0
+    },
+    {
+      "product_code": "1019972",
+      "product_name": "Fersikard Kids 50 ML",
+      "expiry_date": "2027-11-01",
+      "batch_number": "4341",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019973",
+      "product_name": "Fersikard Tablet 30",
+      "expiry_date": "2028-05-01",
+      "batch_number": "53382",
+      "quantity": 72.0
+    },
+    {
+      "product_code": "1019973",
+      "product_name": "Fersikard Tablet 30",
+      "expiry_date": "2028-06-01",
+      "batch_number": "53383",
+      "quantity": 3696.0
+    },
+    {
+      "product_code": "1019973",
+      "product_name": "Fersikard Tablet 30",
+      "expiry_date": "2028-06-01",
+      "batch_number": "53384",
+      "quantity": 11862.0
+    },
+    {
+      "product_code": "1019973",
+      "product_name": "Fersikard Tablet 30",
+      "expiry_date": "2027-11-01",
+      "batch_number": "43422",
+      "quantity": 214.0
+    },
+    {
+      "product_code": "1019973",
+      "product_name": "Fersikard Tablet 30",
+      "expiry_date": "2027-11-01",
+      "batch_number": "43423",
+      "quantity": 120.0
+    },
+    {
+      "product_code": "2893524",
+      "product_name": "Forminol N30 kapsula",
+      "expiry_date": "2027-03-01",
+      "batch_number": "50442501",
+      "quantity": 902.0
+    },
+    {
+      "product_code": "2893524",
+      "product_name": "Forminol N30 kapsula",
+      "expiry_date": "2027-10-01",
+      "batch_number": "50442502",
+      "quantity": 6311.0
+    },
+    {
+      "product_code": "5139321",
+      "product_name": "Galasept nazal sprey 10 ml",
+      "expiry_date": "2028-04-01",
+      "batch_number": "L010426",
+      "quantity": 3337.0
+    },
+    {
+      "product_code": "5139319",
+      "product_name": "Galasept oro sprey 20 ml",
+      "expiry_date": "2028-04-01",
+      "batch_number": "L010426",
+      "quantity": 3336.0
+    },
+    {
+      "product_code": "1019974",
+      "product_name": "Giasin 3ml",
+      "expiry_date": "2027-03-01",
+      "batch_number": "17241201",
+      "quantity": 360.0
+    },
+    {
+      "product_code": "1019974",
+      "product_name": "Giasin 3ml",
+      "expiry_date": "2025-10-01",
+      "batch_number": "17224201",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "1019975",
+      "product_name": "Glisikalin 30 ML",
+      "expiry_date": "2029-02-01",
+      "batch_number": "6158",
+      "quantity": 8975.0
+    },
+    {
+      "product_code": "1019975",
+      "product_name": "Glisikalin 30 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "3339",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019975",
+      "product_name": "Glisikalin 30 ML",
+      "expiry_date": "2026-12-01",
+      "batch_number": "4007",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019975",
+      "product_name": "Glisikalin 30 ML",
+      "expiry_date": "2028-05-31",
+      "batch_number": "5163",
+      "quantity": 3770.0
+    },
+    {
+      "product_code": "5402292",
+      "product_name": "INTERIDON \u0440-\u0440 \u0432-\u0432 125 \u043c\u0433/\u043c\u043b 2 \u043c\u043b.\u21165",
+      "expiry_date": "2028-05-01",
+      "batch_number": "040526/2",
+      "quantity": 500.0
+    },
+    {
+      "product_code": "3234521",
+      "product_name": "Kastagnus \u211630 Tab",
+      "expiry_date": "2027-11-01",
+      "batch_number": "011124",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "3234521",
+      "product_name": "Kastagnus \u211630 Tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "011125",
+      "quantity": 6016.0
+    },
+    {
+      "product_code": "3234521",
+      "product_name": "Kastagnus \u211630 Tab",
+      "expiry_date": "2027-11-30",
+      "batch_number": "011124",
+      "quantity": 533.0
+    },
+    {
+      "product_code": "1019976",
+      "product_name": "Kidskol 30 ML",
+      "expiry_date": "2028-01-01",
+      "batch_number": "5016",
+      "quantity": 1703.0
+    },
+    {
+      "product_code": "1019976",
+      "product_name": "Kidskol 30 ML",
+      "expiry_date": "2026-07-01",
+      "batch_number": "3458",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019976",
+      "product_name": "Kidskol 30 ML",
+      "expiry_date": "2026-09-01",
+      "batch_number": "3781",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019976",
+      "product_name": "Kidskol 30 ML",
+      "expiry_date": "2027-10-01",
+      "batch_number": "4651",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019976",
+      "product_name": "Kidskol 30 ML",
+      "expiry_date": "2028-04-30",
+      "batch_number": "5154",
+      "quantity": 14486.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2027-02-01",
+      "batch_number": "40221",
+      "quantity": 5.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2029-05-01",
+      "batch_number": "61751",
+      "quantity": 30041.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2029-05-01",
+      "batch_number": "61752",
+      "quantity": 20398.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "34513",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2028-07-01",
+      "batch_number": "53391",
+      "quantity": 1084.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2028-08-01",
+      "batch_number": "53392",
+      "quantity": 3138.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2027-09-01",
+      "batch_number": "43442",
+      "quantity": 1265.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "57011",
+      "quantity": 323.0
+    },
+    {
+      "product_code": "1019977",
+      "product_name": "Kretamin kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "57012",
+      "quantity": 1604.0
+    },
+    {
+      "product_code": "1019978",
+      "product_name": "Kretamin Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54521",
+      "quantity": 3664.0
+    },
+    {
+      "product_code": "1019978",
+      "product_name": "Kretamin Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54522",
+      "quantity": 2429.0
+    },
+    {
+      "product_code": "1019978",
+      "product_name": "Kretamin Tablet 30",
+      "expiry_date": "2027-11-01",
+      "batch_number": "43451",
+      "quantity": 1070.0
+    },
+    {
+      "product_code": "1019978",
+      "product_name": "Kretamin Tablet 30",
+      "expiry_date": "2027-11-01",
+      "batch_number": "43452",
+      "quantity": 345.0
+    },
+    {
+      "product_code": "5266150",
+      "product_name": "LIPOSOM FORTE",
+      "expiry_date": "2028-07-01",
+      "batch_number": "L42400",
+      "quantity": 9985.0
+    },
+    {
+      "product_code": "1019979",
+      "product_name": "Livarti kids 50 ML",
+      "expiry_date": "2028-06-01",
+      "batch_number": "51711",
+      "quantity": 1301.0
+    },
+    {
+      "product_code": "1019979",
+      "product_name": "Livarti kids 50 ML",
+      "expiry_date": "2028-06-01",
+      "batch_number": "51712",
+      "quantity": 19988.0
+    },
+    {
+      "product_code": "1019979",
+      "product_name": "Livarti kids 50 ML",
+      "expiry_date": "2026-07-01",
+      "batch_number": "3448",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019979",
+      "product_name": "Livarti kids 50 ML",
+      "expiry_date": "2026-12-01",
+      "batch_number": "3935",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019979",
+      "product_name": "Livarti kids 50 ML",
+      "expiry_date": "2027-12-01",
+      "batch_number": "4777",
+      "quantity": 1448.0
+    },
+    {
+      "product_code": "3700829",
+      "product_name": "MaloksiMAKS \u2116 30 \u043f\u0430\u043a\u0435\u0442 \u0441\u0443\u0441\u043f\u0435\u043d\u0437\u0438\u044f",
+      "expiry_date": "2027-08-01",
+      "batch_number": "010725",
+      "quantity": 4012.0
+    },
+    {
+      "product_code": "1065563",
+      "product_name": "MAMAPREG DUA TABLET \u211628",
+      "expiry_date": "2028-05-01",
+      "batch_number": "550003",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "1065563",
+      "product_name": "MAMAPREG DUA TABLET \u211628",
+      "expiry_date": "2028-11-01",
+      "batch_number": "550004",
+      "quantity": 8045.0
+    },
+    {
+      "product_code": "2893545",
+      "product_name": "Melarginol N30 kapsula",
+      "expiry_date": "2028-03-01",
+      "batch_number": "50332601",
+      "quantity": 15171.0
+    },
+    {
+      "product_code": "2893545",
+      "product_name": "Melarginol N30 kapsula",
+      "expiry_date": "2027-09-01",
+      "batch_number": "50332502",
+      "quantity": 19.0
+    },
+    {
+      "product_code": "4893680",
+      "product_name": "Meldoneks \u0440\u0430\u0441\u0442\u0432\u043e\u0440 \u0434\u043b\u044f \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u0438 100 \u043c\u0433",
+      "expiry_date": "2028-03-01",
+      "batch_number": "040326",
+      "quantity": 776.0
+    },
+    {
+      "product_code": "4893680",
+      "product_name": "Meldoneks \u0440\u0430\u0441\u0442\u0432\u043e\u0440 \u0434\u043b\u044f \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u0438 100 \u043c\u0433",
+      "expiry_date": "2028-03-01",
+      "batch_number": "050326",
+      "quantity": 5112.0
+    },
+    {
+      "product_code": "4893680",
+      "product_name": "Meldoneks \u0440\u0430\u0441\u0442\u0432\u043e\u0440 \u0434\u043b\u044f \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u0438 100 \u043c\u0433",
+      "expiry_date": "2028-03-01",
+      "batch_number": "060326",
+      "quantity": 5456.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2026-04-01",
+      "batch_number": "2404087",
+      "quantity": 271.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2027-05-01",
+      "batch_number": "2505175A",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2027-06-24",
+      "batch_number": "2506198A",
+      "quantity": 38.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2027-06-24",
+      "batch_number": "2506199",
+      "quantity": 1603.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2026-04-30",
+      "batch_number": "2404087",
+      "quantity": 1071.0
+    },
+    {
+      "product_code": "3059680",
+      "product_name": "Mikonid SUPPC \u21167",
+      "expiry_date": "2027-05-31",
+      "batch_number": "2505175A",
+      "quantity": 3.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2029-04-01",
+      "batch_number": "5194017",
+      "quantity": 26706.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2021-05-01",
+      "batch_number": "5194021",
+      "quantity": 115.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2029-05-01",
+      "batch_number": "5194019",
+      "quantity": 34332.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2029-05-01",
+      "batch_number": "5194020",
+      "quantity": 2608.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2029-05-01",
+      "batch_number": "5194021",
+      "quantity": 27705.0
+    },
+    {
+      "product_code": "3478957",
+      "product_name": "Movedeks 50 mg/2 ml",
+      "expiry_date": "2029-05-01",
+      "batch_number": "5194022",
+      "quantity": 36845.0
+    },
+    {
+      "product_code": "3478958",
+      "product_name": "Moveril  4 mg/2ml \u21166",
+      "expiry_date": "2028-04-01",
+      "batch_number": "5133009",
+      "quantity": 514.0
+    },
+    {
+      "product_code": "3478958",
+      "product_name": "Moveril  4 mg/2ml \u21166",
+      "expiry_date": "2028-04-01",
+      "batch_number": "5133010",
+      "quantity": 718.0
+    },
+    {
+      "product_code": "3335589",
+      "product_name": "NAZAHELP Gel 30g",
+      "expiry_date": "2028-02-01",
+      "batch_number": "MD5140",
+      "quantity": 2330.0
+    },
+    {
+      "product_code": "3335589",
+      "product_name": "NAZAHELP Gel 30g",
+      "expiry_date": "2028-02-01",
+      "batch_number": "MD5141",
+      "quantity": 9550.0
+    },
+    {
+      "product_code": "3335587",
+      "product_name": "NAZAHELP sprey 50 ml",
+      "expiry_date": "2028-02-01",
+      "batch_number": "MD5126",
+      "quantity": 1878.0
+    },
+    {
+      "product_code": "3335587",
+      "product_name": "NAZAHELP sprey 50 ml",
+      "expiry_date": "2028-02-01",
+      "batch_number": "MD5127",
+      "quantity": 7850.0
+    },
+    {
+      "product_code": "1019980",
+      "product_name": "Nefroton Kids 50 ML",
+      "expiry_date": "2026-03-01",
+      "batch_number": "3112",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019980",
+      "product_name": "Nefroton Kids 50 ML",
+      "expiry_date": "2028-03-01",
+      "batch_number": "5032",
+      "quantity": 2863.0
+    },
+    {
+      "product_code": "1019980",
+      "product_name": "Nefroton Kids 50 ML",
+      "expiry_date": "2027-05-01",
+      "batch_number": "4335",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019980",
+      "product_name": "Nefroton Kids 50 ML",
+      "expiry_date": "2026-07-01",
+      "batch_number": "3344",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019980",
+      "product_name": "Nefroton Kids 50 ML",
+      "expiry_date": "2028-07-01",
+      "batch_number": "5165",
+      "quantity": 17695.0
+    },
+    {
+      "product_code": "1019981",
+      "product_name": "Nefroton Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54512",
+      "quantity": 1168.0
+    },
+    {
+      "product_code": "1019981",
+      "product_name": "Nefroton Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54513",
+      "quantity": 21789.0
+    },
+    {
+      "product_code": "1019981",
+      "product_name": "Nefroton Tablet 30",
+      "expiry_date": "2028-04-30",
+      "batch_number": "51771",
+      "quantity": 941.0
+    },
+    {
+      "product_code": "5331258",
+      "product_name": "NIGELLUM AZS 200 ml",
+      "expiry_date": "2029-04-01",
+      "batch_number": "010526",
+      "quantity": 2456.0
+    },
+    {
+      "product_code": "5331258",
+      "product_name": "NIGELLUM AZS 200 ml",
+      "expiry_date": "2029-04-01",
+      "batch_number": "020526",
+      "quantity": 2113.0
+    },
+    {
+      "product_code": "1157696",
+      "product_name": "Nottamag 30 Tablet",
+      "expiry_date": "2028-03-01",
+      "batch_number": "250304",
+      "quantity": 92.0
+    },
+    {
+      "product_code": "1157696",
+      "product_name": "Nottamag 30 Tablet",
+      "expiry_date": "2029-04-01",
+      "batch_number": "260405",
+      "quantity": 8929.0
+    },
+    {
+      "product_code": "4737416",
+      "product_name": "Oltan Plus Tab \u211630",
+      "expiry_date": "2027-12-01",
+      "batch_number": "250040",
+      "quantity": 4.0
+    },
+    {
+      "product_code": "4737416",
+      "product_name": "Oltan Plus Tab \u211630",
+      "expiry_date": "2027-12-04",
+      "batch_number": "250040",
+      "quantity": 9338.0
+    },
+    {
+      "product_code": "4737416",
+      "product_name": "Oltan Plus Tab \u211630",
+      "expiry_date": "2027-12-04",
+      "batch_number": "250050",
+      "quantity": 13169.0
+    },
+    {
+      "product_code": "5076798",
+      "product_name": "OMK 1",
+      "expiry_date": "2028-05-01",
+      "batch_number": "0280525",
+      "quantity": 14317.0
+    },
+    {
+      "product_code": "5076798",
+      "product_name": "OMK 1",
+      "expiry_date": "2029-03-31",
+      "batch_number": "0750326",
+      "quantity": 10810.0
+    },
+    {
+      "product_code": "5076800",
+      "product_name": "OMK 2",
+      "expiry_date": "2029-04-30",
+      "batch_number": "0130426",
+      "quantity": 719.0
+    },
+    {
+      "product_code": "5076800",
+      "product_name": "OMK 2",
+      "expiry_date": "2029-04-30",
+      "batch_number": "0150426",
+      "quantity": 10628.0
+    },
+    {
+      "product_code": "2181279",
+      "product_name": "Ozodrop 8 ml",
+      "expiry_date": "2026-02-01",
+      "batch_number": "BG15702",
+      "quantity": 607.0
+    },
+    {
+      "product_code": "2181279",
+      "product_name": "Ozodrop 8 ml",
+      "expiry_date": "2026-01-02",
+      "batch_number": "BG15702",
+      "quantity": 22.0
+    },
+    {
+      "product_code": "2181279",
+      "product_name": "Ozodrop 8 ml",
+      "expiry_date": "2026-02-28",
+      "batch_number": "BG15702",
+      "quantity": 5674.0
+    },
+    {
+      "product_code": "5048371",
+      "product_name": "PROKTOESKULAN \u0433\u0435\u043b\u044c 50 \u043c\u0433/\u0433+5 \u043c\u0433/\u0433 30\u0433",
+      "expiry_date": "2027-04-01",
+      "batch_number": "010525",
+      "quantity": 1412.0
+    },
+    {
+      "product_code": "5331259",
+      "product_name": "Psogellum krem 200 ml",
+      "expiry_date": "2028-10-01",
+      "batch_number": "010526",
+      "quantity": 2066.0
+    },
+    {
+      "product_code": "5331259",
+      "product_name": "Psogellum krem 200 ml",
+      "expiry_date": "2028-10-01",
+      "batch_number": "020526",
+      "quantity": 1566.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-01-01",
+      "batch_number": "50051",
+      "quantity": 314.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-01-01",
+      "batch_number": "50052",
+      "quantity": 216.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-01-01",
+      "batch_number": "50053",
+      "quantity": 958.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2029-02-01",
+      "batch_number": "60332",
+      "quantity": 21249.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2026-03-01",
+      "batch_number": "3109",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2027-03-01",
+      "batch_number": "4042",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-05-01",
+      "batch_number": "53366",
+      "quantity": 0.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2026-07-01",
+      "batch_number": "3342",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2027-08-01",
+      "batch_number": "4346",
+      "quantity": 22.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2026-03-31",
+      "batch_number": "3109",
+      "quantity": 4.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-05-31",
+      "batch_number": "53362",
+      "quantity": 11.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-05-31",
+      "batch_number": "53363",
+      "quantity": 120.0
+    },
+    {
+      "product_code": "1019983",
+      "product_name": "Radavit Kids 30 ML",
+      "expiry_date": "2028-05-31",
+      "batch_number": "53366",
+      "quantity": 834.0
+    },
+    {
+      "product_code": "1019984",
+      "product_name": "Radavit \u211630 kapsula",
+      "expiry_date": "2029-02-01",
+      "batch_number": "312005",
+      "quantity": 12180.0
+    },
+    {
+      "product_code": "1019984",
+      "product_name": "Radavit \u211630 kapsula",
+      "expiry_date": "2028-12-01",
+      "batch_number": "312004",
+      "quantity": 21.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2028-01-01",
+      "batch_number": "50192",
+      "quantity": 312.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2029-01-01",
+      "batch_number": "60161",
+      "quantity": 6744.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2029-01-01",
+      "batch_number": "60162",
+      "quantity": 28002.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2027-02-01",
+      "batch_number": "40201",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "3449",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2026-11-01",
+      "batch_number": "37721",
+      "quantity": 9.0
+    },
+    {
+      "product_code": "1019985",
+      "product_name": "Radelaks Kids 50 ML",
+      "expiry_date": "2028-05-31",
+      "batch_number": "51563",
+      "quantity": 287.0
+    },
+    {
+      "product_code": "1019986",
+      "product_name": "Radelaks Tablet 30",
+      "expiry_date": "2028-04-01",
+      "batch_number": "51643",
+      "quantity": 216.0
+    },
+    {
+      "product_code": "1019986",
+      "product_name": "Radelaks Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54582",
+      "quantity": 564.0
+    },
+    {
+      "product_code": "1019986",
+      "product_name": "Radelaks Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54583",
+      "quantity": 4570.0
+    },
+    {
+      "product_code": "1019986",
+      "product_name": "Radelaks Tablet 30",
+      "expiry_date": "2028-07-01",
+      "batch_number": "54584",
+      "quantity": 19762.0
+    },
+    {
+      "product_code": "1019987",
+      "product_name": "Radoksil Tablet 30",
+      "expiry_date": "2028-08-01",
+      "batch_number": "315004",
+      "quantity": 26755.0
+    },
+    {
+      "product_code": "2349889",
+      "product_name": "Reproduktol N30 Tabletka",
+      "expiry_date": "2029-04-01",
+      "batch_number": "553002",
+      "quantity": 2844.0
+    },
+    {
+      "product_code": "2174354",
+      "product_name": "Rinotin Kids 50 ML",
+      "expiry_date": "2028-03-01",
+      "batch_number": "52021",
+      "quantity": 616.0
+    },
+    {
+      "product_code": "2174354",
+      "product_name": "Rinotin Kids 50 ML",
+      "expiry_date": "2028-10-01",
+      "batch_number": "56961",
+      "quantity": 1935.0
+    },
+    {
+      "product_code": "2174354",
+      "product_name": "Rinotin Kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "56962",
+      "quantity": 382.0
+    },
+    {
+      "product_code": "2174354",
+      "product_name": "Rinotin Kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "56963",
+      "quantity": 1705.0
+    },
+    {
+      "product_code": "2174354",
+      "product_name": "Rinotin Kids 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "56964",
+      "quantity": 13250.0
+    },
+    {
+      "product_code": "1019989",
+      "product_name": "Rinotin Tablet 30",
+      "expiry_date": "2027-01-01",
+      "batch_number": "40231",
+      "quantity": 904.0
+    },
+    {
+      "product_code": "1019989",
+      "product_name": "Rinotin Tablet 30",
+      "expiry_date": "2027-01-01",
+      "batch_number": "40232",
+      "quantity": 3250.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-03-01",
+      "batch_number": "D25027",
+      "quantity": 3.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25074",
+      "quantity": 416.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25075",
+      "quantity": 511.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25076",
+      "quantity": 1158.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25077",
+      "quantity": 3698.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25078",
+      "quantity": 2872.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25079",
+      "quantity": 9551.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-09-30",
+      "batch_number": "D25080",
+      "quantity": 9439.0
+    },
+    {
+      "product_code": "1054700",
+      "product_name": "Rinotin \u211610 SUPPC",
+      "expiry_date": "2028-03-31",
+      "batch_number": "D25024",
+      "quantity": 935.0
+    },
+    {
+      "product_code": "3478955",
+      "product_name": "SalbuKort 2.5 mg/2.5ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "532038",
+      "quantity": 1357.0
+    },
+    {
+      "product_code": "3478955",
+      "product_name": "SalbuKort 2.5 mg/2.5ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "532039",
+      "quantity": 15677.0
+    },
+    {
+      "product_code": "3478955",
+      "product_name": "SalbuKort 2.5 mg/2.5ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "532045",
+      "quantity": 128.0
+    },
+    {
+      "product_code": "3478955",
+      "product_name": "SalbuKort 2.5 mg/2.5ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "532046",
+      "quantity": 11602.0
+    },
+    {
+      "product_code": "3478956",
+      "product_name": "SalbuKort 5 mg/2.5 ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "533001",
+      "quantity": 450.0
+    },
+    {
+      "product_code": "3478956",
+      "product_name": "SalbuKort 5 mg/2.5 ml \u211620",
+      "expiry_date": "2027-04-01",
+      "batch_number": "533002",
+      "quantity": 154.0
+    },
+    {
+      "product_code": "3478956",
+      "product_name": "SalbuKort 5 mg/2.5 ml \u211620",
+      "expiry_date": "2028-03-31",
+      "batch_number": "633002",
+      "quantity": 9587.0
+    },
+    {
+      "product_code": "5212580",
+      "product_name": "Semalong 0.25",
+      "expiry_date": "2027-03-01",
+      "batch_number": "5F00338",
+      "quantity": 1072.0
+    },
+    {
+      "product_code": "5212581",
+      "product_name": "Semalong 0.5",
+      "expiry_date": "2027-03-01",
+      "batch_number": "5F00342",
+      "quantity": 826.0
+    },
+    {
+      "product_code": "1558968",
+      "product_name": "Serkumin \u211630 tab",
+      "expiry_date": "2029-01-01",
+      "batch_number": "555005",
+      "quantity": 2578.0
+    },
+    {
+      "product_code": "1558968",
+      "product_name": "Serkumin \u211630 tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "555004",
+      "quantity": 1093.0
+    },
+    {
+      "product_code": "1558968",
+      "product_name": "Serkumin \u211630 tab",
+      "expiry_date": "2028-04-30",
+      "batch_number": "55503",
+      "quantity": 260.0
+    },
+    {
+      "product_code": "1019990",
+      "product_name": "Sinbotik 50 ML",
+      "expiry_date": "2026-03-01",
+      "batch_number": "3110",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019990",
+      "product_name": "Sinbotik 50 ML",
+      "expiry_date": "2029-03-01",
+      "batch_number": "6035",
+      "quantity": 19296.0
+    },
+    {
+      "product_code": "1019990",
+      "product_name": "Sinbotik 50 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "3343",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019990",
+      "product_name": "Sinbotik 50 ML",
+      "expiry_date": "2028-07-01",
+      "batch_number": "5340",
+      "quantity": 2774.0
+    },
+    {
+      "product_code": "1019990",
+      "product_name": "Sinbotik 50 ML",
+      "expiry_date": "2028-03-31",
+      "batch_number": "5249",
+      "quantity": 414.0
+    },
+    {
+      "product_code": "1019991",
+      "product_name": "Sinflozid 50 ML",
+      "expiry_date": "2029-01-01",
+      "batch_number": "010126",
+      "quantity": 40139.0
+    },
+    {
+      "product_code": "1019991",
+      "product_name": "Sinflozid 50 ML",
+      "expiry_date": "2028-03-01",
+      "batch_number": "250306",
+      "quantity": 958.0
+    },
+    {
+      "product_code": "1019991",
+      "product_name": "Sinflozid 50 ML",
+      "expiry_date": "2027-08-01",
+      "batch_number": "230807",
+      "quantity": 61.0
+    },
+    {
+      "product_code": "1019991",
+      "product_name": "Sinflozid 50 ML",
+      "expiry_date": "2026-09-01",
+      "batch_number": "23011",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": null,
+      "batch_number": null,
+      "quantity": 9.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2027-01-01",
+      "batch_number": "50182",
+      "quantity": 804.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2027-01-01",
+      "batch_number": "50183",
+      "quantity": 413.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2025-07-01",
+      "batch_number": "3447",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2026-07-01",
+      "batch_number": "37831",
+      "quantity": 10.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2027-07-01",
+      "batch_number": "51691",
+      "quantity": 4094.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2027-07-01",
+      "batch_number": "51692",
+      "quantity": 2099.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2027-07-01",
+      "batch_number": "51693",
+      "quantity": 6282.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2025-10-01",
+      "batch_number": "37832",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2026-10-01",
+      "batch_number": "37832",
+      "quantity": 9.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2025-11-01",
+      "batch_number": "39401",
+      "quantity": 10.0
+    },
+    {
+      "product_code": "1019992",
+      "product_name": "Sinproji 15 ML",
+      "expiry_date": "2025-11-01",
+      "batch_number": "39402",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "4537696",
+      "product_name": "Sinrelaks tab \u211630",
+      "expiry_date": "2028-11-01",
+      "batch_number": "57411",
+      "quantity": 6405.0
+    },
+    {
+      "product_code": "4537696",
+      "product_name": "Sinrelaks tab \u211630",
+      "expiry_date": "2028-11-01",
+      "batch_number": "57412",
+      "quantity": 14555.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2028-02-01",
+      "batch_number": "5140",
+      "quantity": 1124.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2026-03-01",
+      "batch_number": "3107",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "3340",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2027-07-01",
+      "batch_number": "5373",
+      "quantity": 1119.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2028-07-01",
+      "batch_number": "5373",
+      "quantity": 660.0
+    },
+    {
+      "product_code": "1019993",
+      "product_name": "Sintanin 50 ML",
+      "expiry_date": "2028-11-01",
+      "batch_number": "5457",
+      "quantity": 27424.0
+    },
+    {
+      "product_code": "4527623",
+      "product_name": "Sintanin tab \u211630",
+      "expiry_date": "2028-11-01",
+      "batch_number": "5742",
+      "quantity": 6228.0
+    },
+    {
+      "product_code": "1158303",
+      "product_name": "Sintsimet 30 Tablet",
+      "expiry_date": "2028-03-01",
+      "batch_number": "250305",
+      "quantity": 125.0
+    },
+    {
+      "product_code": "1158303",
+      "product_name": "Sintsimet 30 Tablet",
+      "expiry_date": "2029-04-01",
+      "batch_number": "260404",
+      "quantity": 9167.0
+    },
+    {
+      "product_code": "1158303",
+      "product_name": "Sintsimet 30 Tablet",
+      "expiry_date": "2026-10-01",
+      "batch_number": "23012",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1158303",
+      "product_name": "Sintsimet 30 Tablet",
+      "expiry_date": "2027-12-01",
+      "batch_number": "211208",
+      "quantity": 8.0
+    },
+    {
+      "product_code": "4855458",
+      "product_name": "Solentra 50 \u043c\u0433/\u043c\u043b, 5 \u043c\u043b \u21165",
+      "expiry_date": "2028-02-01",
+      "batch_number": "030226/1",
+      "quantity": 608.0
+    },
+    {
+      "product_code": "4855458",
+      "product_name": "Solentra 50 \u043c\u0433/\u043c\u043b, 5 \u043c\u043b \u21165",
+      "expiry_date": "2028-02-01",
+      "batch_number": "040226",
+      "quantity": 10718.0
+    },
+    {
+      "product_code": "1019994",
+      "product_name": "Stomorad 20 ML",
+      "expiry_date": "2027-01-01",
+      "batch_number": "316001",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019994",
+      "product_name": "Stomorad 20 ML",
+      "expiry_date": "2029-02-01",
+      "batch_number": "316006",
+      "quantity": 349.0
+    },
+    {
+      "product_code": "1019994",
+      "product_name": "Stomorad 20 ML",
+      "expiry_date": "2026-06-01",
+      "batch_number": "316",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "1019994",
+      "product_name": "Stomorad 20 ML",
+      "expiry_date": "2027-07-01",
+      "batch_number": "316002",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "1019994",
+      "product_name": "Stomorad 20 ML",
+      "expiry_date": "2027-12-01",
+      "batch_number": "316003",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "4737415",
+      "product_name": "Sugapa Tab \u211628",
+      "expiry_date": "2028-11-06",
+      "batch_number": "250010",
+      "quantity": 6570.0
+    },
+    {
+      "product_code": "5197458",
+      "product_name": "Tricortin 12mg+1mg/2ml \u21165",
+      "expiry_date": "2027-03-01",
+      "batch_number": "H14800",
+      "quantity": 10.0
+    },
+    {
+      "product_code": "4821609",
+      "product_name": "Unicenta 2 \u043c\u043b \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f",
+      "expiry_date": "2027-08-26",
+      "batch_number": "250050",
+      "quantity": 1206.0
+    },
+    {
+      "product_code": "4821609",
+      "product_name": "Unicenta 2 \u043c\u043b \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f",
+      "expiry_date": "2027-10-28",
+      "batch_number": "250060",
+      "quantity": 4928.0
+    },
+    {
+      "product_code": "4795702",
+      "product_name": "UNICETAL 100 mg \u211630 Tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250080",
+      "quantity": 16767.0
+    },
+    {
+      "product_code": "4795704",
+      "product_name": "UNIMARYL  2 mg \u211630 Tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250070",
+      "quantity": 7656.0
+    },
+    {
+      "product_code": "4795704",
+      "product_name": "UNIMARYL  2 mg \u211630 Tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250080",
+      "quantity": 9872.0
+    },
+    {
+      "product_code": "4795709",
+      "product_name": "UNIZAC 20 mg \u211630 Tab",
+      "expiry_date": "2028-11-01",
+      "batch_number": "250120",
+      "quantity": 15017.0
+    },
+    {
+      "product_code": "1019995",
+      "product_name": "Vaginersin (\u0412\u0430\u0433\u0438\u043d\u0435\u0440\u0441\u0438\u043d) 10",
+      "expiry_date": "2026-05-01",
+      "batch_number": "D23099",
+      "quantity": 28.0
+    },
+    {
+      "product_code": "1019995",
+      "product_name": "Vaginersin (\u0412\u0430\u0433\u0438\u043d\u0435\u0440\u0441\u0438\u043d) 10",
+      "expiry_date": "2026-05-01",
+      "batch_number": "D23100",
+      "quantity": 23.0
+    },
+    {
+      "product_code": "1019995",
+      "product_name": "Vaginersin (\u0412\u0430\u0433\u0438\u043d\u0435\u0440\u0441\u0438\u043d) 10",
+      "expiry_date": "2027-10-01",
+      "batch_number": "D24048",
+      "quantity": 291.0
+    },
+    {
+      "product_code": "1019995",
+      "product_name": "Vaginersin (\u0412\u0430\u0433\u0438\u043d\u0435\u0440\u0441\u0438\u043d) 10",
+      "expiry_date": "2027-10-01",
+      "batch_number": "D24049",
+      "quantity": 33.0
+    },
+    {
+      "product_code": "1019995",
+      "product_name": "Vaginersin (\u0412\u0430\u0433\u0438\u043d\u0435\u0440\u0441\u0438\u043d) 10",
+      "expiry_date": "2026-02-28",
+      "batch_number": "D23055",
+      "quantity": 10.0
+    },
+    {
+      "product_code": "5197456",
+      "product_name": "Visglyc neo kapli 10 ml",
+      "expiry_date": "2028-03-01",
+      "batch_number": "2501",
+      "quantity": 14964.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-06-01",
+      "batch_number": "25001",
+      "quantity": 608.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-06-01",
+      "batch_number": "25002",
+      "quantity": 1488.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-06-01",
+      "batch_number": "25003",
+      "quantity": 448.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-06-01",
+      "batch_number": "26003",
+      "quantity": 26.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2027-07-01",
+      "batch_number": "25004",
+      "quantity": 4991.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-07-01",
+      "batch_number": "25005",
+      "quantity": 7475.0
+    },
+    {
+      "product_code": "4527656",
+      "product_name": "\u0410\u0440\u0430\u0442\u0440\u043e  200 \u043c\u0433/5\u043c\u043b",
+      "expiry_date": "2029-07-01",
+      "batch_number": "25006",
+      "quantity": 7419.0
+    },
+    {
+      "product_code": "3667568",
+      "product_name": "\u0411\u0438\u043e\u0432\u0438\u0442 \u041d\u0435\u043e  \u0434\u043b\u044f \u0437\u0434\u043e\u0440\u043e\u0432\u043e\u0433\u043e \u0440\u043e\u0441\u0442\u0430 \u0441\u0438\u0440\u043e\u043f 150 \u043c\u043b",
+      "expiry_date": "2027-02-01",
+      "batch_number": "HEA02",
+      "quantity": 15.0
+    },
+    {
+      "product_code": "3667568",
+      "product_name": "\u0411\u0438\u043e\u0432\u0438\u0442 \u041d\u0435\u043e  \u0434\u043b\u044f \u0437\u0434\u043e\u0440\u043e\u0432\u043e\u0433\u043e \u0440\u043e\u0441\u0442\u0430 \u0441\u0438\u0440\u043e\u043f 150 \u043c\u043b",
+      "expiry_date": "2029-02-01",
+      "batch_number": "HEA0226",
+      "quantity": 35.0
+    },
+    {
+      "product_code": "3667575",
+      "product_name": "\u0411\u0438\u043e\u0432\u0438\u0442 \u041d\u0435\u043e \u0440\u044b\u0431\u0438\u0439 \u0436\u0438\u0440 \u0441\u0438\u0440\u043e\u043f 150\u043c\u043b",
+      "expiry_date": "2029-02-01",
+      "batch_number": "FSH0226",
+      "quantity": 35.0
+    },
+    {
+      "product_code": "3974393",
+      "product_name": "\u0412\u0418\u0422\u0410\u0414\u0415\u0422\u0420\u0418\u041c 10 \u043c\u043b \u043a\u0430\u043f\u043b\u0438",
+      "expiry_date": "2028-01-01",
+      "batch_number": "011225",
+      "quantity": 192.0
+    },
+    {
+      "product_code": "3974393",
+      "product_name": "\u0412\u0418\u0422\u0410\u0414\u0415\u0422\u0420\u0418\u041c 10 \u043c\u043b \u043a\u0430\u043f\u043b\u0438",
+      "expiry_date": "2028-08-01",
+      "batch_number": "011225",
+      "quantity": 100.0
+    },
+    {
+      "product_code": "3667594",
+      "product_name": "\u0413\u0438\u0434\u0440\u043e\u043a\u0430\u043b\u043c \u0444\u043e\u0440\u0442\u0435 \u0442\u0430\u0431  \u211630",
+      "expiry_date": "2027-02-01",
+      "batch_number": "HYD02",
+      "quantity": 15.0
+    },
+    {
+      "product_code": "4889329",
+      "product_name": "\u041b\u0415\u0412\u0415\u041d\u0415\u0420 200 \u043c\u0433/5 \u043c\u043b \u21165",
+      "expiry_date": "2028-03-01",
+      "batch_number": "020326",
+      "quantity": 6166.0
+    },
+    {
+      "product_code": "4889329",
+      "product_name": "\u041b\u0415\u0412\u0415\u041d\u0415\u0420 200 \u043c\u0433/5 \u043c\u043b \u21165",
+      "expiry_date": "2028-03-01",
+      "batch_number": "030326",
+      "quantity": 9576.0
+    },
+    {
+      "product_code": "3974392",
+      "product_name": "\u041c\u0410\u0421\u0424\u0418\u0413\u0415\u041b\u042c 50\u0433\u0440 \u043a\u0440\u0435\u043c",
+      "expiry_date": "2027-12-01",
+      "batch_number": "011124",
+      "quantity": 130.0
+    },
+    {
+      "product_code": "3974390",
+      "product_name": "\u041d\u0423\u041a\u041b\u0415\u041e \u041d\u0415\u0419\u0420\u041e \u211630 \u043a\u0430\u043f\u0441\u0443\u043b\u0430",
+      "expiry_date": "2028-09-01",
+      "batch_number": "010826",
+      "quantity": 79.0
+    },
+    {
+      "product_code": "3848096",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 30 \u043c\u043b",
+      "expiry_date": "2028-03-01",
+      "batch_number": "050325",
+      "quantity": 93.0
+    },
+    {
+      "product_code": "3848096",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 30 \u043c\u043b",
+      "expiry_date": "2028-06-01",
+      "batch_number": "100625",
+      "quantity": 13.0
+    },
+    {
+      "product_code": "3848096",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 30 \u043c\u043b",
+      "expiry_date": "2028-06-01",
+      "batch_number": "120625",
+      "quantity": 45.0
+    },
+    {
+      "product_code": "3848096",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 30 \u043c\u043b",
+      "expiry_date": "2028-09-01",
+      "batch_number": "160925",
+      "quantity": 9120.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-05-01",
+      "batch_number": "080525",
+      "quantity": 2.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-05-01",
+      "batch_number": "110525",
+      "quantity": 26.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-06-01",
+      "batch_number": "160625",
+      "quantity": 34.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-06-01",
+      "batch_number": "170625",
+      "quantity": 28.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-10-01",
+      "batch_number": "241025",
+      "quantity": 26.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "271125",
+      "quantity": 111.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "281125",
+      "quantity": 153.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "291125",
+      "quantity": 659.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "301125",
+      "quantity": 27.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "311125",
+      "quantity": 1008.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "331125",
+      "quantity": 2096.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "341125",
+      "quantity": 460.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "351125",
+      "quantity": 2124.0
+    },
+    {
+      "product_code": "3848097",
+      "product_name": "\u041f\u0440\u043e\u0442\u0435\u0444\u043b\u0430\u0437\u0438\u0434 \u211610 SUPPC(\u0441\u0432\u0435\u0447\u0438)",
+      "expiry_date": "2027-11-01",
+      "batch_number": "361125",
+      "quantity": 2124.0
+    },
+    {
+      "product_code": "4839151",
+      "product_name": "\u0422\u0438\u043c\u043e\u0440\u0438\u043d \u0438\u043d\u044a\u0435\u043a\u0446\u0438\u044f 1000 \u043c\u0433/4\u043c\u043b",
+      "expiry_date": "2028-02-01",
+      "batch_number": "030226",
+      "quantity": 8043.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-01",
+      "batch_number": "111025",
+      "quantity": 4.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2029-09-01",
+      "batch_number": "111025",
+      "quantity": 1.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2027-12-01",
+      "batch_number": "190125",
+      "quantity": 278.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "111025",
+      "quantity": 2834.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "131025",
+      "quantity": 8958.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "141025",
+      "quantity": 9101.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "151025",
+      "quantity": 8974.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "161025",
+      "quantity": 9036.0
+    },
+    {
+      "product_code": "3975764",
+      "product_name": "\u0423\u0440\u043e\u0441\u0435\u043f\u0442-Herbapol \u0442\u0430\u0431  \u211660",
+      "expiry_date": "2028-09-30",
+      "batch_number": "173025",
+      "quantity": 4919.0
+    }
+  ]
+}

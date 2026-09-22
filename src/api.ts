@@ -132,7 +132,7 @@ export interface CompanyStockRow {
   productId: string; name: string; manufacturerLabel: string | null;
   projectName: string | null; catalogCategory: string | null; qty: number;
   customsQty: number; orderQty: number; incomingQty: number; avgSales: number;
-  warehouseQty: number; coverageMonths: number | null;
+  warehouseQty: number; coverageMonths: number | null; expiryDatesCount: number;
 }
 export interface CompanyStockPage extends Page<CompanyStockRow> { productsInStock: number; }
 
@@ -150,6 +150,7 @@ export async function listCompanyStock(params: {
       customsQty: x.customs_qty, orderQty: x.order_qty, incomingQty: x.incoming_qty,
       avgSales: x.avg_sales,
       warehouseQty: x.warehouse_qty, coverageMonths: x.coverage_months,
+      expiryDatesCount: x.expiry_dates_count,
     })),
   };
 }
@@ -265,6 +266,24 @@ export async function listCustoms(params: { q?: string; regime?: string }): Prom
 export async function customsCertificateUrl(invoiceId: string): Promise<string> {
   const r = await request<{ url: string }>(`/customs/invoices/${invoiceId}/certificate-url`);
   return r.url;
+}
+
+export interface ProductExpiryRow {
+  expiryDate: string | null; batchNumber: string | null; quantity: number;
+}
+export interface ProductExpiryBreakdown {
+  productId: string; productName: string; sourceDate: string; totalQuantity: number;
+  items: ProductExpiryRow[];
+}
+export async function productExpiryBreakdown(productId: string): Promise<ProductExpiryBreakdown> {
+  const r = await request<any>(`/company-stock/${productId}/expiry-breakdown`);
+  return {
+    productId: r.product_id, productName: r.product_name, sourceDate: r.source_date,
+    totalQuantity: r.total_quantity,
+    items: r.items.map((item: any) => ({
+      expiryDate: item.expiry_date, batchNumber: item.batch_number, quantity: item.quantity,
+    })),
+  };
 }
 
 // ── Certificate library (read-only) ─────────────────────────────────────────

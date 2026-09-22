@@ -516,6 +516,41 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 }
 .series-chip b { color: var(--primary-strong); }
 
+.product-expiry-trigger {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+  padding: 3px 0; border: 0; background: transparent; color: var(--text);
+  font: inherit; cursor: pointer; text-align: left;
+}
+.product-expiry-trigger svg { flex: 0 0 auto; color: var(--primary); }
+.product-expiry-trigger:hover .name { color: var(--primary-strong); text-decoration: underline; text-underline-offset: 3px; }
+.product-expiry-trigger:focus-visible { outline: 3px solid rgba(47,107,255,.2); outline-offset: 3px; border-radius: 5px; }
+.expiry-count {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+  border-radius: 999px; background: var(--primary-soft); color: var(--primary-strong);
+  font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.expiry-details { padding-top: 14px; padding-bottom: 18px; }
+.expiry-summary {
+  display: flex; justify-content: space-between; gap: 16px; margin-bottom: 12px;
+  color: var(--text-soft); font-size: 12px; font-weight: 700;
+}
+.expiry-summary > :first-child { color: var(--text); font-size: 13px; font-weight: 800; }
+.expiry-groups { display: grid; gap: 9px; }
+.expiry-group {
+  display: grid; grid-template-columns: minmax(145px, 190px) 1fr; gap: 14px;
+  align-items: center; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 12px; background: #fff;
+}
+.expiry-date { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--primary-strong); }
+.expiry-date svg { color: var(--primary); }
+.expiry-empty { padding: 14px 0; color: var(--text-muted); font-size: 13px; }
+
+@media (max-width: 720px) {
+  .subtable-inner { padding-left: 18px; }
+  .expiry-summary { flex-direction: column; gap: 3px; }
+  .expiry-group { grid-template-columns: 1fr; gap: 9px; }
+}
+
 /* ── Category chip inline with product name ──────────────────────────────── */
 .prod-cell { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .prod-cell .name { font-weight: 700; }

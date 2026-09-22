@@ -15,6 +15,10 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
+import json
+from pathlib import Path
+import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -45,6 +49,35 @@ ORDER_CLOSE_THRESHOLD = 0.9
 # Regimes matched to catalog products by name (like ANDROMEDA analytics_full).
 CUSTOMS_REGIMES = ("IM-74", "TR-80")   # real customs stock
 INCOMING_REGIMES = ("INCOMING",)       # goods on the way → shown as orange +qty
+EXPIRY_DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "company_stock_expiries.json"
+
+
+def _normalize_product_name(value: str) -> str:
+    return re.sub(r"\s+", " ", value.strip().casefold())
+
+
+@lru_cache(maxsize=1)
+def _expiry_data() -> tuple[dict[str, list[dict]], dict[str, list[dict]], date]:
+    """Load the marketing-only Smartup stock-detail snapshot bundled with this service."""
+    payload = json.loads(EXPIRY_DATA_PATH.read_text(encoding="utf-8"))
+    by_code: dict[str, list[dict]] = {}
+    by_name: dict[str, list[dict]] = {}
+    for row in payload.get("items", []):
+        code = str(row.get("product_code") or "").strip()
+        name = _normalize_product_name(str(row.get("product_name") or ""))
+        if code:
+            by_code.setdefault(code, []).append(row)
+        if name:
+            by_name.setdefault(name, []).append(row)
+    return by_code, by_name, date.fromisoformat(payload["imported_at"])
+
+
+def _product_expiry_rows(product: AnalyticsProduct) -> list[dict]:
+    by_code, by_name, _ = _expiry_data()
+    code = str(product.external_id or "").strip()
+    if code and code in by_code:
+        return by_code[code]
+    return by_name.get(_normalize_product_name(product.name), [])
 
 
 def _month_first(d: date) -> date:
@@ -69,6 +102,7 @@ class CompanyStockRow(BaseModel):
     avg_sales: float
     warehouse_qty: float       # total across warehouses
     coverage_months: Optional[float] = None  # warehouse_qty / avg_sales
+    expiry_dates_count: int = 0
 
 
 class CompanyStockPage(BaseModel):
@@ -244,6 +278,7 @@ def list_company_stock(
                 avg_sales=avg_sales,
                 warehouse_qty=wh,
                 coverage_months=coverage,
+                expiry_dates_count=len({r.get("expiry_date") for r in _product_expiry_rows(p) if r.get("expiry_date")}),
             )
         )
 
@@ -253,6 +288,44 @@ def list_company_stock(
         page=page,
         page_size=page_size,
         products_in_stock=products_in_stock,
+    )
+
+
+class ProductExpiryRow(BaseModel):
+    expiry_date: Optional[date] = None
+    batch_number: Optional[str] = None
+    quantity: float
+
+
+class ProductExpiryBreakdown(BaseModel):
+    product_id: str
+    product_name: str
+    source_date: date
+    total_quantity: float
+    items: list[ProductExpiryRow]
+
+
+@router.get("/{product_id}/expiry-breakdown", response_model=ProductExpiryBreakdown)
+def product_expiry_breakdown(product_id: str, db: Session = Depends(get_db)) -> ProductExpiryBreakdown:
+    product = db.get(AnalyticsProduct, product_id)
+    if product is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found.")
+    source_date = _expiry_data()[2]
+    items = [
+        ProductExpiryRow(
+            expiry_date=date.fromisoformat(row["expiry_date"]) if row.get("expiry_date") else None,
+            batch_number=row.get("batch_number"),
+            quantity=float(row.get("quantity") or 0),
+        )
+        for row in _product_expiry_rows(product)
+    ]
+    items.sort(key=lambda item: (item.expiry_date is None, item.expiry_date or date.max, item.batch_number or ""))
+    return ProductExpiryBreakdown(
+        product_id=str(product.id),
+        product_name=product.name,
+        source_date=source_date,
+        total_quantity=sum(item.quantity for item in items),
+        items=items,
     )
 
 
@@ -342,4 +415,5 @@ def set_company_stock(
         avg_sales=0.0,
         warehouse_qty=0.0,
         coverage_months=None,
+        expiry_dates_count=len({r.get("expiry_date") for r in _product_expiry_rows(product) if r.get("expiry_date")}),
     )

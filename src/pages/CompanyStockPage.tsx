@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Boxes, Search, Check, Pencil, X, ArrowRight } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Boxes, Search, Check, Pencil, X, ArrowRight, ChevronDown, ChevronRight, CalendarDays } from 'lucide-react';
 import * as api from '../api';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../i18n';
-import { PageHead, Spinner, EmptyState, fmtNum } from '../components';
+import { PageHead, Spinner, EmptyState, fmtNum, fmtDate } from '../components';
 
 function catClass(cat: string | null): string {
   const c = (cat || '').toLowerCase();
@@ -34,6 +34,7 @@ export default function CompanyStockPage() {
   const [loading, setLoading] = useState(true);
   const [lookups, setLookups] = useState<api.Lookups | null>(null);
   const [modalProduct, setModalProduct] = useState<api.CompanyStockRow | null>(null);
+  const [openExpiries, setOpenExpiries] = useState<Record<string, boolean>>({});
   const debounce = useRef<number | undefined>(undefined);
 
   useEffect(() => { api.fetchLookups().then(setLookups).catch(() => {}); }, []);
@@ -102,9 +103,22 @@ export default function CompanyStockPage() {
                 </tr>
               </thead>
               <tbody>
-                {data?.items.map((r) => (
-                  <StockRow key={r.productId} row={r} canWrite={canWrite} onSaved={load} onOpen={() => setModalProduct(r)} />
-                ))}
+                {data?.items.map((r) => {
+                  const isOpen = !!openExpiries[r.productId];
+                  return (
+                    <Fragment key={r.productId}>
+                      <StockRow
+                        row={r}
+                        canWrite={canWrite}
+                        isOpen={isOpen}
+                        onToggle={() => setOpenExpiries((current) => ({ ...current, [r.productId]: !current[r.productId] }))}
+                        onSaved={load}
+                        onOpen={() => setModalProduct(r)}
+                      />
+                      {isOpen && <ProductExpiryDetails row={r} />}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -122,8 +136,9 @@ export default function CompanyStockPage() {
   );
 }
 
-function StockRow({ row, canWrite, onSaved, onOpen }: {
-  row: api.CompanyStockRow; canWrite: boolean; onSaved: () => void; onOpen: () => void;
+function StockRow({ row, canWrite, isOpen, onToggle, onSaved, onOpen }: {
+  row: api.CompanyStockRow; canWrite: boolean; isOpen: boolean; onToggle: () => void;
+  onSaved: () => void; onOpen: () => void;
 }) {
   const { t } = useLang();
   const [editing, setEditing] = useState(false);
@@ -147,9 +162,15 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
     <tr>
       <td>
         <div className="prod-cell">
-          <span className="name">{row.name}</span>
+          <button className="product-expiry-trigger" type="button" onClick={onToggle} aria-expanded={isOpen}>
+            {isOpen ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
+            <span className="name">{row.name}</span>
+          </button>
           {row.catalogCategory && (
             <span className={`cat-chip ${catClass(row.catalogCategory)}`}>{row.catalogCategory}</span>
+          )}
+          {row.expiryDatesCount > 0 && (
+            <span className="expiry-count"><CalendarDays size={13} /> {row.expiryDatesCount}</span>
           )}
         </div>
       </td>
@@ -189,6 +210,68 @@ function StockRow({ row, canWrite, onSaved, onOpen }: {
         {row.coverageMonths == null ? '—' : (
           <span className={`cov-pill ${tone}`}>{row.coverageMonths.toFixed(1)}</span>
         )}
+      </td>
+    </tr>
+  );
+}
+
+function ProductExpiryDetails({ row }: { row: api.CompanyStockRow }) {
+  const { t } = useLang();
+  const [data, setData] = useState<api.ProductExpiryBreakdown | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    api.productExpiryBreakdown(row.productId)
+      .then((result) => { if (alive) setData(result); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [row.productId]);
+
+  const groups = useMemo(() => {
+    const grouped = new Map<string, api.ProductExpiryRow[]>();
+    for (const item of data?.items ?? []) {
+      const key = item.expiryDate ?? '';
+      grouped.set(key, [...(grouped.get(key) ?? []), item]);
+    }
+    return [...grouped.entries()];
+  }, [data]);
+
+  return (
+    <tr className="subtable expiry-subtable">
+      <td colSpan={7}>
+        <div className="subtable-inner expiry-details">
+          {loading ? (
+            <Spinner label={t('common.loading')} />
+          ) : !data || data.items.length === 0 ? (
+            <div className="expiry-empty">{t('company.expiry.none')}</div>
+          ) : (
+            <>
+              <div className="expiry-summary">
+                <span>{t('company.expiry.title')}</span>
+                <span>{t('company.expiry.snapshot')}: {fmtDate(data.sourceDate)}</span>
+              </div>
+              <div className="expiry-groups">
+                {groups.map(([expiryDate, items]) => (
+                  <section className="expiry-group" key={expiryDate || 'unknown'}>
+                    <div className="expiry-date">
+                      <CalendarDays size={16} />
+                      <span>{expiryDate ? fmtDate(expiryDate) : t('company.expiry.unknown')}</span>
+                    </div>
+                    <div className="series-chips">
+                      {items.map((item, index) => (
+                        <span className="series-chip" key={`${item.batchNumber ?? 'none'}-${index}`}>
+                          {item.batchNumber || t('company.expiry.noBatch')} · <b>{fmtNum(item.quantity)}</b>
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </td>
     </tr>
   );
