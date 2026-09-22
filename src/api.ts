@@ -267,6 +267,69 @@ export async function customsCertificateUrl(invoiceId: string): Promise<string> 
   return r.url;
 }
 
+// ── Certificate library (read-only) ─────────────────────────────────────────
+export interface CertificateProductLink {
+  productId: string | null;
+  catalogName: string;
+  tradeName: string;
+  dosageForm: string | null;
+}
+
+export interface Certificate {
+  id: string;
+  certificateNumber: string;
+  registrationDate: string | null;
+  validUntil: string | null;
+  tradeName: string;
+  dosageForm: string | null;
+  holderName: string | null;
+  holderCountry: string | null;
+  manufacturerName: string | null;
+  manufacturerCountry: string | null;
+  apiDetails: string | null;
+  authorizedPerson: string | null;
+  notes: string | null;
+  productLinks: CertificateProductLink[];
+  documentName: string | null;
+  documentSizeBytes: number | null;
+  documentMimeType: string | null;
+  documentUploadedAt: string | null;
+}
+
+export async function listCertificates(): Promise<Certificate[]> {
+  const rows = await request<any[]>('/certificates');
+  return rows.map((row) => ({
+    id: row.id,
+    certificateNumber: row.certificate_number,
+    registrationDate: row.registration_date,
+    validUntil: row.valid_until,
+    tradeName: row.trade_name,
+    dosageForm: row.dosage_form,
+    holderName: row.holder_name,
+    holderCountry: row.holder_country,
+    manufacturerName: row.manufacturer_name,
+    manufacturerCountry: row.manufacturer_country,
+    apiDetails: row.api_details,
+    authorizedPerson: row.authorized_person,
+    notes: row.notes,
+    productLinks: (row.product_links || []).map((link: any) => ({
+      productId: link.product_id,
+      catalogName: link.catalog_name,
+      tradeName: link.trade_name,
+      dosageForm: link.dosage_form,
+    })),
+    documentName: row.document_name,
+    documentSizeBytes: row.document_size_bytes,
+    documentMimeType: row.document_mime_type,
+    documentUploadedAt: row.document_uploaded_at,
+  }));
+}
+
+export async function certificateDocumentUrl(certificateId: string): Promise<string> {
+  const result = await request<{ url: string }>(`/certificates/${certificateId}/document-url`);
+  return result.url;
+}
+
 // ── Sales ─────────────────────────────────────────────────────────────────────
 export interface MonthlyPoint { month: string; dispatched: number; sold: number; }
 export interface SalesOverview { months: MonthlyPoint[]; totalDispatched: number; totalSold: number; }

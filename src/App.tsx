@@ -10,6 +10,7 @@ import WarehouseMatrixPage from './pages/WarehouseMatrixPage';
 import CustomsPage from './pages/CustomsPage';
 import CatalogPage from './pages/CatalogPage';
 import SalesPage from './pages/SalesPage';
+import CertificatesPage from './pages/CertificatesPage';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="customs" element={<CustomsPage />} />
               <Route path="catalog" element={<CatalogPage />} />
               <Route path="sales" element={<SalesPage />} />
+              <Route path="certificates" element={<CertificatesPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

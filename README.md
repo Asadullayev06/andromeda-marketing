@@ -6,8 +6,9 @@ PostgreSQL database** as ANDROMEDA (`custom_control`). Whatever ANDROMEDA
 changes appears here instantly, and vice-versa — because it is literally the
 same database. There is no sync job.
 
-Scope is intentionally narrow: **stock ("ostatok") and sales analytics only** —
-no tasks, chat, contracts, finance, logistics, or registration.
+Scope is intentionally narrow: **stock ("ostatok"), sales analytics, and the
+read-only certificate library** — no tasks, chat, contracts, finance,
+logistics, or registration workflows.
 
 ## Modules
 
@@ -18,6 +19,7 @@ no tasks, chat, contracts, finance, logistics, or registration.
 | `/warehouses`, `/warehouses/:id` | Per-warehouse stock | `warehouses`, `warehouse_stocks` |
 | `/customs` | Customs warehouse (customs ostatok) | `customs_warehouse_invoices/products/series` |
 | `/catalog` | Product catalog | `analytics_products` |
+| `/certificates` | Read-only certificate library | `certificates`, `certificate_products` |
 | `/sales` | Sales analytics | `analytics_sales`, `analytics_fact_sales` |
 
 ## Architecture

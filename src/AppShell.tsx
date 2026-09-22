@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Boxes, Warehouse, ShieldCheck, BookOpen, TrendingUp,
   Rocket, LogOut, Menu, X,
+  FileBadge,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { useLang, type Lang } from './i18n';
@@ -13,6 +14,7 @@ const NAV = [
   { to: '/warehouses', icon: Warehouse, key: 'nav.warehouses' },
   { to: '/customs', icon: ShieldCheck, key: 'nav.customs' },
   { to: '/catalog', icon: BookOpen, key: 'nav.catalog' },
+  { to: '/certificates', icon: FileBadge, key: 'nav.certificates' },
   { to: '/sales', icon: TrendingUp, key: 'nav.sales' },
 ];
 

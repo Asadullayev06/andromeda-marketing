@@ -118,6 +118,7 @@ from .api import (  # noqa: E402
     warehouses as warehouses_router,
     customs as customs_router,
     sales as sales_router,
+    certificates as certificates_router,
 )
 
 for module in (
@@ -127,5 +128,6 @@ for module in (
     warehouses_router,
     customs_router,
     sales_router,
+    certificates_router,
 ):
     app.include_router(module.router)

@@ -23,6 +23,7 @@ from .customs_warehouse import (
     CustomsWarehouseProduct,
     CustomsWarehouseSeries,
 )
+from .certificate import Certificate, CertificateProductLink
 
 __all__ = [
     "Base",
@@ -40,4 +41,6 @@ __all__ = [
     "CustomsWarehouseInvoice",
     "CustomsWarehouseProduct",
     "CustomsWarehouseSeries",
+    "Certificate",
+    "CertificateProductLink",
 ]

@@ -43,7 +43,7 @@ export function PageHead({ icon, title, sub, actions }: {
 }
 
 export function Stat({ icon, tone, label, value, hint }: {
-  icon: ReactNode; tone: 'blue' | 'green' | 'amber' | 'violet'; label: string; value: string; hint?: string;
+  icon: ReactNode; tone: 'blue' | 'green' | 'amber' | 'violet' | 'red'; label: string; value: string; hint?: string;
 }) {
   return (
     <div className="stat">

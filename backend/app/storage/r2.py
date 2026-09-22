@@ -1,7 +1,7 @@
 """Minimal read-only Cloudflare R2 client (S3-compatible via boto3).
 
 This Sales app only ever *reads* objects that ANDROMEDA uploaded — it hands the
-browser short-lived presigned GET URLs for customs certificate PDFs. It never
+browser short-lived presigned GET URLs for customs and library certificate PDFs. It never
 uploads or deletes, so there is no storage-outbox / GC involvement here.
 
 Reads config from settings.r2_* and raises R2NotConfigured (mapped to 503) when
