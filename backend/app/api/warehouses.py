@@ -4,13 +4,15 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_db
+from ..config import settings
 from ..models import AnalyticsProduct, Warehouse, WarehouseStock
+from ..services.audit import record_event
 
 router = APIRouter(prefix="/warehouses", tags=["warehouses"])
 
@@ -235,8 +237,11 @@ def set_warehouse_stock(
     warehouse_id: str,
     product_id: str,
     payload: WarehouseStockUpdate,
+    request: Request,
     db: Session = Depends(get_db),
 ) -> WarehouseStockRow:
+    if not settings.can_edit_stock(getattr(request.state, "user_role", None), getattr(request.state, "user_name", None)):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Stock editor access is required.")
     w = db.get(Warehouse, warehouse_id)
     if w is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Warehouse not found.")
@@ -256,12 +261,24 @@ def set_warehouse_stock(
             WarehouseStock.product_id == product.id,
         )
     )
+    previous = float(row.quantity) if row is not None else 0.0
     if row is None:
         row = WarehouseStock(warehouse_id=w.id, product_id=product.id, quantity=qty)
         db.add(row)
     else:
         row.quantity = qty
     db.commit()
+    record_event(
+        actor=getattr(request.state, "user_name", "unknown"),
+        action="warehouse_stock.updated",
+        target=f"{warehouse_id}:{product_id}",
+        details={
+            "warehouse": w.name,
+            "product": product.name,
+            "previous": previous,
+            "quantity": float(qty),
+        },
+    )
     return WarehouseStockRow(
         product_id=str(product.id),
         name=product.name,

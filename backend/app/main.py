@@ -13,6 +13,7 @@ import logging
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -54,9 +55,9 @@ async def auth_gate(request: Request, call_next):
         return await call_next(request)
 
     header = request.headers.get("authorization", "")
-    if not header.lower().startswith("bearer "):
+    token = header[7:].strip() if header.lower().startswith("bearer ") else request.cookies.get(settings.auth_cookie_name, "")
+    if not token:
         return JSONResponse({"detail": "Not authenticated."}, status_code=401)
-    token = header[7:].strip()
     try:
         payload = decode_token(token)
         validate_session(payload)
@@ -80,6 +81,7 @@ async def auth_gate(request: Request, call_next):
 
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=auth_gate)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS added LAST → outermost. Do not reorder.
 app.add_middleware(
@@ -119,6 +121,7 @@ from .api import (  # noqa: E402
     customs as customs_router,
     sales as sales_router,
     certificates as certificates_router,
+    operations as operations_router,
 )
 
 for module in (
@@ -129,5 +132,6 @@ for module in (
     customs_router,
     sales_router,
     certificates_router,
+    operations_router,
 ):
     app.include_router(module.router)

@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Chip, fmtNum } from '../components';
@@ -8,6 +9,7 @@ import { Pager } from './CompanyStockPage';
 
 export default function CatalogPage() {
   const { t } = useLang();
+  const navigate = useNavigate();
   const [q, setQ] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [category, setCategory] = useState('');
@@ -72,7 +74,7 @@ export default function CatalogPage() {
               </thead>
               <tbody>
                 {data?.items.map((p) => (
-                  <tr key={p.id}>
+                  <tr key={p.id} className="click-row" onClick={() => navigate(`/products/${p.id}`)}>
                     <td>
                       <div className="cell-strong">{p.name}</div>
                       {(p.strength || p.dosageForm) && (

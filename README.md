@@ -21,6 +21,7 @@ logistics, or registration workflows.
 | `/catalog` | Product catalog | `analytics_products` |
 | `/certificates` | Read-only certificate library | `certificates`, `certificate_products` |
 | `/sales` | Sales analytics | `analytics_sales`, `analytics_fact_sales` |
+| `/operations` | Alerts, purchase planning, quality and audit | shared read models + marketing-owned files |
 
 ## Architecture
 
@@ -47,7 +48,8 @@ Login reuses ANDROMEDA's `users` + `auth_sessions` tables and the **same
 `AUTH_SECRET_KEY`**, so a Sales user signs in with their existing ANDROMEDA
 account and the JWT is a first-class ANDROMEDA session. Roles: `guest` is
 read-only (blocked from all writes by the auth gate); `admin`/`sysadmin` may
-edit stock quantities.
+edit stock quantities. New Sales sessions use a secure HttpOnly cookie; bearer
+tokens already issued by older versions remain accepted during migration.
 
 ## Local development
 
@@ -94,3 +96,10 @@ Tailwind v4 utilities are enabled through Vite without its global preflight
 reset. Semantic colors in `src/styles.css` map to the existing Sales palette;
 keep those mappings when adding components. Specialized data tables, charts,
 and navigation retain their existing layout.
+
+### Marketing-owned operational data
+
+Expiry imports and stock-edit audit events are stored outside the shared
+ANDROMEDA schema. Set `MARKETING_DATA_DIR` to a persistent mounted directory in
+production. Admins can replace the expiry snapshot from the Company stock page
+using a Smartup `.xlsx` export; imports are validated and written atomically.

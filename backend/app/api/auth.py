@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,6 +18,7 @@ from ..auth import (
     verify_credentials,
 )
 from ..db import get_db
+from ..config import settings
 from ..models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -38,15 +39,15 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    token: str
     role: Role
     username: str
     display_name: Optional[str] = None
     expires_at: int
+    can_edit_stock: bool
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> LoginResponse:
+def login(payload: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)) -> LoginResponse:
     username = payload.username.strip().lower()
     ip = _client_ip(request)
     user_agent = request.headers.get("user-agent")
@@ -63,18 +64,28 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     )
     record_login_event(username=username, success=True, role=role, ip=ip, user_agent=user_agent)
     user = db.scalar(select(User).where(User.username == username))
+    response.set_cookie(
+        key=settings.auth_cookie_name,
+        value=token,
+        max_age=settings.auth_token_ttl_seconds,
+        httponly=True,
+        secure=settings.secure_cookies,
+        samesite="lax",
+        path="/",
+    )
     return LoginResponse(
-        token=token,
         role=role,
         username=username,
         display_name=user.display_name if user else None,
         expires_at=exp,
+        can_edit_stock=settings.can_edit_stock(role, username),
     )
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(request: Request) -> None:
+def logout(request: Request, response: Response) -> None:
     revoke_session(getattr(request.state, "session_id", ""))
+    response.delete_cookie(settings.auth_cookie_name, path="/", secure=settings.secure_cookies, samesite="lax")
 
 
 class MeResponse(BaseModel):
@@ -83,6 +94,7 @@ class MeResponse(BaseModel):
     display_name: Optional[str] = None
     department: Optional[str] = None
     position: Optional[str] = None
+    can_edit_stock: bool = False
 
 
 @router.get("/me", response_model=MeResponse)
@@ -96,4 +108,5 @@ def me(request: Request, db: Session = Depends(get_db)) -> MeResponse:
         display_name=user.display_name if user else None,
         department=user.department if user else None,
         position=user.position if user else None,
+        can_edit_stock=settings.can_edit_stock(role, username),
     )

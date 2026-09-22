@@ -19,10 +19,12 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const isForm = init?.body instanceof FormData;
   const res = await fetch(`${BASE}${path}`, {
     ...init,
+    credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...(isForm ? {} : { 'Content-Type': 'application/json' }),
       ...authHeaders(),
       ...(init?.headers || {}),
     },
@@ -57,21 +59,21 @@ function qs(params: Record<string, unknown>): string {
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 export interface LoginResult {
-  token: string;
   role: 'sysadmin' | 'admin' | 'guest';
   username: string;
   displayName: string | null;
   expiresAt: number;
+  canEditStock: boolean;
 }
 
 export async function login(username: string, password: string): Promise<LoginResult> {
   const r = await request<{
-    token: string; role: LoginResult['role']; username: string;
-    display_name: string | null; expires_at: number;
+    role: LoginResult['role']; username: string;
+    display_name: string | null; expires_at: number; can_edit_stock: boolean;
   }>('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
   return {
-    token: r.token, role: r.role, username: r.username,
-    displayName: r.display_name, expiresAt: r.expires_at,
+    role: r.role, username: r.username,
+    displayName: r.display_name, expiresAt: r.expires_at, canEditStock: r.can_edit_stock,
   };
 }
 
@@ -89,13 +91,14 @@ export interface Me {
   displayName: string | null;
   department: string | null;
   position: string | null;
+  canEditStock: boolean;
 }
 export async function fetchMe(): Promise<Me> {
   const r = await request<{
     username: string; role: Me['role']; display_name: string | null;
-    department: string | null; position: string | null;
+    department: string | null; position: string | null; can_edit_stock: boolean;
   }>('/auth/me');
-  return { username: r.username, role: r.role, displayName: r.display_name, department: r.department, position: r.position };
+  return { username: r.username, role: r.role, displayName: r.display_name, department: r.department, position: r.position, canEditStock: r.can_edit_stock };
 }
 
 // ── Catalog ─────────────────────────────────────────────────────────────────
@@ -372,20 +375,99 @@ export async function certificateDocumentUrl(certificateId: string): Promise<str
 
 // ── Sales ─────────────────────────────────────────────────────────────────────
 export interface MonthlyPoint { month: string; dispatched: number; sold: number; }
-export interface SalesOverview { months: MonthlyPoint[]; totalDispatched: number; totalSold: number; }
-export async function salesOverview(months = 12): Promise<SalesOverview> {
-  const r = await request<any>(`/sales/overview${qs({ months })}`);
+export interface SalesOverview {
+  months: MonthlyPoint[]; totalDispatched: number; totalSold: number;
+  previousDispatched: number; previousSold: number; sellThroughRate: number | null;
+}
+export async function salesOverview(params: number | {
+  months?: number; manufacturer?: string; projectId?: string; productId?: string;
+} = 12): Promise<SalesOverview> {
+  const options = typeof params === 'number' ? { months: params } : params;
+  const r = await request<any>(`/sales/overview${qs({ months: options.months, manufacturer: options.manufacturer, project_id: options.projectId, product_id: options.productId })}`);
   return {
     totalDispatched: r.total_dispatched, totalSold: r.total_sold,
+    previousDispatched: r.previous_dispatched, previousSold: r.previous_sold,
+    sellThroughRate: r.sell_through_rate,
     months: r.months.map((m: any) => ({ month: m.month, dispatched: m.dispatched, sold: m.sold })),
   };
 }
 
-export interface ProductSalesRow { productId: string; name: string; manufacturerLabel: string | null; dispatched: number; sold: number; }
-export async function topProducts(months = 6, limit = 20): Promise<ProductSalesRow[]> {
-  const r = await request<any>(`/sales/top-products${qs({ months, limit })}`);
+export interface ProductSalesRow {
+  productId: string; name: string; manufacturerLabel: string | null; dispatched: number; sold: number;
+  sellThroughRate: number | null; variance: number;
+}
+export async function topProducts(months = 6, limit = 20, filters: { manufacturer?: string; projectId?: string; q?: string } = {}): Promise<ProductSalesRow[]> {
+  const r = await request<any>(`/sales/top-products${qs({ months, limit, manufacturer: filters.manufacturer, project_id: filters.projectId, q: filters.q })}`);
   return r.items.map((x: any) => ({
     productId: x.product_id, name: x.name, manufacturerLabel: x.manufacturer_label,
-    dispatched: x.dispatched, sold: x.sold,
+    dispatched: x.dispatched, sold: x.sold, sellThroughRate: x.sell_through_rate, variance: x.variance,
   }));
 }
+
+// ── Cross-module operations ─────────────────────────────────────────────────
+export interface ExpirySnapshotInfo {
+  source: string; importedAt: string; rowCount: number; aggregatedRowCount: number;
+  productCount: number; totalQuantity: number;
+  ageDays: number; isStale: boolean;
+}
+function mapSnapshot(r: any): ExpirySnapshotInfo {
+  return { source: r.source, importedAt: r.imported_at, rowCount: r.row_count, aggregatedRowCount: r.aggregated_row_count, productCount: r.product_count, totalQuantity: r.total_quantity, ageDays: r.age_days, isStale: r.is_stale };
+}
+export async function expirySnapshotStatus(): Promise<ExpirySnapshotInfo> {
+  return mapSnapshot(await request<any>('/operations/expiry/status'));
+}
+export async function importExpiryWorkbook(file: File): Promise<ExpirySnapshotInfo> {
+  const body = new FormData();
+  body.append('file', file);
+  return mapSnapshot(await request<any>('/operations/expiry/import', { method: 'POST', body }));
+}
+
+export interface DashboardSummary {
+  companyProducts: number; warehouses: number; customsPositions: number;
+  dispatched12m: number; sold12m: number; expiringBatches: number; lowStockProducts: number;
+  expirySnapshot: ExpirySnapshotInfo;
+}
+export async function dashboardSummary(): Promise<DashboardSummary> {
+  const r = await request<any>('/operations/summary');
+  return { companyProducts: r.company_products, warehouses: r.warehouses, customsPositions: r.customs_positions, dispatched12m: r.dispatched_12m, sold12m: r.sold_12m, expiringBatches: r.expiring_batches, lowStockProducts: r.low_stock_products, expirySnapshot: mapSnapshot(r.expiry_snapshot) };
+}
+
+export interface OperationalAlert {
+  id: string; kind: string; severity: string; productId: string | null; productName: string;
+  detail: string; quantity: number | null; date: string | null;
+}
+export async function listAlerts(): Promise<OperationalAlert[]> {
+  const rows = await request<any[]>('/operations/alerts');
+  return rows.map((r) => ({ id: r.id, kind: r.kind, severity: r.severity, productId: r.product_id, productName: r.product_name, detail: r.detail, quantity: r.quantity, date: r.date }));
+}
+
+export interface Recommendation {
+  productId: string; productName: string; projectName: string | null; manufacturerLabel: string | null;
+  avgMonthlySales: number; currentStock: number; customsStock: number; incomingStock: number;
+  openOrders: number; coverageMonths: number | null; targetMonths: number; recommendedOrder: number;
+}
+export async function listRecommendations(targetMonths = 6): Promise<Recommendation[]> {
+  const rows = await request<any[]>(`/operations/recommendations${qs({ target_months: targetMonths })}`);
+  return rows.map((r) => ({ productId: r.product_id, productName: r.product_name, projectName: r.project_name, manufacturerLabel: r.manufacturer_label, avgMonthlySales: r.avg_monthly_sales, currentStock: r.current_stock, customsStock: r.customs_stock, incomingStock: r.incoming_stock, openOrders: r.open_orders, coverageMonths: r.coverage_months, targetMonths: r.target_months, recommendedOrder: r.recommended_order }));
+}
+
+export interface QualityIssue { id: string; kind: string; severity: string; productId: string | null; productName: string; detail: string; }
+export async function listQualityIssues(): Promise<QualityIssue[]> {
+  const rows = await request<any[]>('/operations/quality');
+  return rows.map((r) => ({ id: r.id, kind: r.kind, severity: r.severity, productId: r.product_id, productName: r.product_name, detail: r.detail }));
+}
+
+export interface ProductDossier {
+  product: { id: string; name: string; external_id: string | null; project_name: string | null; manufacturer_label: string | null; category: string | null; strength: string | null; dosage_form: string | null; country: string | null };
+  companyStock: number; warehouses: { name: string; code: string | null; quantity: number }[];
+  expiries: { product_code: string; product_name: string; expiry_date: string | null; batch_number: string | null; quantity: number }[];
+  customs: { id: string; invoice: string; regime: string; quantity: number; expiry_date: string | null; series: { batch: string; quantity: number }[] }[];
+  sales: MonthlyPoint[]; certificates: { id: string; number: string; valid_until: string | null; trade_name: string; has_document: boolean }[];
+}
+export async function productDossier(productId: string): Promise<ProductDossier> {
+  const r = await request<any>(`/operations/products/${productId}`);
+  return { product: r.product, companyStock: r.company_stock, warehouses: r.warehouses, expiries: r.expiries, customs: r.customs, sales: r.sales, certificates: r.certificates };
+}
+
+export interface AuditEvent { at: string; actor: string; action: string; target: string; details: Record<string, unknown>; }
+export async function listAuditEvents(): Promise<AuditEvent[]> { return request<AuditEvent[]>('/operations/audit'); }

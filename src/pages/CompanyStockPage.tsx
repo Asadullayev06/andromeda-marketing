@@ -2,11 +2,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Boxes, Search, Check, Pencil, X, ArrowRight, ChevronDown, ChevronRight, CalendarDays } from 'lucide-react';
+import { Boxes, Search, Check, Pencil, X, ArrowRight, ChevronDown, ChevronRight, CalendarDays, Upload, FileSearch } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import * as api from '../api';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../i18n';
-import { PageHead, Spinner, EmptyState, fmtNum, fmtDate } from '../components';
+import { PageHead, Spinner, EmptyState, Chip, fmtNum, fmtDate } from '../components';
 
 function catClass(cat: string | null): string {
   const c = (cat || '').toLowerCase();
@@ -24,7 +25,7 @@ function covTone(months: number | null): 'healthy' | 'risk' | 'none' {
 
 export default function CompanyStockPage() {
   const { t } = useLang();
-  const { canWrite } = useAuth();
+  const { canWrite, role } = useAuth();
   const [q, setQ] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [projectId, setProjectId] = useState('');
@@ -34,10 +35,22 @@ export default function CompanyStockPage() {
   const [loading, setLoading] = useState(true);
   const [lookups, setLookups] = useState<api.Lookups | null>(null);
   const [modalProduct, setModalProduct] = useState<api.CompanyStockRow | null>(null);
+  const [snapshot, setSnapshot] = useState<api.ExpirySnapshotInfo | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState('');
   const [openExpiries, setOpenExpiries] = useState<Record<string, boolean>>({});
   const debounce = useRef<number | undefined>(undefined);
+  const fileInput = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => { api.fetchLookups().then(setLookups).catch(() => {}); }, []);
+  useEffect(() => { api.expirySnapshotStatus().then(setSnapshot).catch(() => {}); }, []);
+
+  async function importWorkbook(file: File) {
+    setImporting(true); setImportError('');
+    try { setSnapshot(await api.importExpiryWorkbook(file)); await load(); }
+    catch (cause) { setImportError(cause instanceof Error ? cause.message : t('company.expiry.importFailed')); }
+    finally { setImporting(false); if (fileInput.current) fileInput.current.value = ''; }
+  }
 
   const load = useMemo(() => async () => {
     setLoading(true);
@@ -57,7 +70,9 @@ export default function CompanyStockPage() {
 
   return (
     <>
-      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} />
+      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} actions={role === 'admin' || role === 'sysadmin' ? <><input ref={fileInput} hidden type="file" accept=".xlsx" onChange={(e) => { const file = e.target.files?.[0]; if (file) void importWorkbook(file); }} /><Button variant="outline" disabled={importing} onClick={() => fileInput.current?.click()}><Upload data-icon="inline-start" />{importing ? t('company.expiry.importing') : t('company.expiry.import')}</Button></> : undefined} />
+      {snapshot && <div className={`snapshot-banner ${snapshot.isStale ? 'stale' : ''}`}><span>{t('ops.snapshot')}: <b>{snapshot.source}</b> · {snapshot.importedAt} · {fmtNum(snapshot.productCount)} {t('wh.products')}</span>{snapshot.isStale && <Chip tone="amber">{t('ops.stale')} · {snapshot.ageDays}d</Chip>}</div>}
+      {importError && <div className="login-error">{importError}</div>}
 
       <div className="filter-row">
         <button className={`pill ${!onlyInStock ? 'active' : ''}`} onClick={() => { setOnlyInStock(false); setPage(1); }}>
@@ -250,7 +265,7 @@ function ProductExpiryDetails({ row }: { row: api.CompanyStockRow }) {
             <>
               <div className="expiry-summary">
                 <span>{t('company.expiry.title')}</span>
-                <span>{t('company.expiry.snapshot')}: {fmtDate(data.sourceDate)}</span>
+                <span className="flex items-center gap-2">{t('company.expiry.snapshot')}: {fmtDate(data.sourceDate)} <Button size="sm" variant="outline" render={<Link to={`/products/${row.productId}`} />}><FileSearch data-icon="inline-start" />{t('product.details')}</Button></span>
               </div>
               <div className="expiry-groups">
                 {groups.map(([expiryDate, items]) => (

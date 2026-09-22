@@ -11,6 +11,7 @@ export interface StoredUser {
   role: Role;
   displayName?: string | null;
   expiresAt: number;
+  canEditStock?: boolean;
 }
 
 export function getToken(): string | null {
@@ -36,9 +37,9 @@ export function getStoredUser(): StoredUser | null {
   }
 }
 
-export function setAuth(token: string, user: StoredUser): void {
+export function setAuth(user: StoredUser): void {
   try {
-    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   } catch {
     /* private mode — ignore */

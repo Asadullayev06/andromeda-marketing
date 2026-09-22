@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Boxes, Warehouse, ShieldCheck, BookOpen, TrendingUp,
   Rocket, LogOut, Menu, X,
-  FileBadge, PackageCheck,
+  FileBadge, PackageCheck, ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { useLang, type Lang } from './i18n';
@@ -17,6 +17,7 @@ const NAV = [
   { to: '/catalog', icon: BookOpen, key: 'nav.catalog' },
   { to: '/certificates', icon: FileBadge, key: 'nav.certificates' },
   { to: '/sales', icon: TrendingUp, key: 'nav.sales' },
+  { to: '/operations', icon: ShieldAlert, key: 'nav.operations' },
 ];
 
 export default function AppShell() {
@@ -26,6 +27,8 @@ export default function AppShell() {
   const loc = useLocation();
 
   const initials = (user?.displayName || user?.username || '?').slice(0, 2).toUpperCase();
+  const activeNav = NAV.find((item) => item.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(item.to));
+  const crumb = loc.pathname.startsWith('/products/') ? t('product.details') : t(activeNav?.key || 'nav.dashboard');
 
   return (
     <div className="shell">
@@ -76,10 +79,10 @@ export default function AppShell() {
       <div className="main">
         <div className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button className="hamburger" onClick={() => setOpen((v) => !v)}>
+            <button className="hamburger" aria-label={t('action.menu')} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
               {open ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <span className="crumb">{loc.pathname === '/' ? t('nav.dashboard') : ''}</span>
+            <span className="crumb">{crumb}</span>
           </div>
           <div className="topbar-right">
             <div className="lang-switch">

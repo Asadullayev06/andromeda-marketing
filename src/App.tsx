@@ -12,6 +12,9 @@ import ClearedProductsPage from './pages/ClearedProductsPage';
 import CatalogPage from './pages/CatalogPage';
 import SalesPage from './pages/SalesPage';
 import CertificatesPage from './pages/CertificatesPage';
+import OperationsPage from './pages/OperationsPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ErrorBoundary from './ErrorBoundary';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -29,7 +32,7 @@ export default function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <BrowserRouter>
+        <ErrorBoundary><BrowserRouter>
           <Routes>
             <Route path="/login" element={<RedirectIfAuthed><LoginPage /></RedirectIfAuthed>} />
             <Route
@@ -44,10 +47,12 @@ export default function App() {
               <Route path="catalog" element={<CatalogPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route path="certificates" element={<CertificatesPage />} />
+              <Route path="operations" element={<OperationsPage />} />
+              <Route path="products/:productId" element={<ProductDetailPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </BrowserRouter>
+        </BrowserRouter></ErrorBoundary>
       </AuthProvider>
     </I18nProvider>
   );

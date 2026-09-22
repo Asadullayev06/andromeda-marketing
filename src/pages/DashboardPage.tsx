@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Boxes, Warehouse, ShieldCheck, Send } from 'lucide-react';
+import { LayoutDashboard, Boxes, Warehouse, ShieldCheck, Send, AlertTriangle, CalendarClock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Stat, Spinner, Stepper, GroupedBars, fmtNum, fmtMonth, Chip } from '../components';
@@ -8,38 +10,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function DashboardPage() {
   const { t } = useLang();
   const [loading, setLoading] = useState(true);
-  const [companyInStock, setCompanyInStock] = useState(0);
-  const [warehouses, setWarehouses] = useState(0);
-  const [customsPositions, setCustomsPositions] = useState(0);
+  const [summary, setSummary] = useState<api.DashboardSummary | null>(null);
   const [overview, setOverview] = useState<api.SalesOverview | null>(null);
   const [top, setTop] = useState<api.ProductSalesRow[]>([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let alive = true;
     (async () => {
       setLoading(true);
       try {
-        const [cs, whs, customs, ov, tp] = await Promise.all([
-          api.listCompanyStock({ page: 1, pageSize: 1 }),
-          api.listWarehouses(false),
-          api.listCustoms({}),
+        const [sm, ov, tp] = await Promise.all([
+          api.dashboardSummary(),
           api.salesOverview(12),
           api.topProducts(6, 8),
         ]);
         if (!alive) return;
-        setCompanyInStock(cs.productsInStock);
-        setWarehouses(whs.length);
-        setCustomsPositions(customs.totalProducts);
+        setSummary(sm);
         setOverview(ov);
         setTop(tp);
+      } catch (cause) {
+        if (alive) setError(cause instanceof Error ? cause.message : t('common.error'));
       } finally {
         if (alive) setLoading(false);
       }
     })();
     return () => { alive = false; };
-  }, []);
+  }, [t]);
 
   if (loading) return <Spinner label={t('common.loading')} />;
+  if (error) return <div className="login-error">{error} <Button size="sm" onClick={() => location.reload()}>{t('action.refresh')}</Button></div>;
 
   const steps = [
     { label: t('customs.title'), state: 'done' as const },
@@ -54,10 +54,17 @@ export default function DashboardPage() {
       <PageHead icon={<LayoutDashboard size={24} />} title={t('dash.title')} sub={t('dash.sub')} />
 
       <div className="stat-grid">
-        <Stat tone="blue" icon={<Boxes size={26} />} label={t('dash.companyProducts')} value={fmtNum(companyInStock)} />
-        <Stat tone="green" icon={<Warehouse size={26} />} label={t('dash.warehouses')} value={fmtNum(warehouses)} />
-        <Stat tone="amber" icon={<ShieldCheck size={26} />} label={t('dash.customsProducts')} value={fmtNum(customsPositions)} />
+        <Stat tone="blue" icon={<Boxes size={26} />} label={t('dash.companyProducts')} value={fmtNum(summary?.companyProducts ?? 0)} />
+        <Stat tone="green" icon={<Warehouse size={26} />} label={t('dash.warehouses')} value={fmtNum(summary?.warehouses ?? 0)} />
+        <Stat tone="amber" icon={<ShieldCheck size={26} />} label={t('dash.customsProducts')} value={fmtNum(summary?.customsPositions ?? 0)} />
         <Stat tone="violet" icon={<Send size={24} />} label={t('dash.dispatched')} value={fmtNum(overview?.totalDispatched ?? 0)} />
+        <Stat tone="red" icon={<AlertTriangle size={24} />} label={t('ops.lowStock')} value={fmtNum(summary?.lowStockProducts ?? 0)} />
+        <Stat tone="amber" icon={<CalendarClock size={24} />} label={t('ops.expiring')} value={fmtNum(summary?.expiringBatches ?? 0)} />
+      </div>
+
+      <div className="snapshot-banner">
+        <span>{t('ops.snapshot')}: <b>{summary?.expirySnapshot.source}</b> · {summary?.expirySnapshot.importedAt}</span>
+        <Button size="sm" variant="outline" render={<Link to="/operations" />}>{t('ops.open')}</Button>
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>

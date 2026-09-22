@@ -15,18 +15,17 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from functools import lru_cache
-import json
-from pathlib import Path
-import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_db
+from ..config import settings
+from ..services.audit import record_event
+from ..services.expiry_store import rows_for_product, snapshot_info
 from ..models import (
     AnalyticsFactSales,
     AnalyticsOrders,
@@ -49,35 +48,6 @@ ORDER_CLOSE_THRESHOLD = 0.9
 # Regimes matched to catalog products by name (like ANDROMEDA analytics_full).
 CUSTOMS_REGIMES = ("IM-74", "TR-80")   # real customs stock
 INCOMING_REGIMES = ("INCOMING",)       # goods on the way → shown as orange +qty
-EXPIRY_DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "company_stock_expiries.json"
-
-
-def _normalize_product_name(value: str) -> str:
-    return re.sub(r"\s+", " ", value.strip().casefold())
-
-
-@lru_cache(maxsize=1)
-def _expiry_data() -> tuple[dict[str, list[dict]], dict[str, list[dict]], date]:
-    """Load the marketing-only Smartup stock-detail snapshot bundled with this service."""
-    payload = json.loads(EXPIRY_DATA_PATH.read_text(encoding="utf-8"))
-    by_code: dict[str, list[dict]] = {}
-    by_name: dict[str, list[dict]] = {}
-    for row in payload.get("items", []):
-        code = str(row.get("product_code") or "").strip()
-        name = _normalize_product_name(str(row.get("product_name") or ""))
-        if code:
-            by_code.setdefault(code, []).append(row)
-        if name:
-            by_name.setdefault(name, []).append(row)
-    return by_code, by_name, date.fromisoformat(payload["imported_at"])
-
-
-def _product_expiry_rows(product: AnalyticsProduct) -> list[dict]:
-    by_code, by_name, _ = _expiry_data()
-    code = str(product.external_id or "").strip()
-    if code and code in by_code:
-        return by_code[code]
-    return by_name.get(_normalize_product_name(product.name), [])
 
 
 def _month_first(d: date) -> date:
@@ -278,7 +248,7 @@ def list_company_stock(
                 avg_sales=avg_sales,
                 warehouse_qty=wh,
                 coverage_months=coverage,
-                expiry_dates_count=len({r.get("expiry_date") for r in _product_expiry_rows(p) if r.get("expiry_date")}),
+                expiry_dates_count=len({r.get("expiry_date") for r in rows_for_product(p) if r.get("expiry_date")}),
             )
         )
 
@@ -310,14 +280,14 @@ def product_expiry_breakdown(product_id: str, db: Session = Depends(get_db)) -> 
     product = db.get(AnalyticsProduct, product_id)
     if product is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found.")
-    source_date = _expiry_data()[2]
+    source_date = date.fromisoformat(snapshot_info()["imported_at"])
     items = [
         ProductExpiryRow(
             expiry_date=date.fromisoformat(row["expiry_date"]) if row.get("expiry_date") else None,
             batch_number=row.get("batch_number"),
             quantity=float(row.get("quantity") or 0),
         )
-        for row in _product_expiry_rows(product)
+        for row in rows_for_product(product)
     ]
     items.sort(key=lambda item: (item.expiry_date is None, item.expiry_date or date.max, item.batch_number or ""))
     return ProductExpiryBreakdown(
@@ -382,8 +352,11 @@ class CompanyStockUpdate(BaseModel):
 def set_company_stock(
     product_id: str,
     payload: CompanyStockUpdate,
+    request: Request,
     db: Session = Depends(get_db),
 ) -> CompanyStockRow:
+    if not settings.can_edit_stock(getattr(request.state, "user_role", None), getattr(request.state, "user_name", None)):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Stock editor access is required.")
     product = db.get(AnalyticsProduct, product_id)
     if product is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found.")
@@ -396,12 +369,19 @@ def set_company_stock(
     row = db.scalar(
         select(AnalyticsStockCompany).where(AnalyticsStockCompany.analytics_product_id == product.id)
     )
+    previous = float(row.qty) if row is not None else 0.0
     if row is None:
         row = AnalyticsStockCompany(analytics_product_id=product.id, qty=qty)
         db.add(row)
     else:
         row.qty = qty
     db.commit()
+    record_event(
+        actor=getattr(request.state, "user_name", "unknown"),
+        action="company_stock.updated",
+        target=str(product.id),
+        details={"product": product.name, "previous": previous, "quantity": float(qty)},
+    )
     return CompanyStockRow(
         product_id=str(product.id),
         name=product.name,
@@ -415,5 +395,5 @@ def set_company_stock(
         avg_sales=0.0,
         warehouse_qty=0.0,
         coverage_months=None,
-        expiry_dates_count=len({r.get("expiry_date") for r in _product_expiry_rows(product) if r.get("expiry_date")}),
+        expiry_dates_count=len({r.get("expiry_date") for r in rows_for_product(product) if r.get("expiry_date")}),
     )

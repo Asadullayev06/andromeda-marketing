@@ -17,8 +17,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (username: string, password: string) => {
     const r = await api.login(username, password);
-    const stored: StoredUser = { username: r.username, role: r.role, displayName: r.displayName, expiresAt: r.expiresAt };
-    setAuth(r.token, stored);
+    const stored: StoredUser = { username: r.username, role: r.role, displayName: r.displayName, expiresAt: r.expiresAt, canEditStock: r.canEditStock };
+    setAuth(stored);
     setUser(stored);
   }, []);
 
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthCtx>(() => ({
     user,
     role: user?.role ?? null,
-    canWrite: isWriteRole(user?.role),
+    canWrite: user?.canEditStock ?? isWriteRole(user?.role),
     signIn,
     signOut,
   }), [user, signIn, signOut]);

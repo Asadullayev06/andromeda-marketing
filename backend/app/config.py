@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     # so local development against a shared local DB works out of the box.
     auth_secret_key: str = "dev-secret-change-me-in-production"
     auth_token_ttl_seconds: int = 60 * 60 * 12  # 12h
+    auth_cookie_name: str = "andromeda_sales_session"
+    stock_editor_users: str = ""
 
     # Cloudflare R2 (read-only here) — used to hand out short-lived presigned
     # download URLs for customs certificate PDFs. Use the SAME values as
@@ -63,6 +65,10 @@ class Settings(BaseSettings):
     r2_bucket: str = ""
     r2_endpoint_url: str = ""
     r2_presigned_ttl_seconds: int = 300
+
+    # Marketing-owned operational files. Point this at a persistent volume in
+    # production so expiry imports and audit events survive deployments.
+    marketing_data_dir: str = ""
 
     def __init__(self, **values: object) -> None:
         super().__init__(**values)
@@ -88,6 +94,23 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def data_dir(self) -> Path:
+        configured = self.marketing_data_dir.strip()
+        return Path(configured) if configured else Path(__file__).resolve().parent / "data"
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.env.strip().lower() == "production"
+
+    def can_edit_stock(self, role: str | None, username: str | None) -> bool:
+        if role == "sysadmin":
+            return True
+        if role != "admin":
+            return False
+        allowed = {value.strip().lower() for value in self.stock_editor_users.split(",") if value.strip()}
+        return not allowed or (username or "").strip().lower() in allowed
 
     def validate_runtime_security(self) -> None:
         """Refuse an unsafe production boot instead of serving with dev secrets."""
