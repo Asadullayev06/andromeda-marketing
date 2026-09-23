@@ -75,3 +75,27 @@ class CustomsWarehouseSeries(UUIDPKMixin, TimestampMixin, Base):
     qty: Mapped[Decimal] = mapped_column(Numeric(14, 4), server_default="0")
 
     product: Mapped[CustomsWarehouseProduct] = relationship(back_populates="series")
+
+
+class CustomsWarehouseClearance(UUIDPKMixin, TimestampMixin, Base):
+    """Cleared customs goods (goods that left the customs warehouse).
+
+    Written by ANDROMEDA on each clearance; read-only here. Descriptive fields
+    are snapshots, so this survives edits/deletes of the source rows.
+    """
+
+    __tablename__ = "customs_warehouse_clearances"
+
+    invoice_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    product_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    series_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    invoice_name: Mapped[str] = mapped_column(Text)
+    product_name: Mapped[str] = mapped_column(Text)
+    series_batch: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    regime: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    category: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    currency: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    qty: Mapped[Decimal] = mapped_column(Numeric(14, 4))
+    pallets: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 3), nullable=True)
+    boxes: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 3), nullable=True)
+    comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import CompanyStockPage from './pages/CompanyStockPage';
 import WarehouseMatrixPage from './pages/WarehouseMatrixPage';
 import CustomsPage from './pages/CustomsPage';
+import ClearedProductsPage from './pages/ClearedProductsPage';
 import CatalogPage from './pages/CatalogPage';
 import SalesPage from './pages/SalesPage';
 import CertificatesPage from './pages/CertificatesPage';
@@ -39,6 +40,7 @@ export default function App() {
               <Route path="company-stock" element={<CompanyStockPage />} />
               <Route path="warehouses" element={<WarehouseMatrixPage />} />
               <Route path="customs" element={<CustomsPage />} />
+              <Route path="cleared" element={<ClearedProductsPage />} />
               <Route path="catalog" element={<CatalogPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route path="certificates" element={<CertificatesPage />} />

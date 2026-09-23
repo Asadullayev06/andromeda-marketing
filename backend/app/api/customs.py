@@ -15,9 +15,12 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from datetime import datetime
+
 from ..config import settings
 from ..db import get_db
 from ..models import (
+    CustomsWarehouseClearance,
     CustomsWarehouseInvoice,
     CustomsWarehouseProduct,
     CustomsWarehouseSeries,
@@ -99,6 +102,70 @@ def list_customs_products(
         total_invoices=len({p.invoice_id for p in products}),
         total_products=len(items),
         total_qty=sum(i.qty for i in items),
+    )
+
+
+class ClearedRow(BaseModel):
+    id: str
+    invoice_name: str
+    product_name: str
+    series_batch: Optional[str] = None
+    regime: Optional[str] = None
+    qty: float
+    pallets: Optional[float] = None
+    boxes: Optional[float] = None
+    comment: Optional[str] = None
+    cleared_at: datetime
+
+
+class ClearedList(BaseModel):
+    items: list[ClearedRow]
+    total: int
+    total_qty: float
+    total_pallets: float
+    total_boxes: float
+
+
+@router.get("/cleared", response_model=ClearedList)
+def list_cleared(
+    db: Session = Depends(get_db),
+    q: Optional[str] = Query(default=None),
+    regime: Optional[str] = Query(default=None),
+) -> ClearedList:
+    """Goods that have been cleared out of the customs warehouse (append-only
+    ledger written by ANDROMEDA), newest first."""
+    stmt = select(CustomsWarehouseClearance).order_by(CustomsWarehouseClearance.created_at.desc())
+    if q:
+        like = f"%{q.strip()}%"
+        stmt = stmt.where(
+            CustomsWarehouseClearance.product_name.ilike(like)
+            | CustomsWarehouseClearance.invoice_name.ilike(like)
+            | CustomsWarehouseClearance.series_batch.ilike(like)
+        )
+    if regime:
+        stmt = stmt.where(CustomsWarehouseClearance.regime == regime)
+    rows = db.scalars(stmt).all()
+    items = [
+        ClearedRow(
+            id=str(r.id),
+            invoice_name=r.invoice_name,
+            product_name=r.product_name,
+            series_batch=r.series_batch,
+            regime=r.regime,
+            qty=float(r.qty),
+            pallets=float(r.pallets) if r.pallets is not None else None,
+            boxes=float(r.boxes) if r.boxes is not None else None,
+            comment=r.comment,
+            cleared_at=r.created_at,
+        )
+        for r in rows
+    ]
+    return ClearedList(
+        items=items,
+        total=len(items),
+        total_qty=sum(i.qty for i in items),
+        total_pallets=sum(i.pallets or 0 for i in items),
+        total_boxes=sum(i.boxes or 0 for i in items),
     )
 
 

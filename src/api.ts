@@ -268,6 +268,27 @@ export async function customsCertificateUrl(invoiceId: string): Promise<string> 
   return r.url;
 }
 
+// ── Cleared goods ────────────────────────────────────────────────────────────
+export interface ClearedRow {
+  id: string; invoiceName: string; productName: string; seriesBatch: string | null;
+  regime: string | null; qty: number; pallets: number | null; boxes: number | null;
+  comment: string | null; clearedAt: string;
+}
+export interface ClearedList {
+  items: ClearedRow[]; total: number; totalQty: number; totalPallets: number; totalBoxes: number;
+}
+export async function listCleared(params: { q?: string; regime?: string }): Promise<ClearedList> {
+  const r = await request<any>(`/customs/cleared${qs({ q: params.q, regime: params.regime })}`);
+  return {
+    total: r.total, totalQty: r.total_qty, totalPallets: r.total_pallets, totalBoxes: r.total_boxes,
+    items: r.items.map((x: any) => ({
+      id: x.id, invoiceName: x.invoice_name, productName: x.product_name, seriesBatch: x.series_batch,
+      regime: x.regime, qty: x.qty, pallets: x.pallets, boxes: x.boxes,
+      comment: x.comment, clearedAt: x.cleared_at,
+    })),
+  };
+}
+
 export interface ProductExpiryRow {
   expiryDate: string | null; batchNumber: string | null; quantity: number;
 }
