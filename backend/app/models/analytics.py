@@ -6,11 +6,11 @@ the Sales-department "ostatok" (stock/balance) and sales views.
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, Date, ForeignKey, Numeric, Text, text
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Numeric, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -97,6 +97,11 @@ class AnalyticsOrders(_MonthlyFact, Base):
         UUID(as_uuid=True), ForeignKey("analytics_products.id", ondelete="CASCADE")
     )
     manufacturer_label: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    file_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    storage_path: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    size_bytes: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    mime_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    uploaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     product: Mapped["AnalyticsProduct"] = relationship(back_populates="orders")
 
 

@@ -405,6 +405,35 @@ export async function topProducts(months = 6, limit = 20, filters: { manufacture
 }
 
 // ── Cross-module operations ─────────────────────────────────────────────────
+export interface OrderRow {
+  id: string; productId: string; productName: string; externalId: string | null;
+  projectName: string | null; manufacturerLabel: string | null; month: string;
+  qty: number; fileName: string | null; sizeBytes: number | null;
+  mimeType: string | null; uploadedAt: string | null;
+}
+export interface OrderPage extends Page<OrderRow> { totalQty: number; }
+export interface OrderLookups { groups: string[]; manufacturers: string[]; }
+export async function orderLookups(): Promise<OrderLookups> { return request<OrderLookups>('/orders/lookups'); }
+export async function listOrders(params: {
+  q?: string; manufacturer?: string; group?: string; page?: number; pageSize?: number;
+}): Promise<OrderPage> {
+  const r = await request<any>(`/orders${qs({ q: params.q, manufacturer: params.manufacturer, group: params.group, page: params.page, page_size: params.pageSize })}`);
+  return {
+    total: r.total, totalQty: r.total_qty, page: r.page, pageSize: r.page_size,
+    items: r.items.map((x: any) => ({
+      id: x.id, productId: x.product_id, productName: x.product_name,
+      externalId: x.external_id, projectName: x.project_name,
+      manufacturerLabel: x.manufacturer_label, month: x.month, qty: x.qty,
+      fileName: x.file_name, sizeBytes: x.size_bytes,
+      mimeType: x.mime_type, uploadedAt: x.uploaded_at,
+    })),
+  };
+}
+export async function orderDocumentUrl(orderId: string): Promise<string> {
+  const r = await request<{ url: string }>(`/orders/${orderId}/document-url`);
+  return r.url;
+}
+
 export interface ExpirySnapshotInfo {
   source: string; importedAt: string; rowCount: number; aggregatedRowCount: number;
   productCount: number; totalQuantity: number;

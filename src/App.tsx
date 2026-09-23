@@ -11,6 +11,7 @@ import CustomsPage from './pages/CustomsPage';
 import ClearedProductsPage from './pages/ClearedProductsPage';
 import CatalogPage from './pages/CatalogPage';
 import SalesPage from './pages/SalesPage';
+import OrdersPage from './pages/OrdersPage';
 import CertificatesPage from './pages/CertificatesPage';
 import OperationsPage from './pages/OperationsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="cleared" element={<ClearedProductsPage />} />
               <Route path="catalog" element={<CatalogPage />} />
               <Route path="sales" element={<SalesPage />} />
+              <Route path="orders" element={<OrdersPage />} />
               <Route path="certificates" element={<CertificatesPage />} />
               <Route path="operations" element={<OperationsPage />} />
               <Route path="products/:productId" element={<ProductDetailPage />} />

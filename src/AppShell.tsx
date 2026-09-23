@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Boxes, Warehouse, ShieldCheck, BookOpen, TrendingUp,
   Rocket, LogOut, Menu, X,
-  FileBadge, PackageCheck, ShieldAlert,
+  FileBadge, PackageCheck, ShoppingCart, ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { useLang, type Lang } from './i18n';
@@ -17,6 +17,7 @@ const NAV = [
   { to: '/catalog', icon: BookOpen, key: 'nav.catalog' },
   { to: '/certificates', icon: FileBadge, key: 'nav.certificates' },
   { to: '/sales', icon: TrendingUp, key: 'nav.sales' },
+  { to: '/orders', icon: ShoppingCart, key: 'nav.orders' },
   { to: '/operations', icon: ShieldAlert, key: 'nav.operations' },
 ];
 

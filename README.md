@@ -21,6 +21,7 @@ logistics, or registration workflows.
 | `/catalog` | Product catalog | `analytics_products` |
 | `/certificates` | Read-only certificate library | `certificates`, `certificate_products` |
 | `/sales` | Sales analytics | `analytics_sales`, `analytics_fact_sales` |
+| `/orders` | Read-only purchase orders and documents | `analytics_orders` |
 | `/operations` | Alerts, purchase planning, quality and audit | shared read models + marketing-owned files |
 
 ## Architecture
