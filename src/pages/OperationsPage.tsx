@@ -19,6 +19,7 @@ export default function OperationsPage() {
   const [audit, setAudit] = useState<api.AuditEvent[]>([]);
   const [target, setTarget] = useState(6);
   const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState('');
 
   const load = useCallback(async () => {
@@ -28,6 +29,7 @@ export default function OperationsPage() {
       const [a, r, q] = await Promise.all([api.listAlerts(), api.listRecommendations(target), api.listQualityIssues()]);
       setAlerts(a); setRecommendations(r); setQuality(q);
       try { setAudit(await api.listAuditEvents()); } catch { setAudit([]); }
+      setHasLoaded(true);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t('common.error'));
     } finally { setLoading(false); }
@@ -49,17 +51,17 @@ export default function OperationsPage() {
     <>
       <PageHead icon={<ShieldAlert size={24} />} title={t('ops.title')} sub={t('ops.sub')} actions={<div className="flex gap-2"><Button variant="outline" onClick={exportCurrent} disabled={tab === 'audit'}><Download data-icon="inline-start" />{t('action.export')}</Button><Button onClick={load}><RefreshCw data-icon="inline-start" />{t('action.refresh')}</Button></div>} />
       <div className="stat-grid">
-        <Stat tone="red" icon={<AlertTriangle size={24} />} label={t('ops.critical')} value={fmtNum(critical)} />
-        <Stat tone="amber" icon={<AlertTriangle size={24} />} label={t('ops.alerts')} value={fmtNum(alerts.length)} />
-        <Stat tone="blue" icon={<ShoppingCart size={24} />} label={t('ops.toOrder')} value={fmtNum(recommended.length)} />
-        <Stat tone="violet" icon={<ClipboardCheck size={24} />} label={t('ops.quality')} value={fmtNum(quality.length)} />
+        <Stat tone="red" icon={<AlertTriangle size={24} />} label={t('ops.critical')} value={hasLoaded ? fmtNum(critical) : '—'} />
+        <Stat tone="amber" icon={<AlertTriangle size={24} />} label={t('ops.alerts')} value={hasLoaded ? fmtNum(alerts.length) : '—'} />
+        <Stat tone="blue" icon={<ShoppingCart size={24} />} label={t('ops.toOrder')} value={hasLoaded ? fmtNum(recommended.length) : '—'} />
+        <Stat tone="violet" icon={<ClipboardCheck size={24} />} label={t('ops.quality')} value={hasLoaded ? fmtNum(quality.length) : '—'} />
       </div>
       <div className="proj-tabs">
         {(['alerts', 'recommendations', 'quality', 'audit'] as Tab[]).map((value) => <button key={value} className={`proj-tab ${tab === value ? 'active' : ''}`} onClick={() => setTab(value)}>{t(`ops.tab.${value}`)}</button>)}
       </div>
       {tab === 'recommendations' && <div className="toolbar"><label className="field-label">{t('ops.targetMonths')}<select className="field" value={target} onChange={(e) => setTarget(Number(e.target.value))}>{[3, 6, 9, 12].map((n) => <option key={n} value={n}>{n}</option>)}</select></label></div>}
       {error && <div className="login-error">{error}</div>}
-      {loading ? <Spinner label={t('common.loading')} /> : (
+      {loading ? <Spinner label={t('common.loading')} /> : !hasLoaded ? null : (
         <div className="table-wrap"><div className="table-scroll frozen">
           {tab === 'alerts' && (alerts.length ? <table className="data"><thead><tr><th>{t('ops.severity')}</th><th>{t('common.product')}</th><th>{t('ops.detail')}</th><th className="num">{t('common.qty')}</th><th>{t('customs.expiry')}</th></tr></thead><tbody>{alerts.map((row) => <tr key={row.id} className={row.productId ? 'click-row' : ''} onClick={() => productLink(row.productId)}><td><Chip tone={row.severity === 'critical' ? 'red' : row.severity === 'warning' ? 'amber' : 'blue'}>{row.severity}</Chip></td><td className="cell-strong">{row.productName}</td><td>{row.detail}</td><td className="num">{row.quantity == null ? '—' : fmtNum(row.quantity)}</td><td>{fmtDate(row.date)}</td></tr>)}</tbody></table> : <EmptyState title={t('common.none')} />)}
           {tab === 'recommendations' && (recommendations.length ? <table className="data"><thead><tr><th>{t('common.product')}</th><th>{t('common.project')}</th><th className="num">{t('company.avgSales')}</th><th className="num">{t('ops.available')}</th><th className="num">{t('company.forecast')}</th><th className="num">{t('ops.recommended')}</th></tr></thead><tbody>{recommendations.map((row) => <tr key={row.productId} className="click-row" onClick={() => productLink(row.productId)}><td className="cell-strong">{row.productName}</td><td>{row.projectName || '—'}</td><td className="num">{fmtNum(row.avgMonthlySales)}</td><td className="num">{fmtNum(row.currentStock + row.customsStock + row.incomingStock + row.openOrders)}</td><td className="num">{row.coverageMonths?.toFixed(1) ?? '—'}</td><td className="num"><span className="qty-strong">{fmtNum(row.recommendedOrder)}</span></td></tr>)}</tbody></table> : <EmptyState title={t('common.none')} />)}

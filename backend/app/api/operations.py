@@ -1,7 +1,7 @@
 """Cross-module marketing insights without adding tables to the shared schema."""
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, date as CalendarDate, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
@@ -123,7 +123,9 @@ class AlertRow(BaseModel):
     product_name: str
     detail: str
     quantity: Optional[float] = None
-    date: Optional[date] = None
+    # Use a distinct type name: Pydantic resolves a field named `date` against
+    # its default value when the annotation also spells `date`.
+    date: Optional[CalendarDate] = None
 
 
 @router.get("/alerts", response_model=list[AlertRow])
