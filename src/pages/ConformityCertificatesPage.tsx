@@ -13,7 +13,7 @@ import { SortTh, sortRows, useTableSort } from '../tableSort';
 const emptyBatch = (): api.ConformityBatch => ({ batch: null, quantity: null });
 const emptyLine = (): api.ConformityProductLine => ({ name: '', batches: [emptyBatch()] });
 const emptyInput = (): api.ConformityInput => ({
-  notes: null, productLines: [emptyLine()],
+  certificateNumber: '', notes: null, productLines: [emptyLine()],
 });
 
 export default function ConformityCertificatesPage() {
@@ -107,12 +107,15 @@ export default function ConformityCertificatesPage() {
 function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCertificate | null; onClose: () => void; onSaved: () => Promise<void> }) {
   const { t } = useLang();
   const [input, setInput] = useState<api.ConformityInput>(() => row ? {
+    certificateNumber: row.certificateNumber,
     notes: row.notes,
     productLines: row.productLines.map((line) => ({ ...line, batches: line.batches.map((batch) => ({ ...batch })) })),
   } : emptyInput());
   const [file, setFile] = useState<File | undefined>();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [products, setProducts] = useState<string[]>([]);
+  useEffect(() => { void api.productNames().then(setProducts).catch(() => undefined); }, []);
   const lineField = (index: number, value: string) => setInput((current) => ({ ...current, productLines: current.productLines.map((line, i) => i === index ? { ...line, name: value } : line) }));
   const batchField = (productIndex: number, batchIndex: number, key: keyof api.ConformityBatch, value: string) => setInput((current) => ({
     ...current,
@@ -144,17 +147,18 @@ function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCerti
     <DialogHeader><DialogTitle>{t(row ? 'conformity.edit' : 'conformity.create')}</DialogTitle><DialogDescription>{t('conformity.formHint')}</DialogDescription></DialogHeader>
     <form onSubmit={(event) => void save(event)} className="conformity-form">
       {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+      <datalist id="conformity-product-names">{products.map((name) => <option key={name} value={name} />)}</datalist>
+      <label>{t('conformity.number')}<Input required value={input.certificateNumber} onChange={(e) => setInput((current) => ({ ...current, certificateNumber: e.target.value }))} /></label>
       <div className="conformity-lines-head"><strong>{t('conformity.products')}</strong><Button type="button" variant="outline" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: [...current.productLines, emptyLine()] }))}>{t('conformity.addProduct')}</Button></div>
       {input.productLines.map((line, index) => <div className="conformity-product" key={index}>
         <div className="conformity-product-head">
           <strong>{t('conformity.product')} {index + 1}</strong>
           {input.productLines.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: current.productLines.filter((_, i) => i !== index) }))}>{t('conformity.removeProduct')}</Button>}
         </div>
-        <label>{t('conformity.productName')}<Input required value={line.name} onChange={(e) => lineField(index, e.target.value)} /></label>
+        <label>{t('conformity.productName')}<Input required list="conformity-product-names" placeholder={t('conformity.selectProduct')} value={line.name} onChange={(e) => lineField(index, e.target.value)} /></label>
         <div className="conformity-batches-head"><strong>{t('conformity.batches')}</strong><Button type="button" variant="outline" size="sm" onClick={() => addBatch(index)}>{t('conformity.addBatch')}</Button></div>
         {line.batches.map((batch, batchIndex) => <div className="conformity-batch" key={batchIndex}>
           <label>{t('conformity.batch')}<Input value={batch.batch ?? ''} onChange={(e) => batchField(index, batchIndex, 'batch', e.target.value)} /></label>
-          <label>{t('conformity.quantity')}<Input value={batch.quantity ?? ''} onChange={(e) => batchField(index, batchIndex, 'quantity', e.target.value)} /></label>
           {line.batches.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => removeBatch(index, batchIndex)}>{t('conformity.removeBatch')}</Button>}
         </div>)}
       </div>)}

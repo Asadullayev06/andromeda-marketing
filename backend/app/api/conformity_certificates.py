@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
@@ -52,8 +52,17 @@ class ProductLine(BaseModel):
 
 
 class CertificateInput(BaseModel):
+    certificate_number: str = Field(min_length=1, max_length=200)
     notes: str | None = None
     product_lines: list[ProductLine] = Field(min_length=1)
+
+    @field_validator("certificate_number")
+    @classmethod
+    def clean_number(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Certificate number is required.")
+        return value
 
 
 class CertificateRead(CertificateInput):
@@ -73,7 +82,7 @@ class ArchiveInput(BaseModel):
 
 def _read(row: ConformityCertificate) -> CertificateRead:
     return CertificateRead(
-        id=row.id, notes=row.notes,
+        id=row.id, certificate_number=row.certificate_number, notes=row.notes,
         product_lines=[ProductLine.model_validate(line) for line in row.product_lines],
         document_name=row.document_name, document_size_bytes=row.document_size_bytes,
         archived=row.archived, created_by=row.created_by, updated_by=row.updated_by,
@@ -107,6 +116,7 @@ async def _read_pdf(file: UploadFile) -> tuple[str, bytes]:
 
 
 def _assign(row: ConformityCertificate, data: CertificateInput) -> None:
+    row.certificate_number = data.certificate_number
     row.notes = data.notes.strip() or None if data.notes else None
     row.product_lines = [line.model_dump(mode="json") for line in data.product_lines]
 
@@ -125,9 +135,10 @@ async def create_certificate(
     data = _parse_payload(payload)
     name, content = await _read_pdf(document)
     row = ConformityCertificate(
-        # Keep legacy non-null columns populated until the marketing-owned table
-        # can be migrated. These values are internal and never shown as facts.
-        certificate_number=f"internal-{uuid4()}",
+        # certificate_number is set by _assign from the form. The remaining
+        # legacy non-null columns stay populated with internal placeholders
+        # until the marketing-owned table can be migrated; never shown as facts.
+        certificate_number="",
         registration_date=date.today(), valid_until=date.today(),
         applicant="", manufacturer="",
         document_name=name, document_mime_type="application/pdf",

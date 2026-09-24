@@ -376,7 +376,7 @@ export async function certificateDocumentUrl(certificateId: string): Promise<str
 export interface ConformityBatch { batch: string | null; quantity: string | null; }
 export interface ConformityProductLine { name: string; batches: ConformityBatch[]; }
 export interface ConformityCertificate {
-  id: string; notes: string | null;
+  id: string; certificateNumber: string; notes: string | null;
   productLines: ConformityProductLine[]; documentName: string; documentSizeBytes: number;
   archived: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string;
 }
@@ -384,7 +384,7 @@ export type ConformityInput = Omit<ConformityCertificate, 'id' | 'documentName' 
 
 function conformityRow(row: any): ConformityCertificate {
   return {
-    id: row.id, notes: row.notes,
+    id: row.id, certificateNumber: row.certificate_number ?? '', notes: row.notes,
     productLines: row.product_lines.map((line: any) => ({
       name: line.name,
       batches: (line.batches ?? [line]).map((batch: any) => ({
@@ -397,6 +397,19 @@ function conformityRow(row: any): ConformityCertificate {
   };
 }
 
+/** All catalog product names (for the conformity product dropdown). */
+export async function productNames(): Promise<string[]> {
+  const names: string[] = [];
+  let page = 1;
+  for (;;) {
+    const res = await listProducts({ page, pageSize: 500 });
+    names.push(...res.items.map((p) => p.name));
+    if (res.items.length === 0 || page * res.pageSize >= res.total) break;
+    page += 1;
+  }
+  return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+}
+
 export async function listConformityCertificates(): Promise<ConformityCertificate[]> {
   return (await request<any[]>('/conformity-certificates')).map(conformityRow);
 }
@@ -404,6 +417,7 @@ export async function listConformityCertificates(): Promise<ConformityCertificat
 export async function saveConformityCertificate(input: ConformityInput, document?: File, id?: string): Promise<ConformityCertificate> {
   const form = new FormData();
   form.append('payload', JSON.stringify({
+    certificate_number: input.certificateNumber,
     notes: input.notes,
     product_lines: input.productLines.map((line) => ({
       name: line.name,
