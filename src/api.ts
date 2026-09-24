@@ -373,6 +373,62 @@ export async function certificateDocumentUrl(certificateId: string): Promise<str
   return result.url;
 }
 
+export interface ConformityProductLine {
+  name: string; batch: string | null; expiryDate: string | null; quantity: string | null; hsCode: string | null;
+}
+export interface ConformityCertificate {
+  id: string; certificateNumber: string; registrationDate: string; validUntil: string;
+  applicant: string; manufacturer: string; certifyingBody: string | null; notes: string | null;
+  productLines: ConformityProductLine[]; documentName: string; documentSizeBytes: number;
+  archived: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string;
+}
+export type ConformityInput = Omit<ConformityCertificate, 'id' | 'documentName' | 'documentSizeBytes' | 'archived' | 'createdBy' | 'updatedBy' | 'createdAt' | 'updatedAt'>;
+
+function conformityRow(row: any): ConformityCertificate {
+  return {
+    id: row.id, certificateNumber: row.certificate_number,
+    registrationDate: row.registration_date, validUntil: row.valid_until,
+    applicant: row.applicant, manufacturer: row.manufacturer,
+    certifyingBody: row.certifying_body, notes: row.notes,
+    productLines: row.product_lines.map((line: any) => ({
+      name: line.name, batch: line.batch, expiryDate: line.expiry_date,
+      quantity: line.quantity, hsCode: line.hs_code,
+    })),
+    documentName: row.document_name, documentSizeBytes: row.document_size_bytes,
+    archived: row.archived, createdBy: row.created_by, updatedBy: row.updated_by,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  };
+}
+
+export async function listConformityCertificates(): Promise<ConformityCertificate[]> {
+  return (await request<any[]>('/conformity-certificates')).map(conformityRow);
+}
+
+export async function saveConformityCertificate(input: ConformityInput, document?: File, id?: string): Promise<ConformityCertificate> {
+  const form = new FormData();
+  form.append('payload', JSON.stringify({
+    certificate_number: input.certificateNumber, registration_date: input.registrationDate,
+    valid_until: input.validUntil, applicant: input.applicant, manufacturer: input.manufacturer,
+    certifying_body: input.certifyingBody, notes: input.notes,
+    product_lines: input.productLines.map((line) => ({
+      name: line.name, batch: line.batch, expiry_date: line.expiryDate,
+      quantity: line.quantity, hs_code: line.hsCode,
+    })),
+  }));
+  if (document) form.append('document', document);
+  return conformityRow(await request<any>(id ? `/conformity-certificates/${id}` : '/conformity-certificates', { method: id ? 'PUT' : 'POST', body: form }));
+}
+
+export async function setConformityArchived(id: string, archived: boolean): Promise<void> {
+  await request(`/conformity-certificates/${id}/archive`, { method: 'PATCH', body: JSON.stringify({ archived }) });
+}
+
+export async function conformityDocument(id: string): Promise<Blob> {
+  const response = await fetch(`${BASE}/conformity-certificates/${id}/document`, { credentials: 'include', headers: authHeaders() });
+  if (!response.ok) throw new ApiError(response.status, `Document request failed (${response.status}).`);
+  return response.blob();
+}
+
 // ── Sales ─────────────────────────────────────────────────────────────────────
 export interface MonthlyPoint { month: string; dispatched: number; sold: number; }
 export interface SalesOverview {

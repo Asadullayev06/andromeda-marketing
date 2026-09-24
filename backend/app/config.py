@@ -1,9 +1,9 @@
 """Application settings for the ANDROMEDA Sales (marketing_control) backend.
 
 This service is a SECOND, read/write frontend onto the SAME shared PostgreSQL
-database that powers ANDROMEDA (custom_control). It deliberately does NOT own
-the schema: it never runs Alembic migrations. ANDROMEDA remains the single
-owner of migrations; this app only reads and writes existing tables.
+database that powers ANDROMEDA (custom_control). ANDROMEDA owns its shared
+tables and migrations; marketing-control creates only its own conformity
+certificate table.
 
 Login interoperates with ANDROMEDA because both services share:
   * the same `users` / `auth_sessions` tables (same DATABASE_URL), and

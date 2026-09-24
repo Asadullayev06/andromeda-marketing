@@ -5,7 +5,8 @@ gate and is therefore OUTERMOST. Otherwise 401/403/500 responses come back
 without Access-Control-Allow-Origin and the browser reports the misleading
 "Failed to fetch" instead of the real status. (Same rule as ANDROMEDA.)
 
-This service NEVER runs Alembic migrations — ANDROMEDA owns the schema.
+This service never runs Alembic migrations on ANDROMEDA tables. It creates a
+separate marketing-owned conformity certificate table when permitted.
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .auth import (
@@ -45,6 +47,12 @@ PUBLIC_PATHS = {
 @app.on_event("startup")
 def _validate_security() -> None:
     settings.validate_runtime_security()
+    # This table belongs to marketing-control, separate from ANDROMEDA's schema.
+    from .models import ConformityCertificate
+    try:
+        ConformityCertificate.__table__.create(bind=engine, checkfirst=True)
+    except SQLAlchemyError:
+        logger.exception("Could not prepare the marketing conformity certificate table")
 
 
 async def auth_gate(request: Request, call_next):
@@ -123,6 +131,7 @@ from .api import (  # noqa: E402
     certificates as certificates_router,
     operations as operations_router,
     orders as orders_router,
+    conformity_certificates as conformity_certificates_router,
 )
 
 for module in (
@@ -135,5 +144,6 @@ for module in (
     certificates_router,
     operations_router,
     orders_router,
+    conformity_certificates_router,
 ):
     app.include_router(module.router)

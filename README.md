@@ -6,8 +6,8 @@ PostgreSQL database** as ANDROMEDA (`custom_control`). Whatever ANDROMEDA
 changes appears here instantly, and vice-versa — because it is literally the
 same database. There is no sync job.
 
-Scope is intentionally narrow: **stock ("ostatok"), sales analytics, and the
-read-only certificate library** — no tasks, chat, contracts, finance,
+Scope is intentionally narrow: **stock ("ostatok"), sales analytics, the
+read-only registration certificate library, and marketing-managed certificates of conformity** — no tasks, chat, contracts, finance,
 logistics, or registration workflows.
 
 ## Modules
@@ -20,6 +20,7 @@ logistics, or registration workflows.
 | `/customs` | Customs warehouse (customs ostatok) | `customs_warehouse_invoices/products/series` |
 | `/catalog` | Product catalog | `analytics_products` |
 | `/certificates` | Read-only certificate library | `certificates`, `certificate_products` |
+| `/conformity-certificates` | Create, upload, edit, archive, and view official conformity certificates | `marketing_conformity_certificates` |
 | `/sales` | Sales analytics | `analytics_sales`, `analytics_fact_sales` |
 | `/orders` | Read-only purchase orders and documents | `analytics_orders` |
 | `/operations` | Alerts, purchase planning, quality and audit | shared read models + marketing-owned files |
@@ -38,8 +39,11 @@ logistics, or registration workflows.
 ### How the shared database is wired
 
 The backend reads `DATABASE_URL` (same value as ANDROMEDA) and maps the existing
-tables with SQLAlchemy. **It never runs Alembic migrations — ANDROMEDA owns the
-schema.** Keep this app read-mostly; if you add a column that stores a
+tables with SQLAlchemy. **It never runs Alembic migrations on ANDROMEDA tables.**
+The marketing service creates only its own `marketing_conformity_certificates` table
+on startup. Its database role needs `CREATE` permission in the schema on first
+deployment. The table stores official PDFs (up to 10 MB) in PostgreSQL so the
+records remain available across deployments. Keep shared tables read-mostly; if you add a column that stores a
 Cloudflare R2 object key, follow ANDROMEDA's storage-GC rule (name it
 `*_storage_path` or register it) or the object is garbage-collected after 24h.
 

@@ -16,6 +16,7 @@ const NAV = [
   { to: '/cleared', icon: PackageCheck, key: 'nav.cleared' },
   { to: '/catalog', icon: BookOpen, key: 'nav.catalog' },
   { to: '/certificates', icon: FileBadge, key: 'nav.certificates' },
+  { to: '/conformity-certificates', icon: FileBadge, key: 'nav.conformity' },
   { to: '/sales', icon: TrendingUp, key: 'nav.sales' },
   { to: '/orders', icon: ShoppingCart, key: 'nav.orders' },
   { to: '/operations', icon: ShieldAlert, key: 'nav.operations' },
