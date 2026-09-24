@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Archive, FileBadge, FilePlus2, FileText, Pencil, RotateCcw, Search } from 'lucide-react';
+import { Archive, FileBadge, FilePlus2, FileText, Pencil, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -71,6 +71,14 @@ export default function ConformityCertificatesPage() {
     finally { setBusyId(null); }
   }
 
+  async function deleteRow(row: api.ConformityCertificate) {
+    if (!window.confirm(t('conformity.deleteConfirm'))) return;
+    setBusyId(row.id);
+    try { await api.deleteConformityCertificate(row.id); await load(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : t('common.error')); }
+    finally { setBusyId(null); }
+  }
+
   return <>
     <PageHead icon={<FileBadge size={24} />} title={t('conformity.title')} sub={t('conformity.sub')}
       actions={canManage ? <Button onClick={() => setEditing(null)}><FilePlus2 data-icon="inline-start" />{t('conformity.create')}</Button> : undefined} />
@@ -98,6 +106,7 @@ export default function ConformityCertificatesPage() {
             <Button variant="ghost" size="sm" title={row.documentName} disabled={busyId === row.id} onClick={() => void openDocument(row)}><FileText data-icon="inline-start" />PDF</Button>
             {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => setEditing(row)}><Pencil /></Button>}
             {canManage && <Button variant="ghost" size="sm" aria-label={t(row.archived ? 'conformity.restore' : 'conformity.archive')} disabled={busyId === row.id} onClick={() => void toggleArchive(row)}>{row.archived ? <RotateCcw /> : <Archive />}</Button>}
+            {canManage && <Button variant="ghost" size="sm" aria-label={t('conformity.delete')} disabled={busyId === row.id} onClick={() => void deleteRow(row)}><Trash2 /></Button>}
           </div></td>
         </tr>)}</tbody>
       </table></div>}

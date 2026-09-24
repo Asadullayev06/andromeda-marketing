@@ -208,6 +208,19 @@ def archive_certificate(certificate_id: UUID, payload: ArchiveInput, request: Re
     return _read(row)
 
 
+@router.delete("/{certificate_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_certificate(certificate_id: UUID, request: Request, db: Session = Depends(get_db)) -> Response:
+    actor = _require_editor(request)
+    row = db.get(ConformityCertificate, certificate_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Certificate not found.")
+    document_name = row.document_name
+    db.delete(row)
+    db.commit()
+    record_event(actor=actor, action="conformity_certificate_deleted", target=str(certificate_id), details={"document": document_name})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.get("/{certificate_id}/document")
 def download_document(certificate_id: UUID, db: Session = Depends(get_db)) -> Response:
     row = db.get(ConformityCertificate, certificate_id)

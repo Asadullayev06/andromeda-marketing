@@ -436,6 +436,10 @@ export async function setConformityArchived(id: string, archived: boolean): Prom
   await request(`/conformity-certificates/${id}/archive`, { method: 'PATCH', body: JSON.stringify({ archived }) });
 }
 
+export async function deleteConformityCertificate(id: string): Promise<void> {
+  await request(`/conformity-certificates/${id}`, { method: 'DELETE' });
+}
+
 export async function conformityDocument(id: string): Promise<Blob> {
   const response = await fetch(`${BASE}/conformity-certificates/${id}/document`, { credentials: 'include', headers: authHeaders() });
   if (!response.ok) throw new ApiError(response.status, `Document request failed (${response.status}).`);
