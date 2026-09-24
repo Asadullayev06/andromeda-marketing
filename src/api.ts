@@ -110,10 +110,10 @@ export interface Product {
 export interface Page<T> { items: T[]; total: number; page: number; pageSize: number; }
 
 export async function listProducts(params: {
-  q?: string; manufacturer?: string; projectId?: string; category?: string; page?: number; pageSize?: number;
+  q?: string; manufacturer?: string; projectId?: string; category?: string; page?: number; pageSize?: number; sortBy?: string; sortDir?: string;
 }): Promise<Page<Product>> {
   const r = await request<{ items: any[]; total: number; page: number; page_size: number }>(
-    `/catalog/products${qs({ q: params.q, manufacturer: params.manufacturer, project_id: params.projectId, category: params.category, page: params.page, page_size: params.pageSize })}`,
+    `/catalog/products${qs({ q: params.q, manufacturer: params.manufacturer, project_id: params.projectId, category: params.category, page: params.page, page_size: params.pageSize, sort_by: params.sortBy, sort_dir: params.sortDir })}`,
   );
   return {
     total: r.total, page: r.page, pageSize: r.page_size,
@@ -140,10 +140,10 @@ export interface CompanyStockRow {
 export interface CompanyStockPage extends Page<CompanyStockRow> { productsInStock: number; }
 
 export async function listCompanyStock(params: {
-  q?: string; manufacturer?: string; projectId?: string; onlyInStock?: boolean; page?: number; pageSize?: number;
+  q?: string; manufacturer?: string; projectId?: string; onlyInStock?: boolean; page?: number; pageSize?: number; sortBy?: string; sortDir?: string;
 }): Promise<CompanyStockPage> {
   const r = await request<any>(
-    `/company-stock${qs({ q: params.q, manufacturer: params.manufacturer, project_id: params.projectId, only_in_stock: params.onlyInStock, page: params.page, page_size: params.pageSize })}`,
+    `/company-stock${qs({ q: params.q, manufacturer: params.manufacturer, project_id: params.projectId, only_in_stock: params.onlyInStock, page: params.page, page_size: params.pageSize, sort_by: params.sortBy, sort_dir: params.sortDir })}`,
   );
   return {
     total: r.total, page: r.page, pageSize: r.page_size, productsInStock: r.products_in_stock,
@@ -415,9 +415,9 @@ export interface OrderPage extends Page<OrderRow> { totalQty: number; }
 export interface OrderLookups { groups: string[]; manufacturers: string[]; }
 export async function orderLookups(): Promise<OrderLookups> { return request<OrderLookups>('/orders/lookups'); }
 export async function listOrders(params: {
-  q?: string; manufacturer?: string; group?: string; page?: number; pageSize?: number;
+  q?: string; manufacturer?: string; group?: string; page?: number; pageSize?: number; sortBy?: string; sortDir?: string;
 }): Promise<OrderPage> {
-  const r = await request<any>(`/orders${qs({ q: params.q, manufacturer: params.manufacturer, group: params.group, page: params.page, page_size: params.pageSize })}`);
+  const r = await request<any>(`/orders${qs({ q: params.q, manufacturer: params.manufacturer, group: params.group, page: params.page, page_size: params.pageSize, sort_by: params.sortBy, sort_dir: params.sortDir })}`);
   return {
     total: r.total, totalQty: r.total_qty, page: r.page, pageSize: r.page_size,
     items: r.items.map((x: any) => ({

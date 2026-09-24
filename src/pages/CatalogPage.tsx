@@ -6,6 +6,7 @@ import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Chip, fmtNum } from '../components';
 import { Pager } from './CompanyStockPage';
+import { SortTh, useTableSort } from '../tableSort';
 
 export default function CatalogPage() {
   const { t } = useLang();
@@ -14,6 +15,8 @@ export default function CatalogPage() {
   const [manufacturer, setManufacturer] = useState('');
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
+  const sort = useTableSort<'name' | 'manufacturer' | 'project' | 'category' | 'country'>('name');
+  const changeSort = (key: typeof sort.key) => { sort.toggle(key); setPage(1); };
   const [data, setData] = useState<api.Page<api.Product> | null>(null);
   const [loading, setLoading] = useState(true);
   const [lookups, setLookups] = useState<api.Lookups | null>(null);
@@ -24,11 +27,11 @@ export default function CatalogPage() {
   const load = useMemo(() => async () => {
     setLoading(true);
     try {
-      setData(await api.listProducts({ q, manufacturer, category, page, pageSize: 50 }));
+      setData(await api.listProducts({ q, manufacturer, category, page, pageSize: 50, sortBy: sort.key, sortDir: sort.direction }));
     } finally {
       setLoading(false);
     }
-  }, [q, manufacturer, category, page]);
+  }, [q, manufacturer, category, page, sort.key, sort.direction]);
 
   useEffect(() => {
     window.clearTimeout(debounce.current);
@@ -65,11 +68,11 @@ export default function CatalogPage() {
             <table className="data">
               <thead>
                 <tr>
-                  <th>{t('common.product')}</th>
-                  <th>{t('common.manufacturer')}</th>
-                  <th>{t('common.project')}</th>
-                  <th>{t('common.category')}</th>
-                  <th>{t('customs.supplier')}</th>
+                  <SortTh label={t('common.product')} column="name" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.manufacturer')} column="manufacturer" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.project')} column="project" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.category')} column="category" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.country')} column="country" sort={{ ...sort, toggle: changeSort }} />
                 </tr>
               </thead>
               <tbody>

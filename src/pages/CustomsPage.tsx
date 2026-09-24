@@ -4,6 +4,7 @@ import { ShieldCheck, Search, FileText, FileCheck2 } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Stat, Chip, type ChipTone, fmtNum, fmtDate } from '../components';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 function isIncoming(regime: string): boolean {
   return regime.toUpperCase().includes('INCOMING');
@@ -23,6 +24,7 @@ export default function CustomsPage() {
   const [q, setQ] = useState('');
   const [data, setData] = useState<api.CustomsList | null>(null);
   const [loading, setLoading] = useState(true);
+  const sort = useTableSort<'productName' | 'productExpiry' | 'qty' | 'regime' | 'certificateStatus'>('productName');
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [certError, setCertError] = useState('');
   const debounce = useRef<number | undefined>(undefined);
@@ -89,15 +91,15 @@ export default function CustomsPage() {
             <table className="data">
               <thead>
                 <tr>
-                  <th>{t('common.product')}</th>
-                  <th>{t('customs.expiry')}</th>
-                  <th className="num">{t('common.qty')}</th>
-                  <th>{t('customs.regime')}</th>
-                  <th>{t('customs.certificate')}</th>
+                  <SortTh label={t('common.product')} column="productName" sort={sort} />
+                  <SortTh label={t('customs.expiry')} column="productExpiry" sort={sort} />
+                  <SortTh label={t('common.qty')} column="qty" sort={sort} numeric />
+                  <SortTh label={t('customs.regime')} column="regime" sort={sort} />
+                  <SortTh label={t('customs.certificate')} column="certificateStatus" sort={sort} />
                 </tr>
               </thead>
               <tbody>
-                {data?.items.map((p) => {
+                {data && sortRows(data.items, sort.key, sort.direction, (row, key) => row[key as typeof sort.key]).map((p) => {
                   const isOpen = !!open[p.id];
                   return (
                     <Fragment key={p.id}>

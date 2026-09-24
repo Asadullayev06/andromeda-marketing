@@ -1,7 +1,7 @@
 """Product catalog + filter lookups (manufacturers, projects)."""
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -61,6 +61,8 @@ def list_products(
     category: Optional[str] = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=500),
+    sort_by: Literal["name", "manufacturer", "project", "category", "country"] = Query(default="name"),
+    sort_dir: Literal["asc", "desc"] = Query(default="asc"),
 ) -> ProductPage:
     stmt = select(AnalyticsProduct).options(selectinload(AnalyticsProduct.project_rel))
     count_stmt = select(func.count()).select_from(AnalyticsProduct)
@@ -84,8 +86,20 @@ def list_products(
         count_stmt = count_stmt.where(cond)
 
     total = db.scalar(count_stmt) or 0
+    columns = {
+        "name": AnalyticsProduct.name,
+        "manufacturer": AnalyticsProduct.manufacturer_label,
+        "project": func.coalesce(Project.name, AnalyticsProduct.product_group),
+        "category": AnalyticsProduct.catalog_category,
+        "country": AnalyticsProduct.country,
+    }
+    if sort_by == "project":
+        stmt = stmt.outerjoin(Project, Project.id == AnalyticsProduct.project_id)
+    column = func.lower(columns[sort_by])
+    order = column.desc() if sort_dir == "desc" else column.asc()
     rows = db.scalars(
-        stmt.order_by(AnalyticsProduct.name).offset((page - 1) * page_size).limit(page_size)
+        stmt.order_by(order.nulls_last(), AnalyticsProduct.id)
+        .offset((page - 1) * page_size).limit(page_size)
     ).all()
     return ProductPage(
         items=[_row(p) for p in rows],

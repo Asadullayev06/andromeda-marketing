@@ -314,6 +314,11 @@ table.data thead th {
   position: sticky; top: 0;
 }
 table.data thead th.num, table.data td.num { text-align: right; }
+.table-sort { display: inline-flex; align-items: center; gap: 6px; width: 100%; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-align: inherit; cursor: pointer; }
+.table-sort.numeric { justify-content: flex-end; }
+.table-sort svg { flex: none; opacity: .75; }
+.table-sort:hover svg, .table-sort:focus-visible svg { opacity: 1; }
+.table-sort:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 2px; }
 table.data tbody td {
   padding: 15px 18px; border-bottom: 1px solid var(--border);
   color: var(--text); vertical-align: middle;

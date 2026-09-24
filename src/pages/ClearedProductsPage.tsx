@@ -3,6 +3,7 @@ import { PackageCheck, Search, Layers, Boxes as BoxesIcon } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Stat, Chip, type ChipTone, fmtNum, fmtDate } from '../components';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 function regimeInfo(regime: string | null, transit: string, customs: string): { tone: ChipTone; label: string } {
   const r = (regime || '').toUpperCase();
@@ -15,6 +16,7 @@ export default function ClearedProductsPage() {
   const [q, setQ] = useState('');
   const [data, setData] = useState<api.ClearedList | null>(null);
   const [loading, setLoading] = useState(true);
+  const sort = useTableSort<keyof api.ClearedRow>('productName');
   const debounce = useRef<number | undefined>(undefined);
 
   const load = useMemo(() => async () => {
@@ -60,19 +62,19 @@ export default function ClearedProductsPage() {
             <table className="data">
               <thead>
                 <tr>
-                  <th>{t('common.product')}</th>
-                  <th>{t('cleared.invoice')}</th>
-                  <th>{t('cleared.series')}</th>
-                  <th>{t('customs.regime')}</th>
-                  <th className="num">{t('common.qty')}</th>
-                  <th className="num">{t('cleared.pallets')}</th>
-                  <th className="num">{t('cleared.boxes')}</th>
-                  <th>{t('cleared.comment')}</th>
-                  <th>{t('cleared.date')}</th>
+                  <SortTh label={t('common.product')} column="productName" sort={sort} />
+                  <SortTh label={t('cleared.invoice')} column="invoiceName" sort={sort} />
+                  <SortTh label={t('cleared.series')} column="seriesBatch" sort={sort} />
+                  <SortTh label={t('customs.regime')} column="regime" sort={sort} />
+                  <SortTh label={t('common.qty')} column="qty" sort={sort} numeric />
+                  <SortTh label={t('cleared.pallets')} column="pallets" sort={sort} numeric />
+                  <SortTh label={t('cleared.boxes')} column="boxes" sort={sort} numeric />
+                  <SortTh label={t('cleared.comment')} column="comment" sort={sort} />
+                  <SortTh label={t('cleared.date')} column="clearedAt" sort={sort} />
                 </tr>
               </thead>
               <tbody>
-                {data?.items.map((r) => {
+                {data && sortRows(data.items, sort.key, sort.direction, (row, key) => row[key as keyof api.ClearedRow] as string | number | null).map((r) => {
                   const reg = regimeInfo(r.regime, t('regime.transit'), t('regime.customs'));
                   return (
                     <tr key={r.id}>

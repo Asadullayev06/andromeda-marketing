@@ -9,6 +9,7 @@ import { EmptyState, fmtMonth, fmtNum, PageHead, Spinner, Stat } from '../compon
 import { downloadCsv } from '../export';
 import { useLang } from '../i18n';
 import { Pager } from './CompanyStockPage';
+import { SortTh, useTableSort } from '../tableSort';
 
 const PAGE_SIZE = 50;
 
@@ -18,6 +19,8 @@ export default function OrdersPage() {
   const [manufacturer, setManufacturer] = useState('');
   const [group, setGroup] = useState('');
   const [page, setPage] = useState(1);
+  const sort = useTableSort<'month' | 'product' | 'project' | 'manufacturer' | 'qty' | 'document'>('month', 'desc');
+  const changeSort = (key: typeof sort.key) => { sort.toggle(key); setPage(1); };
   const [refresh, setRefresh] = useState(0);
   const [data, setData] = useState<api.OrderPage | null>(null);
   const [lookups, setLookups] = useState<api.OrderLookups | null>(null);
@@ -36,7 +39,7 @@ export default function OrdersPage() {
       setLoading(true);
       setError('');
       try {
-        const result = await api.listOrders({ q: query, manufacturer, group, page, pageSize: PAGE_SIZE });
+        const result = await api.listOrders({ q: query, manufacturer, group, page, pageSize: PAGE_SIZE, sortBy: sort.key, sortDir: sort.direction });
         if (active) setData(result);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t('common.error'));
@@ -45,7 +48,7 @@ export default function OrdersPage() {
       }
     }, refresh ? 0 : 250);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [query, manufacturer, group, page, refresh, t]);
+  }, [query, manufacturer, group, page, refresh, t, sort.key, sort.direction]);
 
   async function openDocument(row: api.OrderRow) {
     setOpeningId(row.id);
@@ -68,7 +71,7 @@ export default function OrdersPage() {
       let current = 1;
       let total = 0;
       do {
-        const result = await api.listOrders({ q: query, manufacturer, group, page: current, pageSize: 200 });
+        const result = await api.listOrders({ q: query, manufacturer, group, page: current, pageSize: 200, sortBy: sort.key, sortDir: sort.direction });
         if (result.items.length === 0) break;
         rows.push(...result.items);
         total = result.total;
@@ -113,8 +116,8 @@ export default function OrdersPage() {
     {loading && !data ? <Spinner label={t('common.loading')} /> : data && <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <div className="table-scroll"><table className="data">
         <thead><tr>
-          <th>{t('orders.month')}</th><th>{t('common.product')}</th><th>{t('common.project')}</th>
-          <th>{t('common.manufacturer')}</th><th className="num">{t('orders.quantity')}</th><th>{t('orders.document')}</th>
+          <SortTh label={t('orders.month')} column="month" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('common.product')} column="product" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('common.project')} column="project" sort={{ ...sort, toggle: changeSort }} />
+          <SortTh label={t('common.manufacturer')} column="manufacturer" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('orders.quantity')} column="qty" sort={{ ...sort, toggle: changeSort }} numeric /><SortTh label={t('orders.document')} column="document" sort={{ ...sort, toggle: changeSort }} />
         </tr></thead>
         <tbody>{data.items.map((row) => <tr key={row.id}>
           <td>{fmtMonth(row.month)}</td>

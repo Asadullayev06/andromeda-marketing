@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import * as api from '../api';
 import { Chip, EmptyState, PageHead, Spinner, Stat, fmtDate, fmtNum, type ChipTone } from '../components';
 import { useLang } from '../i18n';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 type StatusFilter = 'all' | 'valid' | 'expiring' | 'critical' | 'unknown';
 type CertificateStatus = Exclude<StatusFilter, 'all'>;
@@ -43,6 +44,7 @@ export default function CertificatesPage() {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const sort = useTableSort<'number' | 'manufacturer' | 'products' | 'registered' | 'valid' | 'status' | 'document'>('number');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -79,6 +81,12 @@ export default function CertificatesPage() {
       ].some((value) => value?.toLocaleLowerCase().includes(needle));
     });
   }, [query, rows, statusFilter]);
+  const sorted = sortRows(filtered, sort.key, sort.direction, (row, key) => ({
+    number: row.certificateNumber, manufacturer: row.manufacturerName,
+    products: row.productLinks.map((link) => link.catalogName).join(', '),
+    registered: row.registrationDate, valid: row.validUntil,
+    status: certificateStatus(row.validUntil), document: row.documentName,
+  })[key as typeof sort.key]);
 
   async function openDocument(item: api.Certificate) {
     setOpeningId(item.id);
@@ -137,17 +145,17 @@ export default function CertificatesPage() {
             <table className="data certificate-table">
               <thead>
                 <tr>
-                  <th>{t('cert.number')}</th>
-                  <th>{t('cert.manufacturer')}</th>
-                  <th>{t('cert.products')}</th>
-                  <th>{t('cert.registeredOn')}</th>
-                  <th>{t('cert.validUntil')}</th>
-                  <th>{t('cert.status')}</th>
-                  <th>{t('cert.document')}</th>
+                  <SortTh label={t('cert.number')} column="number" sort={sort} />
+                  <SortTh label={t('cert.manufacturer')} column="manufacturer" sort={sort} />
+                  <SortTh label={t('cert.products')} column="products" sort={sort} />
+                  <SortTh label={t('cert.registeredOn')} column="registered" sort={sort} />
+                  <SortTh label={t('cert.validUntil')} column="valid" sort={sort} />
+                  <SortTh label={t('cert.status')} column="status" sort={sort} />
+                  <SortTh label={t('cert.document')} column="document" sort={sort} />
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((item) => {
+                {sorted.map((item) => {
                   const status = certificateStatus(item.validUntil);
                   return (
                     <tr key={item.id}>

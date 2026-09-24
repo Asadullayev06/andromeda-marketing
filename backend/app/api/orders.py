@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ..config import settings
 from ..db import get_db
-from ..models import AnalyticsOrders, AnalyticsProduct
+from ..models import AnalyticsOrders, AnalyticsProduct, Project
 from ..storage import r2
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -70,6 +71,8 @@ def list_orders(
     group: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=200),
+    sort_by: Literal["month", "product", "project", "manufacturer", "qty", "document"] = Query(default="month"),
+    sort_dir: Literal["asc", "desc"] = Query(default="desc"),
 ) -> OrderPage:
     conditions = [AnalyticsOrders.qty > 0]
     if q and q.strip():
@@ -92,9 +95,21 @@ def list_orders(
         .join(AnalyticsOrders.product)
         .where(*conditions)
     ).one()
+    if sort_by == "project":
+        base = base.outerjoin(Project, Project.id == AnalyticsProduct.project_id)
+    columns = {
+        "month": AnalyticsOrders.month,
+        "product": func.lower(AnalyticsProduct.name),
+        "project": func.lower(func.coalesce(AnalyticsProduct.product_group, Project.name)),
+        "manufacturer": func.lower(func.coalesce(AnalyticsOrders.manufacturer_label, AnalyticsProduct.manufacturer_label)),
+        "qty": AnalyticsOrders.qty,
+        "document": func.lower(AnalyticsOrders.file_name),
+    }
+    column = columns[sort_by]
+    order = column.desc() if sort_dir == "desc" else column.asc()
     orders = db.scalars(
         base.options(selectinload(AnalyticsOrders.product).selectinload(AnalyticsProduct.project_rel))
-        .order_by(AnalyticsOrders.month.desc(), AnalyticsProduct.name, AnalyticsOrders.id)
+        .order_by(order.nulls_last(), AnalyticsProduct.name, AnalyticsOrders.id)
         .offset((page - 1) * page_size)
         .limit(page_size)
     ).all()

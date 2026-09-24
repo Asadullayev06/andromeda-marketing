@@ -3,6 +3,7 @@ import { Warehouse, Search, Layers } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, fmtNum } from '../components';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 // Projects hidden from the Sales view.
 const EXCLUDED = new Set(['kazakhstan', 'tadjikistan', 'tajikistan']);
@@ -45,6 +46,7 @@ export default function WarehouseMatrixPage() {
   const [warehouseFilter, setWarehouseFilter] = useState('ALL');
   const [includeZero, setIncludeZero] = useState(false);
   const [q, setQ] = useState('');
+  const sort = useTableSort<string>('productName');
 
   useEffect(() => { api.warehouseMatrix().then(setData).catch(() => setData({ warehouses: [], products: [] })); }, []);
 
@@ -117,9 +119,15 @@ export default function WarehouseMatrixPage() {
             ? group.warehouses
             : group.warehouses.filter((w) => w.id === warehouseFilter);
           if (cols.length === 0) return null;
-          const products = group.products.filter(
+          const filteredProducts = group.products.filter(
             (p) => !search || p.productName.toLowerCase().includes(search) || (p.productGroup || '').toLowerCase().includes(search),
           );
+          const products = sortRows(filteredProducts, sort.key, sort.direction, (row, key) => {
+            if (key === 'productName') return row.productName;
+            if (key === 'productGroup') return row.productGroup;
+            if (key === 'total') return cols.reduce((sum, warehouse) => sum + (row.warehouseStocks[warehouse.id] || 0), 0);
+            return row.warehouseStocks[key] || 0;
+          });
           return (
             <div className="card matrix-card" key={group.project || 'unassigned'}>
               <div className="matrix-head">
@@ -133,10 +141,10 @@ export default function WarehouseMatrixPage() {
                   <table className="data matrix">
                     <thead>
                       <tr>
-                        <th className="sticky-col">{t('common.product')}</th>
-                        <th>{t('wh.group')}</th>
-                        <th className="num">{t('wh.projectStock')}</th>
-                        {cols.map((w) => <th key={w.id} className="num wh-col" title={w.name}>{w.name}</th>)}
+                        <SortTh label={t('common.product')} column="productName" sort={sort} className="sticky-col" />
+                        <SortTh label={t('wh.group')} column="productGroup" sort={sort} />
+                        <SortTh label={t('wh.projectStock')} column="total" sort={sort} numeric />
+                        {cols.map((w) => <SortTh key={w.id} label={w.name} column={w.id} sort={sort} numeric className="wh-col" title={w.name} />)}
                       </tr>
                     </thead>
                     <tbody>

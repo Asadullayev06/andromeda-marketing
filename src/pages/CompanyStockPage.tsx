@@ -8,6 +8,7 @@ import * as api from '../api';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../i18n';
 import { PageHead, Spinner, EmptyState, Chip, fmtNum, fmtDate } from '../components';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 function catClass(cat: string | null): string {
   const c = (cat || '').toLowerCase();
@@ -31,6 +32,8 @@ export default function CompanyStockPage() {
   const [projectId, setProjectId] = useState('');
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [page, setPage] = useState(1);
+  const sort = useTableSort<'name' | 'project' | 'qty' | 'customs' | 'orders' | 'avg_sales' | 'coverage'>('name');
+  const changeSort = (key: typeof sort.key) => { sort.toggle(key); setPage(1); };
   const [data, setData] = useState<api.CompanyStockPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [lookups, setLookups] = useState<api.Lookups | null>(null);
@@ -55,12 +58,12 @@ export default function CompanyStockPage() {
   const load = useMemo(() => async () => {
     setLoading(true);
     try {
-      const res = await api.listCompanyStock({ q, manufacturer, projectId, onlyInStock, page, pageSize: 50 });
+      const res = await api.listCompanyStock({ q, manufacturer, projectId, onlyInStock, page, pageSize: 50, sortBy: sort.key, sortDir: sort.direction });
       setData(res);
     } finally {
       setLoading(false);
     }
-  }, [q, manufacturer, projectId, onlyInStock, page]);
+  }, [q, manufacturer, projectId, onlyInStock, page, sort.key, sort.direction]);
 
   useEffect(() => {
     window.clearTimeout(debounce.current);
@@ -108,13 +111,13 @@ export default function CompanyStockPage() {
             <table className="data">
               <thead>
                 <tr>
-                  <th>{t('common.product')}</th>
-                  <th>{t('common.project')}</th>
-                  <th className="num">{t('common.qty')}</th>
-                  <th className="num">{t('company.customs')}</th>
-                  <th className="num">{t('company.order')}</th>
-                  <th className="num">{t('company.avgSales')}</th>
-                  <th className="num">{t('company.forecast')}</th>
+                  <SortTh label={t('common.product')} column="name" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.project')} column="project" sort={{ ...sort, toggle: changeSort }} />
+                  <SortTh label={t('common.qty')} column="qty" sort={{ ...sort, toggle: changeSort }} numeric />
+                  <SortTh label={t('company.customs')} column="customs" sort={{ ...sort, toggle: changeSort }} numeric />
+                  <SortTh label={t('company.order')} column="orders" sort={{ ...sort, toggle: changeSort }} numeric />
+                  <SortTh label={t('company.avgSales')} column="avg_sales" sort={{ ...sort, toggle: changeSort }} numeric />
+                  <SortTh label={t('company.forecast')} column="coverage" sort={{ ...sort, toggle: changeSort }} numeric />
                 </tr>
               </thead>
               <tbody>
@@ -294,6 +297,7 @@ function ProductExpiryDetails({ row }: { row: api.CompanyStockRow }) {
 
 function WarehouseBreakdownModal({ row, onClose }: { row: api.CompanyStockRow; onClose: () => void }) {
   const { t } = useLang();
+  const sort = useTableSort<'name' | 'code' | 'qty'>('name');
   const [data, setData] = useState<api.WarehouseBreakdown | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -335,13 +339,13 @@ function WarehouseBreakdownModal({ row, onClose }: { row: api.CompanyStockRow; o
                 <table className="data">
                   <thead>
                     <tr>
-                      <th>{t('modal.warehouse')}</th>
-                      <th>{t('modal.code')}</th>
-                      <th className="num">{t('modal.qty')}</th>
+                      <SortTh label={t('modal.warehouse')} column="name" sort={sort} />
+                      <SortTh label={t('modal.code')} column="code" sort={sort} />
+                      <SortTh label={t('modal.qty')} column="qty" sort={sort} numeric />
                     </tr>
                   </thead>
                   <tbody>
-                    {data.warehouses.map((w) => (
+                    {sortRows(data.warehouses, sort.key, sort.direction, (w, key) => key === 'name' ? w.warehouseName : key === 'code' ? w.warehouseCode : w.quantity).map((w) => (
                       <tr key={w.warehouseId} className={w.quantity > 0 ? 'row-highlight' : ''}>
                         <td className="cell-strong">{w.warehouseName}</td>
                         <td>{w.warehouseCode ? <span className="code-chip">{w.warehouseCode}</span> : '—'}</td>

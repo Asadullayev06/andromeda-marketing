@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import * as api from '../api';
 import { downloadCsv } from '../export';
 import { useLang } from '../i18n';
+import { SortTh, sortRows, useTableSort } from '../tableSort';
 import { PageHead, Spinner, EmptyState, Stat, GroupedBars, fmtNum, fmtMonth } from '../components';
 
 function change(current: number, previous: number): string {
@@ -25,6 +26,7 @@ export default function SalesPage() {
   const [projectId, setProjectId] = useState('');
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
+  const sort = useTableSort<'name' | 'manufacturerLabel' | 'dispatched' | 'sold' | 'sellThroughRate' | 'variance'>('sold', 'desc');
 
   useEffect(() => { api.fetchLookups().then(setLookups).catch(() => setLookups({ manufacturers: [], projects: [], categories: [] })); }, []);
   const load = useCallback(async () => {
@@ -60,6 +62,6 @@ export default function SalesPage() {
       <Stat tone="violet" icon={<TrendingUp size={24} />} label={t('sales.sellThrough')} value={overview.sellThroughRate == null ? '—' : `${overview.sellThroughRate.toFixed(1)}%`} hint={`${months} ${t('company.months')}`} />
     </div>
     <div className="card" style={{ marginBottom: 20 }}><div className="card-title">{t('dash.salesTrend')}</div>{overview.months.length ? <GroupedBars data={overview.months.map((m) => ({ label: fmtMonth(m.month), a: m.dispatched, b: m.sold }))} labels={[t('sales.dispatched'), t('sales.sold')]} colorA="#2f6bff" colorB="#22c55e" height={300} /> : <EmptyState title={t('common.none')} />}</div>
-    <div className="card"><div className="card-title">{t('dash.topProducts')}</div>{top.length ? <div className="table-scroll"><table className="data" style={{ boxShadow: 'none' }}><thead><tr><th>{t('common.product')}</th><th>{t('common.manufacturer')}</th><th className="num">{t('sales.dispatched')}</th><th className="num">{t('sales.sold')}</th><th className="num">{t('sales.sellThrough')}</th><th className="num">{t('sales.variance')}</th></tr></thead><tbody>{top.map((p) => <tr key={p.productId} className="click-row" onClick={() => navigate(`/products/${p.productId}`)}><td className="cell-strong">{p.name}</td><td>{p.manufacturerLabel || '—'}</td><td className="num">{fmtNum(p.dispatched)}</td><td className="num">{fmtNum(p.sold)}</td><td className="num">{p.sellThroughRate == null ? '—' : `${p.sellThroughRate.toFixed(1)}%`}</td><td className={`num ${p.variance < 0 ? 'negative' : 'positive'}`}>{fmtNum(p.variance)}</td></tr>)}</tbody></table></div> : <EmptyState title={t('common.none')} />}</div>
+    <div className="card"><div className="card-title">{t('dash.topProducts')}</div>{top.length ? <div className="table-scroll"><table className="data" style={{ boxShadow: 'none' }}><thead><tr><SortTh label={t('common.product')} column="name" sort={sort} /><SortTh label={t('common.manufacturer')} column="manufacturerLabel" sort={sort} /><SortTh label={t('sales.dispatched')} column="dispatched" sort={sort} numeric /><SortTh label={t('sales.sold')} column="sold" sort={sort} numeric /><SortTh label={t('sales.sellThrough')} column="sellThroughRate" sort={sort} numeric /><SortTh label={t('sales.variance')} column="variance" sort={sort} numeric /></tr></thead><tbody>{sortRows(top, sort.key, sort.direction, (row, key) => row[key as typeof sort.key]).map((p) => <tr key={p.productId} className="click-row" onClick={() => navigate(`/products/${p.productId}`)}><td className="cell-strong">{p.name}</td><td>{p.manufacturerLabel || '—'}</td><td className="num">{fmtNum(p.dispatched)}</td><td className="num">{fmtNum(p.sold)}</td><td className="num">{p.sellThroughRate == null ? '—' : `${p.sellThroughRate.toFixed(1)}%`}</td><td className={`num ${p.variance < 0 ? 'negative' : 'positive'}`}>{fmtNum(p.variance)}</td></tr>)}</tbody></table></div> : <EmptyState title={t('common.none')} />}</div>
   </>;
 }

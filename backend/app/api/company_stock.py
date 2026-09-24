@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
@@ -115,6 +115,8 @@ def list_company_stock(
     only_in_stock: bool = Query(default=False),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=500),
+    sort_by: Literal["name", "project", "qty", "customs", "orders", "avg_sales", "coverage"] = Query(default="name"),
+    sort_dir: Literal["asc", "desc"] = Query(default="asc"),
 ) -> CompanyStockPage:
     stmt = (
         select(AnalyticsProduct, AnalyticsStockCompany.qty)
@@ -150,9 +152,14 @@ def list_company_stock(
         select(func.count()).select_from(AnalyticsStockCompany).where(AnalyticsStockCompany.qty > 0)
     ) or 0
 
-    rows = db.execute(
-        stmt.order_by(AnalyticsProduct.name).offset((page - 1) * page_size).limit(page_size)
-    ).all()
+    if sort_by == "name":
+        order = AnalyticsProduct.name.desc() if sort_dir == "desc" else AnalyticsProduct.name.asc()
+        rows = db.execute(
+            stmt.order_by(order, AnalyticsProduct.id)
+            .offset((page - 1) * page_size).limit(page_size)
+        ).all()
+    else:
+        rows = db.execute(stmt.order_by(AnalyticsProduct.name, AnalyticsProduct.id)).all()
     products = [p for (p, _q) in rows]
     company_qty = {p.id: float(qty) if qty is not None else 0.0 for (p, qty) in rows}
     ids = [p.id for p in products]
@@ -248,9 +255,32 @@ def list_company_stock(
                 avg_sales=avg_sales,
                 warehouse_qty=wh,
                 coverage_months=coverage,
-                expiry_dates_count=len({r.get("expiry_date") for r in rows_for_product(p) if r.get("expiry_date")}),
+                expiry_dates_count=0,
             )
         )
+
+    values = {
+        "name": lambda row: row.name.casefold(),
+        "project": lambda row: row.project_name.casefold() if row.project_name else None,
+        "qty": lambda row: row.qty,
+        "customs": lambda row: row.customs_qty,
+        "orders": lambda row: row.order_qty + row.incoming_qty,
+        "avg_sales": lambda row: row.avg_sales,
+        "coverage": lambda row: row.coverage_months,
+    }
+    if sort_by != "name":
+        value = values[sort_by]
+        present = [row for row in items if value(row) is not None]
+        missing = [row for row in items if value(row) is None]
+        present.sort(key=lambda row: (value(row), row.name.casefold()), reverse=sort_dir == "desc")
+        start = (page - 1) * page_size
+        items = (present + missing)[start:start + page_size]
+    product_by_id = {str(p.id): p for p in products}
+    for row in items:
+        row.expiry_dates_count = len({
+            expiry.get("expiry_date") for expiry in rows_for_product(product_by_id[row.product_id])
+            if expiry.get("expiry_date")
+        })
 
     return CompanyStockPage(
         items=items,
