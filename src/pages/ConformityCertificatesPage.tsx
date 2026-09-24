@@ -27,6 +27,7 @@ export default function ConformityCertificatesPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<api.ConformityCertificate | null | undefined>(undefined);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [savedCertificate, setSavedCertificate] = useState<api.ConformityCertificate | null>(null);
   const sort = useTableSort<'certificateNumber' | 'products' | 'expiry'>('certificateNumber', 'asc');
 
   const load = useCallback(async () => {
@@ -47,7 +48,7 @@ export default function ConformityCertificatesPage() {
     if (key === 'expiry') return row.productLines.map((line) => line.expiry ?? '').filter(Boolean).sort()[0] ?? '';
     if (key === 'certificateNumber') return row.certificateNumber;
     return '';
-  });
+  }).sort((a, b) => Number(b.id === savedCertificate?.id) - Number(a.id === savedCertificate?.id));
 
   async function openDocument(row: api.ConformityCertificate) {
     const tab = window.open('', '_blank');
@@ -81,12 +82,13 @@ export default function ConformityCertificatesPage() {
 
   return <>
     <PageHead icon={<FileBadge size={24} />} title={t('conformity.title')} sub={t('conformity.sub')}
-      actions={canManage ? <Button onClick={() => setEditing(null)}><FilePlus2 data-icon="inline-start" />{t('conformity.create')}</Button> : undefined} />
+      actions={canManage ? <Button onClick={() => { setSavedCertificate(null); setEditing(null); }}><FilePlus2 data-icon="inline-start" />{t('conformity.create')}</Button> : undefined} />
     <div className="toolbar">
-      <div className="search"><Search size={18} /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('conformity.search')} /></div>
+      <div className="search"><Search size={18} /><Input value={query} onChange={(event) => { setQuery(event.target.value); setSavedCertificate(null); }} placeholder={t('conformity.search')} /></div>
       <label className="chk"><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} />{t('conformity.showArchived')}</label>
     </div>
     {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+    {savedCertificate && <Alert role="status"><AlertDescription>{t('conformity.saved')}: {savedCertificate.certificateNumber}</AlertDescription></Alert>}
     {loading && rows.length === 0 ? <Spinner label={t('common.loading')} /> : <div className="table-wrap">
       {filtered.length === 0 ? <EmptyState title={t('conformity.empty')} /> : <div className="table-scroll frozen"><table className="data">
         <thead><tr>
@@ -104,7 +106,7 @@ export default function ConformityCertificatesPage() {
           <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}>{line.expiry ? fmtDate(line.expiry) : '—'}</div>)}</td>
           <td><div className="flex gap-1">
             <Button variant="ghost" size="sm" title={row.documentName} disabled={busyId === row.id} onClick={() => void openDocument(row)}><FileText data-icon="inline-start" />PDF</Button>
-            {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => setEditing(row)}><Pencil /></Button>}
+            {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => { setSavedCertificate(null); setEditing(row); }}><Pencil /></Button>}
             {canManage && <Button variant="ghost" size="sm" aria-label={t(row.archived ? 'conformity.restore' : 'conformity.archive')} disabled={busyId === row.id} onClick={() => void toggleArchive(row)}>{row.archived ? <RotateCcw /> : <Archive />}</Button>}
             {canManage && <Button variant="ghost" size="sm" aria-label={t('conformity.delete')} disabled={busyId === row.id} onClick={() => void deleteRow(row)}><Trash2 /></Button>}
           </div></td>
@@ -112,11 +114,18 @@ export default function ConformityCertificatesPage() {
       </table></div>}
       <div className="table-foot">{fmtNum(filtered.length)} {t('common.results')}</div>
     </div>}
-    {editing !== undefined && <CertificateEditor key={editing?.id ?? 'new'} row={editing} onClose={() => setEditing(undefined)} onSaved={async () => { setEditing(undefined); await load(); }} />}
+    {editing !== undefined && <CertificateEditor key={editing?.id ?? 'new'} row={editing} onClose={() => setEditing(undefined)} onSaved={(saved) => {
+      setRows((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+      setQuery(saved.certificateNumber);
+      setShowArchived(false);
+      setSavedCertificate(saved);
+      setError('');
+      setEditing(undefined);
+    }} />}
   </>;
 }
 
-function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCertificate | null; onClose: () => void; onSaved: () => Promise<void> }) {
+function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCertificate | null; onClose: () => void; onSaved: (saved: api.ConformityCertificate) => void }) {
   const { t } = useLang();
   const [input, setInput] = useState<api.ConformityInput>(() => row ? {
     certificateNumber: row.certificateNumber,
@@ -151,7 +160,7 @@ function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCerti
     event.preventDefault();
     if (!row && !file) { setError(t('conformity.pdfRequired')); return; }
     setSaving(true); setError('');
-    try { await api.saveConformityCertificate(input, file, row?.id); await onSaved(); }
+    try { const saved = await api.saveConformityCertificate(input, file, row?.id); onSaved(saved); }
     catch (cause) { setError(cause instanceof Error ? cause.message : t('common.error')); }
     finally { setSaving(false); }
   }
