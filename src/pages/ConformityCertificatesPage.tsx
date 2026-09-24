@@ -94,23 +94,25 @@ export default function ConformityCertificatesPage() {
         <thead><tr>
           <SortTh label={t('conformity.number')} column="certificateNumber" sort={sort} />
           <SortTh label={t('conformity.products')} column="products" sort={sort} />
+          <th>{t('conformity.batches')}</th>
           <SortTh label={t('conformity.expiry')} column="expiry" sort={sort} />
           <th>{t('conformity.download')}</th>
         </tr></thead>
-        <tbody>{sorted.map((row) => <tr key={row.id}>
-          <td>
+        <tbody>{sorted.flatMap((row) => row.productLines.map((line, index) => <tr key={`${row.id}-${index}`}>
+          {index === 0 && <td rowSpan={row.productLines.length}>
             <div className="cell-strong">{row.certificateNumber}</div>
             {!row.archived ? null : <Chip tone="slate">{t('conformity.archived')}</Chip>}
-          </td>
-          <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}><strong>{line.name}</strong><div className="cell-sub">{line.batches.map((batch) => batch.batch || '—').join(', ')}</div></div>)}</td>
-          <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}>{line.expiry ? fmtDate(line.expiry) : '—'}</div>)}</td>
-          <td><div className="flex gap-1">
+          </td>}
+          <td><strong>{line.name}</strong></td>
+          <td>{line.batches.map((batch) => batch.batch || '—').join(', ')}</td>
+          <td>{line.expiry ? fmtDate(line.expiry) : '—'}</td>
+          {index === 0 && <td rowSpan={row.productLines.length}><div className="flex gap-1">
             <Button variant="ghost" size="sm" title={row.documentName} disabled={busyId === row.id} onClick={() => void openDocument(row)}><FileText data-icon="inline-start" />PDF</Button>
             {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => { setSavedCertificate(null); setEditing(row); }}><Pencil /></Button>}
             {canManage && <Button variant="ghost" size="sm" aria-label={t(row.archived ? 'conformity.restore' : 'conformity.archive')} disabled={busyId === row.id} onClick={() => void toggleArchive(row)}>{row.archived ? <RotateCcw /> : <Archive />}</Button>}
             {canManage && <Button variant="ghost" size="sm" aria-label={t('conformity.delete')} disabled={busyId === row.id} onClick={() => void deleteRow(row)}><Trash2 /></Button>}
-          </div></td>
-        </tr>)}</tbody>
+          </div></td>}
+        </tr>))}</tbody>
       </table></div>}
       <div className="table-foot">{fmtNum(filtered.length)} {t('common.results')}</div>
     </div>}
