@@ -37,11 +37,42 @@ app = FastAPI(title="ANDROMEDA Sales API", version="0.1.0")
 PUBLIC_PATHS = {
     "/",
     "/health",
+    "/debug/status",
     "/auth/login",
     "/docs",
     "/redoc",
     "/openapi.json",
 }
+
+
+@app.get("/debug/status")
+def debug_status() -> dict:
+    """Diagnostic: which container + which database is answering this request.
+    Refresh a few times — if `host`/`pid`/`db` change between requests, more
+    than one backend (or database) is serving this domain, which is why writes
+    and reads disagree. No secrets are returned (credentials are stripped)."""
+    import os
+    import socket
+    from urllib.parse import urlsplit
+
+    from sqlalchemy import func, select
+
+    from .db import SessionLocal
+    from .models import ConformityCertificate
+
+    parts = urlsplit(settings.database_url)
+    db_target = f"{parts.hostname or '?'}:{parts.port or '?'}{parts.path or ''}"
+    try:
+        with SessionLocal() as session:
+            count = session.scalar(select(func.count()).select_from(ConformityCertificate))
+    except Exception as exc:  # pragma: no cover - diagnostic only
+        count = f"error: {type(exc).__name__}"
+    return {
+        "host": socket.gethostname(),
+        "pid": os.getpid(),
+        "db": db_target,
+        "conformity_count": count,
+    }
 
 
 @app.on_event("startup")
