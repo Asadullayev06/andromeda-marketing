@@ -22,6 +22,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const isForm = init?.body instanceof FormData;
   const res = await fetch(`${BASE}${path}`, {
     ...init,
+    cache: 'no-store',
     credentials: 'include',
     headers: {
       ...(isForm ? {} : { 'Content-Type': 'application/json' }),
@@ -441,7 +442,7 @@ export async function deleteConformityCertificate(id: string): Promise<void> {
 }
 
 export async function conformityDocument(id: string): Promise<Blob> {
-  const response = await fetch(`${BASE}/conformity-certificates/${id}/document`, { credentials: 'include', headers: authHeaders() });
+  const response = await fetch(`${BASE}/conformity-certificates/${id}/document`, { cache: 'no-store', credentials: 'include', headers: authHeaders() });
   if (!response.ok) throw new ApiError(response.status, `Document request failed (${response.status}).`);
   return response.blob();
 }

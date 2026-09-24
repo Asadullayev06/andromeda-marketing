@@ -91,32 +91,38 @@ async def auth_gate(request: Request, call_next):
     enforce the read-only guest gate on write methods."""
     path = request.url.path
     if request.method == "OPTIONS" or path in PUBLIC_PATHS:
-        return await call_next(request)
+        response = await call_next(request)
+        if path == "/auth/login":
+            response.headers["Cache-Control"] = "no-store"
+        return response
 
     header = request.headers.get("authorization", "")
     token = header[7:].strip() if header.lower().startswith("bearer ") else request.cookies.get(settings.auth_cookie_name, "")
     if not token:
-        return JSONResponse({"detail": "Not authenticated."}, status_code=401)
+        return JSONResponse({"detail": "Not authenticated."}, status_code=401, headers={"Cache-Control": "no-store"})
     try:
         payload = decode_token(token)
         validate_session(payload)
     except InvalidToken as exc:
-        return JSONResponse({"detail": str(exc)}, status_code=401)
+        return JSONResponse({"detail": str(exc)}, status_code=401, headers={"Cache-Control": "no-store"})
 
     role = payload["role"]
     if role not in ROLES:
-        return JSONResponse({"detail": "Unknown role."}, status_code=403)
+        return JSONResponse({"detail": "Unknown role."}, status_code=403, headers={"Cache-Control": "no-store"})
     # Guests are read-only across the whole app.
     if is_write_method(request.method) and role == "guest":
         return JSONResponse(
             {"detail": "Read-only account: writes are not permitted."},
             status_code=403,
+            headers={"Cache-Control": "no-store"},
         )
 
     request.state.user_name = payload["sub"]
     request.state.user_role = role
     request.state.session_id = payload["jti"]
-    return await call_next(request)
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
 
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=auth_gate)
