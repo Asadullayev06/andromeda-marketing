@@ -26,6 +26,7 @@ class ProductBatch(BaseModel):
 
 class ProductLine(BaseModel):
     name: str = Field(min_length=1, max_length=500)
+    expiry: str | None = None  # ISO 'yyyy-mm-dd'; optional per product
     batches: list[ProductBatch] = Field(min_length=1)
 
     @model_validator(mode="before")
@@ -35,6 +36,7 @@ class ProductLine(BaseModel):
         if isinstance(value, dict) and "batches" not in value:
             return {
                 "name": value.get("name"),
+                "expiry": value.get("expiry"),
                 "batches": [{
                     "batch": value.get("batch"),
                     "quantity": value.get("quantity"),
@@ -49,6 +51,14 @@ class ProductLine(BaseModel):
         if not value:
             raise ValueError("Product name is required.")
         return value
+
+    @field_validator("expiry")
+    @classmethod
+    def clean_expiry(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
 
 
 class CertificateInput(BaseModel):

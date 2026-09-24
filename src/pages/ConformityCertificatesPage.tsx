@@ -11,7 +11,7 @@ import { useLang } from '../i18n';
 import { SortTh, sortRows, useTableSort } from '../tableSort';
 
 const emptyBatch = (): api.ConformityBatch => ({ batch: null, quantity: null });
-const emptyLine = (): api.ConformityProductLine => ({ name: '', batches: [emptyBatch()] });
+const emptyLine = (): api.ConformityProductLine => ({ name: '', expiry: null, batches: [emptyBatch()] });
 const emptyInput = (): api.ConformityInput => ({
   certificateNumber: '', notes: null, productLines: [emptyLine()],
 });
@@ -27,7 +27,7 @@ export default function ConformityCertificatesPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<api.ConformityCertificate | null | undefined>(undefined);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const sort = useTableSort<'products' | 'documentName' | 'createdAt' | 'status'>('createdAt', 'desc');
+  const sort = useTableSort<'certificateNumber' | 'products' | 'expiry'>('certificateNumber', 'asc');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,13 +39,14 @@ export default function ConformityCertificatesPage() {
 
   const needle = query.trim().toLocaleLowerCase();
   const filtered = rows.filter((row) => (showArchived || !row.archived) && (!needle || [
-    row.documentName,
+    row.certificateNumber, row.documentName,
     ...row.productLines.flatMap((line) => [line.name, ...line.batches.map((batch) => batch.batch ?? '')]),
   ].some((value) => value.toLocaleLowerCase().includes(needle))));
   const sorted = sortRows(filtered, sort.key, sort.direction, (row, key) => {
     if (key === 'products') return row.productLines.map((line) => line.name).join(', ');
-    if (key === 'status') return row.archived ? 'archived' : 'active';
-    return row[key as Exclude<typeof sort.key, 'products' | 'status'>];
+    if (key === 'expiry') return row.productLines.map((line) => line.expiry ?? '').filter(Boolean).sort()[0] ?? '';
+    if (key === 'certificateNumber') return row.certificateNumber;
+    return '';
   });
 
   async function openDocument(row: api.ConformityCertificate) {
@@ -81,16 +82,18 @@ export default function ConformityCertificatesPage() {
     {loading && rows.length === 0 ? <Spinner label={t('common.loading')} /> : <div className="table-wrap">
       {filtered.length === 0 ? <EmptyState title={t('conformity.empty')} /> : <div className="table-scroll frozen"><table className="data">
         <thead><tr>
+          <SortTh label={t('conformity.number')} column="certificateNumber" sort={sort} />
           <SortTh label={t('conformity.products')} column="products" sort={sort} />
-          <SortTh label={t('conformity.pdf')} column="documentName" sort={sort} />
-          <SortTh label={t('conformity.added')} column="createdAt" sort={sort} />
-          <SortTh label={t('conformity.status')} column="status" sort={sort} />
-          <th>{t('conformity.actions')}</th>
+          <SortTh label={t('conformity.expiry')} column="expiry" sort={sort} />
+          <th>{t('conformity.download')}</th>
         </tr></thead>
         <tbody>{sorted.map((row) => <tr key={row.id}>
+          <td>
+            <div className="cell-strong">{row.certificateNumber}</div>
+            {!row.archived ? null : <Chip tone="slate">{t('conformity.archived')}</Chip>}
+          </td>
           <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}><strong>{line.name}</strong><div className="cell-sub">{line.batches.map((batch) => batch.batch || '—').join(', ')}</div></div>)}</td>
-          <td>{row.documentName}</td><td>{fmtDate(row.createdAt)}</td>
-          <td><Chip tone={row.archived ? 'slate' : 'green'}>{t(row.archived ? 'conformity.archived' : 'conformity.active')}</Chip></td>
+          <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}>{line.expiry ? fmtDate(line.expiry) : '—'}</div>)}</td>
           <td><div className="flex gap-1">
             <Button variant="ghost" size="sm" title={row.documentName} disabled={busyId === row.id} onClick={() => void openDocument(row)}><FileText data-icon="inline-start" />PDF</Button>
             {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => setEditing(row)}><Pencil /></Button>}
@@ -117,6 +120,7 @@ function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCerti
   const [products, setProducts] = useState<string[]>([]);
   useEffect(() => { void api.productNames().then(setProducts).catch(() => undefined); }, []);
   const lineField = (index: number, value: string) => setInput((current) => ({ ...current, productLines: current.productLines.map((line, i) => i === index ? { ...line, name: value } : line) }));
+  const lineExpiry = (index: number, value: string) => setInput((current) => ({ ...current, productLines: current.productLines.map((line, i) => i === index ? { ...line, expiry: value || null } : line) }));
   const batchField = (productIndex: number, batchIndex: number, key: keyof api.ConformityBatch, value: string) => setInput((current) => ({
     ...current,
     productLines: current.productLines.map((line, i) => i === productIndex ? {
@@ -156,6 +160,7 @@ function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCerti
           {input.productLines.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: current.productLines.filter((_, i) => i !== index) }))}>{t('conformity.removeProduct')}</Button>}
         </div>
         <label>{t('conformity.productName')}<Input required list="conformity-product-names" placeholder={t('conformity.selectProduct')} value={line.name} onChange={(e) => lineField(index, e.target.value)} /></label>
+        <label>{t('conformity.expiry')}<Input type="date" value={line.expiry ?? ''} onChange={(e) => lineExpiry(index, e.target.value)} /></label>
         <div className="conformity-batches-head"><strong>{t('conformity.batches')}</strong><Button type="button" variant="outline" size="sm" onClick={() => addBatch(index)}>{t('conformity.addBatch')}</Button></div>
         {line.batches.map((batch, batchIndex) => <div className="conformity-batch" key={batchIndex}>
           <label>{t('conformity.batch')}<Input value={batch.batch ?? ''} onChange={(e) => batchField(index, batchIndex, 'batch', e.target.value)} /></label>

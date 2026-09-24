@@ -374,7 +374,7 @@ export async function certificateDocumentUrl(certificateId: string): Promise<str
 }
 
 export interface ConformityBatch { batch: string | null; quantity: string | null; }
-export interface ConformityProductLine { name: string; batches: ConformityBatch[]; }
+export interface ConformityProductLine { name: string; expiry: string | null; batches: ConformityBatch[]; }
 export interface ConformityCertificate {
   id: string; certificateNumber: string; notes: string | null;
   productLines: ConformityProductLine[]; documentName: string; documentSizeBytes: number;
@@ -387,6 +387,7 @@ function conformityRow(row: any): ConformityCertificate {
     id: row.id, certificateNumber: row.certificate_number ?? '', notes: row.notes,
     productLines: row.product_lines.map((line: any) => ({
       name: line.name,
+      expiry: line.expiry ?? null,
       batches: (line.batches ?? [line]).map((batch: any) => ({
         batch: batch.batch, quantity: batch.quantity,
       })),
@@ -421,6 +422,7 @@ export async function saveConformityCertificate(input: ConformityInput, document
     notes: input.notes,
     product_lines: input.productLines.map((line) => ({
       name: line.name,
+      expiry: line.expiry,
       batches: line.batches.map((batch) => ({
         batch: batch.batch, quantity: batch.quantity,
       })),
