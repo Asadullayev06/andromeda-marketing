@@ -21,6 +21,10 @@ logistics, or registration workflows.
 | `/catalog` | Product catalog | `analytics_products` |
 | `/certificates` | Read-only certificate library | `certificates`, `certificate_products` |
 | `/conformity-certificates` | Create, upload, edit, archive, and view official conformity certificates | `marketing_conformity_certificates` |
+
+Conformity certificate records contain an official PDF, notes, and one or more
+products. Each product can contain multiple batch or series entries with their
+quantities. Existing single-batch records are read in the same editor.
 | `/sales` | Sales analytics | `analytics_sales`, `analytics_fact_sales` |
 | `/orders` | Read-only purchase orders and documents | `analytics_orders` |
 | `/operations` | Alerts, purchase planning, quality and audit | shared read models + marketing-owned files |

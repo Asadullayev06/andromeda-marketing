@@ -373,12 +373,10 @@ export async function certificateDocumentUrl(certificateId: string): Promise<str
   return result.url;
 }
 
-export interface ConformityProductLine {
-  name: string; batch: string | null; expiryDate: string | null; quantity: string | null; hsCode: string | null;
-}
+export interface ConformityBatch { batch: string | null; quantity: string | null; }
+export interface ConformityProductLine { name: string; batches: ConformityBatch[]; }
 export interface ConformityCertificate {
-  id: string; certificateNumber: string; registrationDate: string; validUntil: string;
-  applicant: string; manufacturer: string; certifyingBody: string | null; notes: string | null;
+  id: string; notes: string | null;
   productLines: ConformityProductLine[]; documentName: string; documentSizeBytes: number;
   archived: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string;
 }
@@ -386,13 +384,12 @@ export type ConformityInput = Omit<ConformityCertificate, 'id' | 'documentName' 
 
 function conformityRow(row: any): ConformityCertificate {
   return {
-    id: row.id, certificateNumber: row.certificate_number,
-    registrationDate: row.registration_date, validUntil: row.valid_until,
-    applicant: row.applicant, manufacturer: row.manufacturer,
-    certifyingBody: row.certifying_body, notes: row.notes,
+    id: row.id, notes: row.notes,
     productLines: row.product_lines.map((line: any) => ({
-      name: line.name, batch: line.batch, expiryDate: line.expiry_date,
-      quantity: line.quantity, hsCode: line.hs_code,
+      name: line.name,
+      batches: (line.batches ?? [line]).map((batch: any) => ({
+        batch: batch.batch, quantity: batch.quantity,
+      })),
     })),
     documentName: row.document_name, documentSizeBytes: row.document_size_bytes,
     archived: row.archived, createdBy: row.created_by, updatedBy: row.updated_by,
@@ -407,12 +404,12 @@ export async function listConformityCertificates(): Promise<ConformityCertificat
 export async function saveConformityCertificate(input: ConformityInput, document?: File, id?: string): Promise<ConformityCertificate> {
   const form = new FormData();
   form.append('payload', JSON.stringify({
-    certificate_number: input.certificateNumber, registration_date: input.registrationDate,
-    valid_until: input.validUntil, applicant: input.applicant, manufacturer: input.manufacturer,
-    certifying_body: input.certifyingBody, notes: input.notes,
+    notes: input.notes,
     product_lines: input.productLines.map((line) => ({
-      name: line.name, batch: line.batch, expiry_date: line.expiryDate,
-      quantity: line.quantity, hs_code: line.hsCode,
+      name: line.name,
+      batches: line.batches.map((batch) => ({
+        batch: batch.batch, quantity: batch.quantity,
+      })),
     })),
   }));
   if (document) form.append('document', document);

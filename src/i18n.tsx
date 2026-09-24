@@ -204,7 +204,7 @@ const en: Dict = {
   'conformity.archived': 'Archived',
   'conformity.archive': 'Archive',
   'conformity.restore': 'Restore',
-  'conformity.formHint': 'Enter the official details and attach the original PDF.',
+  'conformity.formHint': 'Add products and their batches or series, then attach the official PDF.',
   'conformity.addProduct': 'Add product',
   'conformity.productName': 'Product name',
   'conformity.batch': 'Batch / series',
@@ -216,6 +216,13 @@ const en: Dict = {
   'conformity.pdf': 'Official PDF',
   'conformity.pdfRequired': 'Attach the official PDF.',
   'conformity.saving': 'Saving…',
+  'conformity.product': 'Product',
+  'conformity.removeProduct': 'Remove product',
+  'conformity.batches': 'Batches / series',
+  'conformity.addBatch': 'Add batch / series',
+  'conformity.removeBatch': 'Remove batch',
+  'conformity.added': 'Added',
+  'conformity.active': 'Active',
 };
 
 const ru: Dict = {
@@ -414,7 +421,7 @@ const ru: Dict = {
   'conformity.archived': 'В архиве',
   'conformity.archive': 'В архив',
   'conformity.restore': 'Восстановить',
-  'conformity.formHint': 'Введите официальные данные и прикрепите оригинал PDF.',
+  'conformity.formHint': 'Добавьте товары и их партии или серии, затем прикрепите официальный PDF.',
   'conformity.addProduct': 'Добавить товар',
   'conformity.productName': 'Наименование товара',
   'conformity.batch': 'Партия / серия',
@@ -426,6 +433,13 @@ const ru: Dict = {
   'conformity.pdf': 'Официальный PDF',
   'conformity.pdfRequired': 'Прикрепите официальный PDF.',
   'conformity.saving': 'Сохранение…',
+  'conformity.product': 'Товар',
+  'conformity.removeProduct': 'Удалить товар',
+  'conformity.batches': 'Партии / серии',
+  'conformity.addBatch': 'Добавить партию / серию',
+  'conformity.removeBatch': 'Удалить партию',
+  'conformity.added': 'Добавлено',
+  'conformity.active': 'Активен',
 };
 
 const uz: Dict = {
@@ -624,7 +638,7 @@ const uz: Dict = {
   'conformity.archived': 'Arxivda',
   'conformity.archive': 'Arxivlash',
   'conformity.restore': 'Qayta tiklash',
-  'conformity.formHint': 'Rasmiy ma’lumotlarni kiriting va asl PDF faylni biriktiring.',
+  'conformity.formHint': 'Mahsulotlar va ularning partiyalari yoki seriyalarini qo‘shing, so‘ng rasmiy PDF faylni biriktiring.',
   'conformity.addProduct': 'Mahsulot qo‘shish',
   'conformity.productName': 'Mahsulot nomi',
   'conformity.batch': 'Partiya / seriya',
@@ -636,6 +650,13 @@ const uz: Dict = {
   'conformity.pdf': 'Rasmiy PDF',
   'conformity.pdfRequired': 'Rasmiy PDF faylni biriktiring.',
   'conformity.saving': 'Saqlanmoqda…',
+  'conformity.product': 'Mahsulot',
+  'conformity.removeProduct': 'Mahsulotni olib tashlash',
+  'conformity.batches': 'Partiyalar / seriyalar',
+  'conformity.addBatch': 'Partiya / seriya qo‘shish',
+  'conformity.removeBatch': 'Partiyani olib tashlash',
+  'conformity.added': 'Qo‘shilgan',
+  'conformity.active': 'Faol',
 };
 
 const DICTS: Record<Lang, Dict> = { en, ru, uz };

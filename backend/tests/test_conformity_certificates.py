@@ -11,20 +11,30 @@ from app.api.conformity_certificates import CertificateInput, _read_pdf
 
 
 class ConformityCertificateTests(unittest.TestCase):
-    def test_certificate_requires_a_valid_date_range_and_product(self) -> None:
+    def test_certificate_accepts_multiple_batches_and_requires_product(self) -> None:
         valid = {
-            "certificate_number": "UZ.SMT-01-0105-186819",
-            "registration_date": "2026-04-01",
-            "valid_until": "2028-12-16",
-            "applicant": "SYNERGY PHARMCO",
-            "manufacturer": "UNIMED",
-            "product_lines": [{"name": "Cholready", "batch": "250100", "quantity": "24900 packages"}],
+            "product_lines": [{"name": "Cholready", "batches": [
+                {"batch": "250100", "quantity": "24900 packages"},
+                {"batch": "250700", "quantity": "24850 packages"},
+            ]}],
         }
-        self.assertEqual(CertificateInput.model_validate(valid).product_lines[0].name, "Cholready")
-        with self.assertRaises(ValidationError):
-            CertificateInput.model_validate({**valid, "valid_until": "2026-03-31"})
+        product = CertificateInput.model_validate(valid).product_lines[0]
+        self.assertEqual(product.name, "Cholready")
+        self.assertEqual([batch.batch for batch in product.batches], ["250100", "250700"])
         with self.assertRaises(ValidationError):
             CertificateInput.model_validate({**valid, "product_lines": [{"name": "  "}]})
+        with self.assertRaises(ValidationError):
+            CertificateInput.model_validate({**valid, "product_lines": [{"name": "Cholready", "batches": []}]})
+
+    def test_legacy_product_line_reads_as_one_batch(self) -> None:
+        from app.api.conformity_certificates import ProductLine
+
+        product = ProductLine.model_validate({
+            "name": "Cholready", "batch": "250100", "expiry_date": "2028-12-16",
+            "quantity": "24900 packages", "hs_code": "3004900002",
+        })
+        self.assertEqual(product.batches[0].batch, "250100")
+        self.assertEqual(product.batches[0].quantity, "24900 packages")
 
     def test_upload_rejects_non_pdf_content(self) -> None:
         file = UploadFile(file=BytesIO(b"not a PDF"), filename="certificate.pdf")

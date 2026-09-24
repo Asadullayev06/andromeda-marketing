@@ -10,19 +10,11 @@ import { Chip, EmptyState, fmtDate, fmtNum, PageHead, Spinner } from '../compone
 import { useLang } from '../i18n';
 import { SortTh, sortRows, useTableSort } from '../tableSort';
 
-const emptyLine = (): api.ConformityProductLine => ({ name: '', batch: null, expiryDate: null, quantity: null, hsCode: null });
+const emptyBatch = (): api.ConformityBatch => ({ batch: null, quantity: null });
+const emptyLine = (): api.ConformityProductLine => ({ name: '', batches: [emptyBatch()] });
 const emptyInput = (): api.ConformityInput => ({
-  certificateNumber: '', registrationDate: '', validUntil: '', applicant: '', manufacturer: '',
-  certifyingBody: null, notes: null, productLines: [emptyLine()],
+  notes: null, productLines: [emptyLine()],
 });
-
-function statusOf(row: api.ConformityCertificate): 'archived' | 'expired' | 'expiring' | 'valid' {
-  if (row.archived) return 'archived';
-  const days = (new Date(`${row.validUntil}T23:59:59`).getTime() - Date.now()) / 86_400_000;
-  if (days < 0) return 'expired';
-  if (days <= 180) return 'expiring';
-  return 'valid';
-}
 
 export default function ConformityCertificatesPage() {
   const { t } = useLang();
@@ -35,7 +27,7 @@ export default function ConformityCertificatesPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<api.ConformityCertificate | null | undefined>(undefined);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const sort = useTableSort<'certificateNumber' | 'registrationDate' | 'validUntil' | 'applicant' | 'manufacturer' | 'products' | 'status'>('validUntil');
+  const sort = useTableSort<'products' | 'documentName' | 'createdAt' | 'status'>('createdAt', 'desc');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -47,12 +39,12 @@ export default function ConformityCertificatesPage() {
 
   const needle = query.trim().toLocaleLowerCase();
   const filtered = rows.filter((row) => (showArchived || !row.archived) && (!needle || [
-    row.certificateNumber, row.applicant, row.manufacturer,
-    ...row.productLines.map((line) => line.name),
+    row.documentName,
+    ...row.productLines.flatMap((line) => [line.name, ...line.batches.map((batch) => batch.batch ?? '')]),
   ].some((value) => value.toLocaleLowerCase().includes(needle))));
   const sorted = sortRows(filtered, sort.key, sort.direction, (row, key) => {
     if (key === 'products') return row.productLines.map((line) => line.name).join(', ');
-    if (key === 'status') return statusOf(row);
+    if (key === 'status') return row.archived ? 'archived' : 'active';
     return row[key as Exclude<typeof sort.key, 'products' | 'status'>];
   });
 
@@ -89,21 +81,16 @@ export default function ConformityCertificatesPage() {
     {loading && rows.length === 0 ? <Spinner label={t('common.loading')} /> : <div className="table-wrap">
       {filtered.length === 0 ? <EmptyState title={t('conformity.empty')} /> : <div className="table-scroll frozen"><table className="data">
         <thead><tr>
-          <SortTh label={t('conformity.number')} column="certificateNumber" sort={sort} />
-          <SortTh label={t('conformity.registered')} column="registrationDate" sort={sort} />
-          <SortTh label={t('conformity.validUntil')} column="validUntil" sort={sort} />
-          <SortTh label={t('conformity.applicant')} column="applicant" sort={sort} />
-          <SortTh label={t('conformity.manufacturer')} column="manufacturer" sort={sort} />
           <SortTh label={t('conformity.products')} column="products" sort={sort} />
+          <SortTh label={t('conformity.pdf')} column="documentName" sort={sort} />
+          <SortTh label={t('conformity.added')} column="createdAt" sort={sort} />
           <SortTh label={t('conformity.status')} column="status" sort={sort} />
           <th>{t('conformity.actions')}</th>
         </tr></thead>
         <tbody>{sorted.map((row) => <tr key={row.id}>
-          <td className="cell-strong">{row.certificateNumber}</td>
-          <td>{fmtDate(row.registrationDate)}</td><td>{fmtDate(row.validUntil)}</td>
-          <td>{row.applicant}</td><td>{row.manufacturer}</td>
-          <td>{row.productLines.map((line) => line.name).join(', ')}</td>
-          <td><Chip tone={statusOf(row) === 'valid' ? 'green' : statusOf(row) === 'expiring' ? 'amber' : statusOf(row) === 'expired' ? 'red' : 'slate'}>{t(`conformity.${statusOf(row)}`)}</Chip></td>
+          <td>{row.productLines.map((line, index) => <div key={`${line.name}-${index}`}><strong>{line.name}</strong><div className="cell-sub">{line.batches.map((batch) => batch.batch || '—').join(', ')}</div></div>)}</td>
+          <td>{row.documentName}</td><td>{fmtDate(row.createdAt)}</td>
+          <td><Chip tone={row.archived ? 'slate' : 'green'}>{t(row.archived ? 'conformity.archived' : 'conformity.active')}</Chip></td>
           <td><div className="flex gap-1">
             <Button variant="ghost" size="sm" title={row.documentName} disabled={busyId === row.id} onClick={() => void openDocument(row)}><FileText data-icon="inline-start" />PDF</Button>
             {canManage && <Button variant="ghost" size="sm" aria-label={t('action.edit')} onClick={() => setEditing(row)}><Pencil /></Button>}
@@ -120,16 +107,29 @@ export default function ConformityCertificatesPage() {
 function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCertificate | null; onClose: () => void; onSaved: () => Promise<void> }) {
   const { t } = useLang();
   const [input, setInput] = useState<api.ConformityInput>(() => row ? {
-    certificateNumber: row.certificateNumber, registrationDate: row.registrationDate,
-    validUntil: row.validUntil, applicant: row.applicant, manufacturer: row.manufacturer,
-    certifyingBody: row.certifyingBody, notes: row.notes,
-    productLines: row.productLines.map((line) => ({ ...line })),
+    notes: row.notes,
+    productLines: row.productLines.map((line) => ({ ...line, batches: line.batches.map((batch) => ({ ...batch })) })),
   } : emptyInput());
   const [file, setFile] = useState<File | undefined>();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const field = (key: keyof Omit<api.ConformityInput, 'productLines'>, value: string) => setInput((current) => ({ ...current, [key]: value }));
-  const lineField = (index: number, key: keyof api.ConformityProductLine, value: string) => setInput((current) => ({ ...current, productLines: current.productLines.map((line, i) => i === index ? { ...line, [key]: value || null } : line) }));
+  const lineField = (index: number, value: string) => setInput((current) => ({ ...current, productLines: current.productLines.map((line, i) => i === index ? { ...line, name: value } : line) }));
+  const batchField = (productIndex: number, batchIndex: number, key: keyof api.ConformityBatch, value: string) => setInput((current) => ({
+    ...current,
+    productLines: current.productLines.map((line, i) => i === productIndex ? {
+      ...line, batches: line.batches.map((batch, j) => j === batchIndex ? { ...batch, [key]: value || null } : batch),
+    } : line),
+  }));
+  const addBatch = (productIndex: number) => setInput((current) => ({
+    ...current,
+    productLines: current.productLines.map((line, i) => i === productIndex ? { ...line, batches: [...line.batches, emptyBatch()] } : line),
+  }));
+  const removeBatch = (productIndex: number, batchIndex: number) => setInput((current) => ({
+    ...current,
+    productLines: current.productLines.map((line, i) => i === productIndex ? {
+      ...line, batches: line.batches.filter((_, j) => j !== batchIndex),
+    } : line),
+  }));
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -144,24 +144,21 @@ function CertificateEditor({ row, onClose, onSaved }: { row: api.ConformityCerti
     <DialogHeader><DialogTitle>{t(row ? 'conformity.edit' : 'conformity.create')}</DialogTitle><DialogDescription>{t('conformity.formHint')}</DialogDescription></DialogHeader>
     <form onSubmit={(event) => void save(event)} className="conformity-form">
       {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-      <div className="conformity-fields">
-        <label>{t('conformity.number')}<Input required value={input.certificateNumber} onChange={(e) => field('certificateNumber', e.target.value)} /></label>
-        <label>{t('conformity.registered')}<Input required type="date" value={input.registrationDate} onChange={(e) => field('registrationDate', e.target.value)} /></label>
-        <label>{t('conformity.validUntil')}<Input required type="date" min={input.registrationDate} value={input.validUntil} onChange={(e) => field('validUntil', e.target.value)} /></label>
-        <label>{t('conformity.applicant')}<Input required value={input.applicant} onChange={(e) => field('applicant', e.target.value)} /></label>
-        <label>{t('conformity.manufacturer')}<Input required value={input.manufacturer} onChange={(e) => field('manufacturer', e.target.value)} /></label>
-        <label>{t('conformity.body')}<Input value={input.certifyingBody ?? ''} onChange={(e) => field('certifyingBody', e.target.value)} /></label>
-      </div>
       <div className="conformity-lines-head"><strong>{t('conformity.products')}</strong><Button type="button" variant="outline" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: [...current.productLines, emptyLine()] }))}>{t('conformity.addProduct')}</Button></div>
-      {input.productLines.map((line, index) => <div className="conformity-line" key={index}>
-        <label>{t('conformity.productName')}<Input required value={line.name} onChange={(e) => lineField(index, 'name', e.target.value)} /></label>
-        <label>{t('conformity.batch')}<Input value={line.batch ?? ''} onChange={(e) => lineField(index, 'batch', e.target.value)} /></label>
-        <label>{t('conformity.expiry')}<Input type="date" value={line.expiryDate ?? ''} onChange={(e) => lineField(index, 'expiryDate', e.target.value)} /></label>
-        <label>{t('conformity.quantity')}<Input value={line.quantity ?? ''} onChange={(e) => lineField(index, 'quantity', e.target.value)} /></label>
-        <label>{t('conformity.hsCode')}<Input value={line.hsCode ?? ''} onChange={(e) => lineField(index, 'hsCode', e.target.value)} /></label>
-        {input.productLines.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: current.productLines.filter((_, i) => i !== index) }))}>{t('conformity.remove')}</Button>}
+      {input.productLines.map((line, index) => <div className="conformity-product" key={index}>
+        <div className="conformity-product-head">
+          <strong>{t('conformity.product')} {index + 1}</strong>
+          {input.productLines.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setInput((current) => ({ ...current, productLines: current.productLines.filter((_, i) => i !== index) }))}>{t('conformity.removeProduct')}</Button>}
+        </div>
+        <label>{t('conformity.productName')}<Input required value={line.name} onChange={(e) => lineField(index, e.target.value)} /></label>
+        <div className="conformity-batches-head"><strong>{t('conformity.batches')}</strong><Button type="button" variant="outline" size="sm" onClick={() => addBatch(index)}>{t('conformity.addBatch')}</Button></div>
+        {line.batches.map((batch, batchIndex) => <div className="conformity-batch" key={batchIndex}>
+          <label>{t('conformity.batch')}<Input value={batch.batch ?? ''} onChange={(e) => batchField(index, batchIndex, 'batch', e.target.value)} /></label>
+          <label>{t('conformity.quantity')}<Input value={batch.quantity ?? ''} onChange={(e) => batchField(index, batchIndex, 'quantity', e.target.value)} /></label>
+          {line.batches.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => removeBatch(index, batchIndex)}>{t('conformity.removeBatch')}</Button>}
+        </div>)}
       </div>)}
-      <label>{t('conformity.notes')}<textarea className="field conformity-notes" value={input.notes ?? ''} onChange={(e) => field('notes', e.target.value)} /></label>
+      <label>{t('conformity.notes')}<textarea className="field conformity-notes" value={input.notes ?? ''} onChange={(e) => setInput((current) => ({ ...current, notes: e.target.value }))} /></label>
       <label>{t('conformity.pdf')}<Input required={!row} type="file" accept="application/pdf,.pdf" onChange={(e) => setFile(e.target.files?.[0])} />{row && <span className="cell-sub">{row.documentName} · {fmtNum(row.documentSizeBytes)} bytes</span>}</label>
       <div className="conformity-form-actions"><Button type="button" variant="outline" onClick={onClose}>{t('action.cancel')}</Button><Button type="submit" disabled={saving}>{saving ? t('conformity.saving') : t('action.save')}</Button></div>
     </form>

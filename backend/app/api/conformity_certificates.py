@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
@@ -19,12 +19,28 @@ router = APIRouter(prefix="/conformity-certificates", tags=["conformity-certific
 MAX_PDF_BYTES = 10 * 1024 * 1024
 
 
+class ProductBatch(BaseModel):
+    batch: str | None = None
+    quantity: str | None = None
+
+
 class ProductLine(BaseModel):
     name: str = Field(min_length=1, max_length=500)
-    batch: str | None = None
-    expiry_date: date | None = None
-    quantity: str | None = None
-    hs_code: str | None = None
+    batches: list[ProductBatch] = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_legacy_line(cls, value):
+        """Read records saved before products could contain multiple batches."""
+        if isinstance(value, dict) and "batches" not in value:
+            return {
+                "name": value.get("name"),
+                "batches": [{
+                    "batch": value.get("batch"),
+                    "quantity": value.get("quantity"),
+                }],
+            }
+        return value
 
     @field_validator("name")
     @classmethod
@@ -36,28 +52,8 @@ class ProductLine(BaseModel):
 
 
 class CertificateInput(BaseModel):
-    certificate_number: str = Field(min_length=1, max_length=200)
-    registration_date: date
-    valid_until: date
-    applicant: str = Field(min_length=1, max_length=500)
-    manufacturer: str = Field(min_length=1, max_length=500)
-    certifying_body: str | None = None
     notes: str | None = None
     product_lines: list[ProductLine] = Field(min_length=1)
-
-    @field_validator("certificate_number", "applicant", "manufacturer")
-    @classmethod
-    def clean_required(cls, value: str) -> str:
-        value = value.strip()
-        if not value:
-            raise ValueError("This field is required.")
-        return value
-
-    @model_validator(mode="after")
-    def check_dates(self):
-        if self.valid_until < self.registration_date:
-            raise ValueError("Valid-until date must be on or after registration date.")
-        return self
 
 
 class CertificateRead(CertificateInput):
@@ -77,10 +73,7 @@ class ArchiveInput(BaseModel):
 
 def _read(row: ConformityCertificate) -> CertificateRead:
     return CertificateRead(
-        id=row.id, certificate_number=row.certificate_number,
-        registration_date=row.registration_date, valid_until=row.valid_until,
-        applicant=row.applicant, manufacturer=row.manufacturer,
-        certifying_body=row.certifying_body, notes=row.notes,
+        id=row.id, notes=row.notes,
         product_lines=[ProductLine.model_validate(line) for line in row.product_lines],
         document_name=row.document_name, document_size_bytes=row.document_size_bytes,
         archived=row.archived, created_by=row.created_by, updated_by=row.updated_by,
@@ -114,19 +107,13 @@ async def _read_pdf(file: UploadFile) -> tuple[str, bytes]:
 
 
 def _assign(row: ConformityCertificate, data: CertificateInput) -> None:
-    row.certificate_number = data.certificate_number
-    row.registration_date = data.registration_date
-    row.valid_until = data.valid_until
-    row.applicant = data.applicant
-    row.manufacturer = data.manufacturer
-    row.certifying_body = data.certifying_body.strip() or None if data.certifying_body else None
     row.notes = data.notes.strip() or None if data.notes else None
     row.product_lines = [line.model_dump(mode="json") for line in data.product_lines]
 
 
 @router.get("", response_model=list[CertificateRead])
 def list_certificates(db: Session = Depends(get_db)) -> list[CertificateRead]:
-    rows = db.scalars(select(ConformityCertificate).order_by(ConformityCertificate.valid_until, ConformityCertificate.certificate_number)).all()
+    rows = db.scalars(select(ConformityCertificate).order_by(ConformityCertificate.created_at.desc())).all()
     return [_read(row) for row in rows]
 
 
@@ -137,10 +124,12 @@ async def create_certificate(
     actor = _require_editor(request)
     data = _parse_payload(payload)
     name, content = await _read_pdf(document)
-    existing = db.scalar(select(ConformityCertificate.id).where(ConformityCertificate.certificate_number == data.certificate_number))
-    if existing:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Certificate number already exists.")
     row = ConformityCertificate(
+        # Keep legacy non-null columns populated until the marketing-owned table
+        # can be migrated. These values are internal and never shown as facts.
+        certificate_number=f"internal-{uuid4()}",
+        registration_date=date.today(), valid_until=date.today(),
+        applicant="", manufacturer="",
         document_name=name, document_mime_type="application/pdf",
         document_size_bytes=len(content), document_blob=content,
         created_by=actor, updated_by=actor,
@@ -151,9 +140,9 @@ async def create_certificate(
         db.commit()
     except IntegrityError as exc:
         db.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT, "Certificate number already exists.") from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, "Could not save certificate.") from exc
     db.refresh(row)
-    record_event(actor=actor, action="conformity_certificate_created", target=str(row.id), details={"number": row.certificate_number})
+    record_event(actor=actor, action="conformity_certificate_created", target=str(row.id), details={"document": row.document_name})
     return _read(row)
 
 
@@ -167,12 +156,6 @@ async def update_certificate(
     if row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Certificate not found.")
     data = _parse_payload(payload)
-    existing = db.scalar(select(ConformityCertificate.id).where(
-        ConformityCertificate.certificate_number == data.certificate_number,
-        ConformityCertificate.id != certificate_id,
-    ))
-    if existing:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Certificate number already exists.")
     _assign(row, data)
     if document is not None:
         name, content = await _read_pdf(document)
@@ -184,9 +167,9 @@ async def update_certificate(
         db.commit()
     except IntegrityError as exc:
         db.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT, "Certificate number already exists.") from exc
+        raise HTTPException(status.HTTP_409_CONFLICT, "Could not save certificate.") from exc
     db.refresh(row)
-    record_event(actor=actor, action="conformity_certificate_updated", target=str(row.id), details={"number": row.certificate_number})
+    record_event(actor=actor, action="conformity_certificate_updated", target=str(row.id), details={"document": row.document_name})
     return _read(row)
 
 
@@ -200,7 +183,7 @@ def archive_certificate(certificate_id: UUID, payload: ArchiveInput, request: Re
     row.updated_by = actor
     db.commit()
     db.refresh(row)
-    record_event(actor=actor, action="conformity_certificate_archived" if row.archived else "conformity_certificate_restored", target=str(row.id), details={"number": row.certificate_number})
+    record_event(actor=actor, action="conformity_certificate_archived" if row.archived else "conformity_certificate_restored", target=str(row.id), details={"document": row.document_name})
     return _read(row)
 
 
