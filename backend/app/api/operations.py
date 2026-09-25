@@ -12,9 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 from ..db import get_db
 from ..models import (
     AnalyticsFactSales,
-    AnalyticsOrders,
     AnalyticsProduct,
-    AnalyticsReceived,
     AnalyticsSales,
     AnalyticsStockCompany,
     Certificate,
@@ -25,6 +23,7 @@ from ..models import (
 )
 from ..services.audit import recent_events, record_event
 from ..services.expiry_store import import_workbook, indexes, normalize_product_name, rows_for_product, snapshot_info
+from ..services.order_balance import load_order_balances
 from .company_stock import CUSTOMS_REGIMES, INCOMING_REGIMES, _add_months, _month_first, _series_avg
 
 router = APIRouter(prefix="/operations", tags=["operations"])
@@ -202,8 +201,7 @@ def recommendations(
         bucket = incoming if regime in INCOMING_REGIMES else customs if regime in CUSTOMS_REGIMES else None
         if bucket is not None:
             bucket[name] = bucket.get(name, 0.0) + float(qty or 0)
-    orders = {pid: float(qty or 0) for pid, qty in db.execute(select(AnalyticsOrders.analytics_product_id, func.sum(AnalyticsOrders.qty)).where(AnalyticsOrders.month >= current).group_by(AnalyticsOrders.analytics_product_id)).all()}
-    received = {pid: float(qty or 0) for pid, qty in db.execute(select(AnalyticsReceived.analytics_product_id, func.sum(AnalyticsReceived.qty)).where(AnalyticsReceived.month >= current).group_by(AnalyticsReceived.analytics_product_id)).all()}
+    open_orders = load_order_balances(db, ids).by_product
     result: list[RecommendationRow] = []
     for product in products:
         a = avg_ot.get(product.id, 0.0)
@@ -214,7 +212,7 @@ def recommendations(
         current_stock = stock.get(product.id, 0.0)
         custom = customs.get(product.name.casefold(), 0.0)
         transit = incoming.get(product.name.casefold(), 0.0)
-        open_order = max(0.0, orders.get(product.id, 0.0) - received.get(product.id, 0.0))
+        open_order = float(open_orders.get(product.id, 0))
         recommended = max(0.0, round(avg * target_months - current_stock - custom - transit - open_order))
         result.append(RecommendationRow(product_id=str(product.id), product_name=product.name, project_name=product.project_name, manufacturer_label=product.manufacturer_label, avg_monthly_sales=avg, current_stock=current_stock, customs_stock=custom, incoming_stock=transit, open_orders=open_order, coverage_months=current_stock / avg, target_months=target_months, recommended_order=recommended))
     result.sort(key=lambda row: (-row.recommended_order, row.coverage_months or 0, row.product_name.casefold()))

@@ -13,6 +13,10 @@ import { SortTh, useTableSort } from '../tableSort';
 
 const PAGE_SIZE = 50;
 
+function orderStatus(row: api.OrderRow): 'orders.statusClosed' | 'orders.statusReceived' | 'orders.statusOpen' {
+  return row.isClosed ? 'orders.statusClosed' : row.openQty <= 0 ? 'orders.statusReceived' : 'orders.statusOpen';
+}
+
 export default function OrdersPage() {
   const { t } = useLang();
   const [query, setQuery] = useState('');
@@ -77,8 +81,8 @@ export default function OrdersPage() {
         total = result.total;
         current += 1;
       } while (rows.length < total);
-      downloadCsv('orders.csv', [t('orders.month'), t('common.product'), t('orders.externalId'), t('common.project'), t('common.manufacturer'), t('orders.quantity'), t('orders.document')],
-        rows.map((row) => [row.month.slice(0, 7), row.productName, row.externalId, row.projectName, row.manufacturerLabel, row.qty, row.fileName]));
+      downloadCsv('orders.csv', [t('orders.month'), t('common.product'), t('orders.externalId'), t('common.project'), t('common.manufacturer'), t('orders.quantity'), t('orders.openQty'), t('orders.status'), t('orders.document')],
+        rows.map((row) => [row.month.slice(0, 7), row.productName, row.externalId, row.projectName, row.manufacturerLabel, row.qty, row.openQty, t(orderStatus(row)), row.fileName]));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t('common.error'));
     } finally {
@@ -117,13 +121,15 @@ export default function OrdersPage() {
       <div className="table-scroll"><table className="data">
         <thead><tr>
           <SortTh label={t('orders.month')} column="month" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('common.product')} column="product" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('common.project')} column="project" sort={{ ...sort, toggle: changeSort }} />
-          <SortTh label={t('common.manufacturer')} column="manufacturer" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('orders.quantity')} column="qty" sort={{ ...sort, toggle: changeSort }} numeric /><SortTh label={t('orders.document')} column="document" sort={{ ...sort, toggle: changeSort }} />
+          <SortTh label={t('common.manufacturer')} column="manufacturer" sort={{ ...sort, toggle: changeSort }} /><SortTh label={t('orders.quantity')} column="qty" sort={{ ...sort, toggle: changeSort }} numeric /><th className="num">{t('orders.openQty')}</th><th>{t('orders.status')}</th><SortTh label={t('orders.document')} column="document" sort={{ ...sort, toggle: changeSort }} />
         </tr></thead>
         <tbody>{data.items.map((row) => <tr key={row.id}>
           <td>{fmtMonth(row.month)}</td>
           <td><Link className="cell-strong" to={`/products/${row.productId}`}>{row.productName}</Link>{row.externalId && <div className="cell-sub">{row.externalId}</div>}</td>
           <td>{row.projectName || '—'}</td><td>{row.manufacturerLabel || '—'}</td>
           <td className="num qty-strong">{fmtNum(row.qty, 2)}</td>
+          <td className="num">{fmtNum(row.openQty, 2)}</td>
+          <td>{t(orderStatus(row))}</td>
           <td>{row.fileName ? <Button variant="ghost" size="sm" onClick={() => void openDocument(row)} disabled={openingId === row.id} title={row.fileName}>
             <FileText data-icon="inline-start" />{row.fileName}
           </Button> : '—'}</td>

@@ -482,7 +482,7 @@ export async function topProducts(months = 6, limit = 20, filters: { manufacture
 export interface OrderRow {
   id: string; productId: string; productName: string; externalId: string | null;
   projectName: string | null; manufacturerLabel: string | null; month: string;
-  qty: number; fileName: string | null; sizeBytes: number | null;
+  qty: number; openQty: number; isClosed: boolean; fileName: string | null; sizeBytes: number | null;
   mimeType: string | null; uploadedAt: string | null;
 }
 export interface OrderPage extends Page<OrderRow> { totalQty: number; }
@@ -498,6 +498,7 @@ export async function listOrders(params: {
       id: x.id, productId: x.product_id, productName: x.product_name,
       externalId: x.external_id, projectName: x.project_name,
       manufacturerLabel: x.manufacturer_label, month: x.month, qty: x.qty,
+      openQty: x.open_qty, isClosed: x.is_closed,
       fileName: x.file_name, sizeBytes: x.size_bytes,
       mimeType: x.mime_type, uploadedAt: x.uploaded_at,
     })),

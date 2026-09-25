@@ -96,6 +96,7 @@ class AnalyticsOrders(_MonthlyFact, Base):
     analytics_product_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("analytics_products.id", ondelete="CASCADE")
     )
+    is_closed: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     manufacturer_label: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     file_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     storage_path: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

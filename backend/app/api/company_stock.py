@@ -3,7 +3,7 @@
 Each row carries, alongside the company balance:
   * customs stock (derived live from customs_warehouse_products in the
     IM-74 / TR-80 regimes, matched to the catalog product by name),
-  * open orders for the current+future months (shown as +qty),
+  * remaining open orders after later receipts (shown as plain qty),
   * average monthly sales (Excel AVERAGEIF over a trailing 3-month window,
     combining otgruzka and sell-through — identical to ANDROMEDA),
   * warehouse-based coverage (prognoz) = warehouse stock ÷ average sales.
@@ -28,15 +28,14 @@ from ..services.audit import record_event
 from ..services.expiry_store import rows_for_product, snapshot_info
 from ..models import (
     AnalyticsFactSales,
-    AnalyticsOrders,
     AnalyticsProduct,
-    AnalyticsReceived,
     AnalyticsSales,
     AnalyticsStockCompany,
     CustomsWarehouseProduct,
     Warehouse,
     WarehouseStock,
 )
+from ..services.order_balance import load_order_balances
 
 router = APIRouter(prefix="/company-stock", tags=["company-stock"])
 
@@ -44,7 +43,6 @@ router = APIRouter(prefix="/company-stock", tags=["company-stock"])
 # COVERAGE_WINDOW). Coverage above this many months is considered healthy.
 COVERAGE_WINDOW = 3
 COVERAGE_THRESHOLD = 4
-ORDER_CLOSE_THRESHOLD = 0.9
 # Regimes matched to catalog products by name (like ANDROMEDA analytics_full).
 CUSTOMS_REGIMES = ("IM-74", "TR-80")   # real customs stock
 INCOMING_REGIMES = ("INCOMING",)       # goods on the way → shown as orange +qty
@@ -67,7 +65,7 @@ class CompanyStockRow(BaseModel):
     catalog_category: Optional[str] = None
     qty: float                 # company stock (analytics_stock_company)
     customs_qty: float         # customs warehouse stock (IM-74 / TR-80)
-    order_qty: float           # open orders, current+future months (plain)
+    order_qty: float           # open orders after later receipts (plain)
     incoming_qty: float        # goods on the way (INCOMING regime) → orange +qty
     avg_sales: float
     warehouse_qty: float       # total across warehouses
@@ -169,7 +167,7 @@ def list_company_stock(
     warehouse_total: dict = {}
     avg_ot: dict = {}
     avg_fs: dict = {}
-    open_future: dict = {}
+    open_orders: dict = {}
 
     if ids:
         # Warehouse totals per product.
@@ -210,29 +208,7 @@ def list_company_stock(
         avg_ot = _series_avg(db, AnalyticsSales, ids, window_start, window_end)
         avg_fs = _series_avg(db, AnalyticsFactSales, ids, window_start, window_end)
 
-        # Open orders in current+future months (received < 90% of ordered) —
-        # the plain "Orders" number (ANDROMEDA openOrdersFuture).
-        order_rows = db.execute(
-            select(AnalyticsOrders.analytics_product_id, AnalyticsOrders.month, func.coalesce(func.sum(AnalyticsOrders.qty), 0))
-            .where(AnalyticsOrders.analytics_product_id.in_(ids), AnalyticsOrders.month >= current_first)
-            .group_by(AnalyticsOrders.analytics_product_id, AnalyticsOrders.month)
-        ).all()
-        recv_rows = db.execute(
-            select(AnalyticsReceived.analytics_product_id, AnalyticsReceived.month, func.coalesce(func.sum(AnalyticsReceived.qty), 0))
-            .where(AnalyticsReceived.analytics_product_id.in_(ids), AnalyticsReceived.month >= current_first)
-            .group_by(AnalyticsReceived.analytics_product_id, AnalyticsReceived.month)
-        ).all()
-        recv_map = {(pid, m): float(qty or 0) for pid, m, qty in recv_rows}
-        for pid, m, oq in order_rows:
-            ordered = float(oq or 0)
-            if ordered <= 0:
-                continue
-            received = recv_map.get((pid, m), 0.0)
-            if received >= ordered * ORDER_CLOSE_THRESHOLD:  # order closed
-                continue
-            open_qty = ordered - received
-            if open_qty > 0:
-                open_future[pid] = open_future.get(pid, 0.0) + open_qty
+        open_orders = load_order_balances(db, ids).by_product
 
     items: list[CompanyStockRow] = []
     for p in products:
@@ -250,7 +226,7 @@ def list_company_stock(
                 catalog_category=p.catalog_category,
                 qty=company_qty.get(p.id, 0.0),
                 customs_qty=customs_by_name.get(p.name.lower(), 0.0),
-                order_qty=open_future.get(p.id, 0.0),
+                order_qty=float(open_orders.get(p.id, 0)),
                 incoming_qty=incoming_by_name.get(p.name.lower(), 0.0),
                 avg_sales=avg_sales,
                 warehouse_qty=wh,

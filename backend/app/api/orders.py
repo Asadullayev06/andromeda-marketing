@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, selectinload
 from ..config import settings
 from ..db import get_db
 from ..models import AnalyticsOrders, AnalyticsProduct, Project
+from ..services.order_balance import load_order_balances
 from ..storage import r2
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -27,6 +28,8 @@ class OrderRow(BaseModel):
     manufacturer_label: str | None = None
     month: date
     qty: float
+    open_qty: float
+    is_closed: bool
     file_name: str | None = None
     size_bytes: int | None = None
     mime_type: str | None = None
@@ -113,6 +116,7 @@ def list_orders(
         .offset((page - 1) * page_size)
         .limit(page_size)
     ).all()
+    balances = load_order_balances(db, (order.analytics_product_id for order in orders)).by_order
     return OrderPage(
         items=[OrderRow(
             id=order.id,
@@ -123,6 +127,8 @@ def list_orders(
             manufacturer_label=order.manufacturer_label or order.product.manufacturer_label,
             month=order.month,
             qty=float(order.qty),
+            open_qty=float(balances.get((order.analytics_product_id, order.month), 0)),
+            is_closed=order.is_closed,
             file_name=order.file_name,
             size_bytes=order.size_bytes,
             mime_type=order.mime_type,
