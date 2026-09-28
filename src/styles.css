@@ -653,6 +653,23 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
   border-radius: 12px; background: var(--primary-soft); color: var(--text-soft); font-size: 13px;
 }
 .snapshot-banner.stale { border-color: #f3d49b; background: var(--amber-soft); }
+
+/* "New cleared goods since last visit" banner on the Cleared page. */
+.new-banner {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin: -4px 0 18px; padding: 12px 16px;
+  border: 1px solid var(--primary); border-radius: 12px;
+  background: var(--primary-soft, #e8f0ff); color: var(--primary-strong);
+  font-size: 14px; font-weight: 700;
+}
+.new-banner .new-banner-btn {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px; border: 1px solid var(--primary);
+  background: var(--primary); color: #fff; font: inherit; font-weight: 700;
+  font-size: 13px; cursor: pointer;
+}
+.new-banner .new-banner-btn:hover { background: var(--primary-strong); border-color: var(--primary-strong); }
+.row-new td { background: var(--primary-soft, #e8f0ff); }
 .click-row { cursor: pointer; }
 .click-row:hover td { background: #f5f8ff; }
 .field-label { display: inline-flex; align-items: center; gap: 10px; color: var(--text-soft); font-weight: 700; }
