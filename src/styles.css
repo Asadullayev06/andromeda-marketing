@@ -150,6 +150,31 @@ button { font-family: inherit; }
 .nav-item.active { background: var(--sidebar-active); color: #fff; box-shadow: 0 8px 18px rgba(47,107,255,.4); }
 .nav-item svg { flex-shrink: 0; }
 
+/* Collapsible nav group (Certificate library) */
+.nav-group-toggle {
+  width: calc(100% - 24px);
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+}
+.nav-group-toggle .nav-caret {
+  margin-left: auto;
+  transition: transform .18s ease;
+  opacity: .8;
+}
+.nav-group-toggle .nav-caret.open { transform: rotate(180deg); }
+/* Highlight the parent (subtly) when a child page is active, but keep the
+   full "active" pill for the selected sub-item only. */
+.nav-group-toggle.active-parent { color: #fff; background: var(--sidebar-2); }
+
+.nav-subitems { display: flex; flex-direction: column; margin: 2px 0 4px; }
+.nav-item.nav-subitem {
+  padding-left: 46px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .sidebar-spacer { flex: 1; }
 
 .sidebar-user {
