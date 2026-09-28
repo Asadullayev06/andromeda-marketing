@@ -669,7 +669,19 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
   font-size: 13px; cursor: pointer;
 }
 .new-banner .new-banner-btn:hover { background: var(--primary-strong); border-color: var(--primary-strong); }
+.new-banner .new-banner-btn:disabled { opacity: .6; cursor: default; }
 .row-new td { background: var(--primary-soft, #e8f0ff); }
+
+/* Admin controls on the Cleared page */
+.cleared-status { padding: 6px 10px; font-size: 13px; font-weight: 600; min-width: 150px; }
+.cleared-del-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--red);
+  cursor: pointer;
+}
+.cleared-del-btn:hover { background: var(--red-soft); border-color: var(--red); }
+.cleared-del-btn:disabled { opacity: .5; cursor: default; }
 .click-row { cursor: pointer; }
 .click-row:hover td { background: #f5f8ff; }
 .field-label { display: inline-flex; align-items: center; gap: 10px; color: var(--text-soft); font-weight: 700; }

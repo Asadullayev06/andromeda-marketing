@@ -6,11 +6,11 @@ columns exist on the invoice but are not surfaced by this Sales app.
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Date, ForeignKey, Numeric, Text
+from sqlalchemy import Date, DateTime, ForeignKey, Numeric, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship  # noqa: F401
 
@@ -99,3 +99,9 @@ class CustomsWarehouseClearance(UUIDPKMixin, TimestampMixin, Base):
     pallets: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 3), nullable=True)
     boxes: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 3), nullable=True)
     comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Admin-editable logistics status (NULL -> derived from regime) and
+    # "Qabul qilindi" acceptance tracking. Columns added by ANDROMEDA
+    # migration 0099; written here by the Sales admin actions.
+    warehouse_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

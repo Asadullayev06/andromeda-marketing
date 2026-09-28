@@ -10,12 +10,13 @@ from __future__ import annotations
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from datetime import datetime
+from datetime import datetime, timezone
+from uuid import UUID
 
 from ..config import settings
 from ..db import get_db
@@ -25,6 +26,7 @@ from ..models import (
     CustomsWarehouseProduct,
     CustomsWarehouseSeries,
 )
+from ..services.audit import record_event
 from ..storage import r2
 
 router = APIRouter(prefix="/customs", tags=["customs"])
@@ -116,6 +118,9 @@ class ClearedRow(BaseModel):
     boxes: Optional[float] = None
     comment: Optional[str] = None
     cleared_at: datetime
+    # 'customs' | 'transit' | 'company'; None falls back to the regime.
+    warehouse_status: Optional[str] = None
+    acknowledged: bool = False
 
 
 class ClearedList(BaseModel):
@@ -124,6 +129,7 @@ class ClearedList(BaseModel):
     total_qty: float
     total_pallets: float
     total_boxes: float
+    unacknowledged: int
 
 
 @router.get("/cleared", response_model=ClearedList)
@@ -157,6 +163,8 @@ def list_cleared(
             boxes=float(r.boxes) if r.boxes is not None else None,
             comment=r.comment,
             cleared_at=r.created_at,
+            warehouse_status=r.warehouse_status,
+            acknowledged=r.acknowledged_at is not None,
         )
         for r in rows
     ]
@@ -166,7 +174,80 @@ def list_cleared(
         total_qty=sum(i.qty for i in items),
         total_pallets=sum(i.pallets or 0 for i in items),
         total_boxes=sum(i.boxes or 0 for i in items),
+        unacknowledged=sum(1 for i in items if not i.acknowledged),
     )
+
+
+# ── Admin-only mutations on the cleared ledger ───────────────────────────────
+# These write to the shared customs_warehouse_clearances table (created by
+# ANDROMEDA). Restricted to admin/sysadmin and audited.
+CLEARED_STATUSES = {"customs", "transit", "company"}
+
+
+def _require_admin(request: Request) -> str:
+    if getattr(request.state, "user_role", None) not in ("admin", "sysadmin"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Administrator access required.")
+    return getattr(request.state, "user_name", "admin")
+
+
+class ClearedStatusInput(BaseModel):
+    status: str
+
+
+@router.patch("/cleared/{clearance_id}/status", response_model=ClearedRow)
+def set_cleared_status(clearance_id: UUID, payload: ClearedStatusInput, request: Request, db: Session = Depends(get_db)) -> ClearedRow:
+    actor = _require_admin(request)
+    if payload.status not in CLEARED_STATUSES:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid status.")
+    row = db.get(CustomsWarehouseClearance, clearance_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Clearance not found.")
+    row.warehouse_status = payload.status
+    db.commit()
+    db.refresh(row)
+    record_event(actor=actor, action="clearance_status_changed", target=str(row.id), details={"status": payload.status, "product": row.product_name})
+    return ClearedRow(
+        id=str(row.id), invoice_name=row.invoice_name, product_name=row.product_name,
+        series_batch=row.series_batch, regime=row.regime, qty=float(row.qty),
+        pallets=float(row.pallets) if row.pallets is not None else None,
+        boxes=float(row.boxes) if row.boxes is not None else None,
+        comment=row.comment, cleared_at=row.created_at,
+        warehouse_status=row.warehouse_status, acknowledged=row.acknowledged_at is not None,
+    )
+
+
+class AcknowledgeResult(BaseModel):
+    acknowledged: int
+
+
+@router.post("/cleared/acknowledge", response_model=AcknowledgeResult)
+def acknowledge_cleared(request: Request, db: Session = Depends(get_db)) -> AcknowledgeResult:
+    """Mark every not-yet-accepted clearance as received ("Qabul qilindi")."""
+    actor = _require_admin(request)
+    rows = db.scalars(
+        select(CustomsWarehouseClearance).where(CustomsWarehouseClearance.acknowledged_at.is_(None))
+    ).all()
+    now = datetime.now(timezone.utc)
+    for r in rows:
+        r.acknowledged_at = now
+        r.acknowledged_by = actor
+    db.commit()
+    if rows:
+        record_event(actor=actor, action="clearances_acknowledged", target="cleared", details={"count": len(rows)})
+    return AcknowledgeResult(acknowledged=len(rows))
+
+
+@router.delete("/cleared/{clearance_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_cleared(clearance_id: UUID, request: Request, db: Session = Depends(get_db)) -> Response:
+    actor = _require_admin(request)
+    row = db.get(CustomsWarehouseClearance, clearance_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Clearance not found.")
+    product = row.product_name
+    db.delete(row)
+    db.commit()
+    record_event(actor=actor, action="clearance_deleted", target=str(clearance_id), details={"product": product})
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 class CertificateUrl(BaseModel):

@@ -273,24 +273,39 @@ export async function customsCertificateUrl(invoiceId: string): Promise<string> 
 }
 
 // ── Cleared goods ────────────────────────────────────────────────────────────
+export type ClearedStatus = 'customs' | 'transit' | 'company';
 export interface ClearedRow {
   id: string; invoiceName: string; productName: string; seriesBatch: string | null;
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
   comment: string | null; clearedAt: string;
+  warehouseStatus: ClearedStatus | null; acknowledged: boolean;
 }
 export interface ClearedList {
   items: ClearedRow[]; total: number; totalQty: number; totalPallets: number; totalBoxes: number;
+  unacknowledged: number;
 }
 export async function listCleared(params: { q?: string; regime?: string }): Promise<ClearedList> {
   const r = await request<any>(`/customs/cleared${qs({ q: params.q, regime: params.regime })}`);
   return {
     total: r.total, totalQty: r.total_qty, totalPallets: r.total_pallets, totalBoxes: r.total_boxes,
+    unacknowledged: r.unacknowledged ?? 0,
     items: r.items.map((x: any) => ({
       id: x.id, invoiceName: x.invoice_name, productName: x.product_name, seriesBatch: x.series_batch,
       regime: x.regime, qty: x.qty, pallets: x.pallets, boxes: x.boxes,
       comment: x.comment, clearedAt: x.cleared_at,
+      warehouseStatus: (x.warehouse_status ?? null) as ClearedStatus | null, acknowledged: !!x.acknowledged,
     })),
   };
+}
+export async function setClearedStatus(id: string, status: ClearedStatus): Promise<void> {
+  await request(`/customs/cleared/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+}
+export async function acknowledgeCleared(): Promise<number> {
+  const r = await request<{ acknowledged: number }>(`/customs/cleared/acknowledge`, { method: 'POST' });
+  return r.acknowledged;
+}
+export async function deleteCleared(id: string): Promise<void> {
+  await request(`/customs/cleared/${id}`, { method: 'DELETE' });
 }
 
 export interface ProductExpiryRow {
