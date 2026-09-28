@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { LayoutDashboard, Boxes, Warehouse, ShieldCheck, Send, AlertTriangle, CalendarClock } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import * as api from '../api';
 import { useLang } from '../i18n';
@@ -64,7 +63,6 @@ export default function DashboardPage() {
 
       <div className="snapshot-banner">
         <span>{t('ops.snapshot')}: <b>{summary?.expirySnapshot.source}</b> · {summary?.expirySnapshot.importedAt}</span>
-        <Button size="sm" variant="outline" render={<Link to="/operations" />}>{t('ops.open')}</Button>
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>

@@ -14,7 +14,6 @@ import SalesPage from './pages/SalesPage';
 import OrdersPage from './pages/OrdersPage';
 import CertificatesPage from './pages/CertificatesPage';
 import ConformityCertificatesPage from './pages/ConformityCertificatesPage';
-import OperationsPage from './pages/OperationsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -51,7 +50,6 @@ export default function App() {
               <Route path="orders" element={<OrdersPage />} />
               <Route path="certificates" element={<CertificatesPage />} />
               <Route path="conformity-certificates" element={<ConformityCertificatesPage />} />
-              <Route path="operations" element={<OperationsPage />} />
               <Route path="products/:productId" element={<ProductDetailPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

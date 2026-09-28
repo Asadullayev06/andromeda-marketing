@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Boxes, Warehouse, ShieldCheck, BookOpen, TrendingUp,
   Rocket, LogOut, Menu, X, ChevronDown,
-  FileBadge, PackageCheck, ShoppingCart, ShieldAlert,
+  FileBadge, PackageCheck, ShoppingCart,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { useLang, type Lang } from './i18n';
@@ -29,7 +29,6 @@ const NAV: NavEntry[] = [
   },
   { to: '/sales', icon: TrendingUp, key: 'nav.sales' },
   { to: '/orders', icon: ShoppingCart, key: 'nav.orders' },
-  { to: '/operations', icon: ShieldAlert, key: 'nav.operations' },
 ];
 
 function NavGroupItem({ group, onNavigate }: { group: NavGroup; onNavigate: () => void }) {
