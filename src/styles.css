@@ -168,12 +168,31 @@ button { font-family: inherit; }
    full "active" pill for the selected sub-item only. */
 .nav-group-toggle.active-parent { color: #fff; background: var(--sidebar-2); }
 
-.nav-subitems { display: flex; flex-direction: column; margin: 2px 0 4px; }
+/* Sub-items sit inset under the parent with a dashed connector line and a
+   bullet per item, so the hierarchy reads at a glance (not like top-level pages). */
+.nav-subitems {
+  display: grid;
+  gap: 2px;
+  margin: 2px 12px 6px 30px;
+  padding-left: 14px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.18);
+}
 .nav-item.nav-subitem {
-  padding-left: 46px;
+  margin: 0;
+  padding: 9px 14px;
+  gap: 11px;
   font-size: 14px;
   font-weight: 600;
 }
+.nav-sub-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.nav-item.nav-subitem.active .nav-sub-dot { opacity: 1; }
 
 .sidebar-spacer { flex: 1; }
 

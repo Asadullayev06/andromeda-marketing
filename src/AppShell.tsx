@@ -61,6 +61,7 @@ function NavGroupItem({ group, onNavigate }: { group: NavGroup; onNavigate: () =
               className={({ isActive }) => `nav-item nav-subitem ${isActive ? 'active' : ''}`}
               onClick={onNavigate}
             >
+              <span className="nav-sub-dot" aria-hidden="true" />
               <span>{t(c.key)}</span>
             </NavLink>
           ))}
