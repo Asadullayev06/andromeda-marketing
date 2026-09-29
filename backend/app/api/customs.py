@@ -239,8 +239,13 @@ class AcknowledgeResult(BaseModel):
 
 @router.post("/cleared/acknowledge", response_model=AcknowledgeResult)
 def acknowledge_cleared(request: Request, db: Session = Depends(get_db)) -> AcknowledgeResult:
-    """Mark every not-yet-accepted clearance as received ("Qabul qilindi")."""
-    actor = _require_admin(request)
+    """Mark every not-yet-accepted clearance as received ("Qabul qilindi").
+
+    Open to any signed-in user (guests included) — accepting is a low-risk
+    acknowledgement. The read-only guest gate is bypassed for this path in
+    main.py's GUEST_WRITABLE_PATHS.
+    """
+    actor = getattr(request.state, "user_name", "user")
     rows = db.scalars(
         select(CustomsWarehouseClearance).where(CustomsWarehouseClearance.acknowledged_at.is_(None))
     ).all()

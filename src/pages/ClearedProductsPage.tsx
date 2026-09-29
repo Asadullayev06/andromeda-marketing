@@ -83,11 +83,9 @@ export default function ClearedProductsPage() {
         <div className="new-banner" role="status">
           <BellRing size={18} />
           <span>{t('cleared.newBanner').replace('{count}', String(unacknowledged))}</span>
-          {isAdmin && (
-            <button type="button" className="new-banner-btn" onClick={acceptAll} disabled={busy === 'ack'}>
-              <Check size={15} /> {t('cleared.acknowledge')}
-            </button>
-          )}
+          <button type="button" className="new-banner-btn" onClick={acceptAll} disabled={busy === 'ack'}>
+            <Check size={15} /> {t('cleared.acknowledge')}
+          </button>
         </div>
       )}
 
