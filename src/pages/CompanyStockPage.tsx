@@ -73,7 +73,7 @@ export default function CompanyStockPage() {
 
   return (
     <>
-      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} actions={role === 'admin' || role === 'sysadmin' ? <><input ref={fileInput} hidden type="file" accept=".xlsx" onChange={(e) => { const file = e.target.files?.[0]; if (file) void importWorkbook(file); }} /><Button variant="outline" disabled={importing} onClick={() => fileInput.current?.click()}><Upload data-icon="inline-start" />{importing ? t('company.expiry.importing') : t('company.expiry.import')}</Button></> : undefined} />
+      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} actions={(role === 'admin' || role === 'sysadmin') && (!snapshot?.source.startsWith('Smartup sync') || snapshot.source.includes('legacy file')) ? <><input ref={fileInput} hidden type="file" accept=".xlsx" onChange={(e) => { const file = e.target.files?.[0]; if (file) void importWorkbook(file); }} /><Button variant="outline" disabled={importing} onClick={() => fileInput.current?.click()}><Upload data-icon="inline-start" />{importing ? t('company.expiry.importing') : t('company.expiry.import')}</Button></> : undefined} />
       {snapshot && <div className={`snapshot-banner ${snapshot.isStale ? 'stale' : ''}`}><span>{t('ops.snapshot')}: <b>{snapshot.source}</b> · {snapshot.importedAt} · {fmtNum(snapshot.productCount)} {t('wh.products')}</span>{snapshot.isStale && <Chip tone="amber">{t('ops.stale')} · {snapshot.ageDays}d</Chip>}</div>}
       {importError && <div className="login-error">{importError}</div>}
 

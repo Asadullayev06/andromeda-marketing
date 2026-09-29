@@ -108,7 +108,11 @@ and navigation retain their existing layout.
 
 ### Marketing-owned operational data
 
-Expiry imports and stock-edit audit events are stored outside the shared
-ANDROMEDA schema. Set `MARKETING_DATA_DIR` to a persistent mounted directory in
-production. Admins can replace the expiry snapshot from the Company stock page
-using a Smartup `.xlsx` export; imports are validated and written atomically.
+After the first applied ANDROMEDA Smartup stock sync, Marketing reads batch and
+expiry details from the shared `smartup_stock_batch_rows` snapshot. The sync
+replaces only its selected warehouses, atomically with their stock totals. The
+Company stock page shows how many warehouses have synced and keeps legacy
+expiry rows for projects not yet synced. Before the first sync, the legacy
+Smartup `.xlsx` snapshot remains available; set
+`MARKETING_DATA_DIR` to persistent storage if using that fallback. Stock-edit
+audit events also use this directory.

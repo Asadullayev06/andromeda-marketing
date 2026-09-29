@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from pydantic import BaseModel
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from ..db import get_db
@@ -22,7 +22,7 @@ from ..models import (
     WarehouseStock,
 )
 from ..services.audit import recent_events, record_event
-from ..services.expiry_store import import_workbook, indexes, normalize_product_name, rows_for_product, snapshot_info
+from ..services.expiry_store import _live_payload, import_workbook, indexes, normalize_product_name, rows_for_product, snapshot_info
 from ..services.order_balance import load_order_balances
 from .company_stock import CUSTOMS_REGIMES, INCOMING_REGIMES, _add_months, _month_first, _series_avg
 
@@ -48,20 +48,24 @@ class SnapshotInfo(BaseModel):
 
 
 @router.get("/expiry/status", response_model=SnapshotInfo)
-def expiry_status() -> SnapshotInfo:
-    return SnapshotInfo(**snapshot_info())
+def expiry_status(db: Session = Depends(get_db)) -> SnapshotInfo:
+    return SnapshotInfo(**snapshot_info(db))
 
 
 @router.post("/expiry/import", response_model=SnapshotInfo)
-async def expiry_import(request: Request, file: UploadFile = File(...)) -> SnapshotInfo:
+async def expiry_import(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)) -> SnapshotInfo:
     actor = _require_admin(request)
+    live = _live_payload(db)
+    if live is not None and not live["has_legacy_items"]:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Expiry details now come from the Smartup stock sync. Preview and apply stock in ANDROMEDA.")
     content = await file.read()
     try:
         result = import_workbook(content, file.filename or "stock-details.xlsx")
     except ValueError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
     record_event(actor=actor, action="expiry_snapshot.imported", target=file.filename or "workbook", details=result)
-    return SnapshotInfo(**result)
+    db.info.pop("smartup_expiry_payload", None)
+    return SnapshotInfo(**snapshot_info(db))
 
 
 class DashboardSummary(BaseModel):
@@ -99,7 +103,7 @@ def dashboard_summary(db: Session = Depends(get_db)) -> DashboardSummary:
     expiring = 0
     for product in products:
         expiring += sum(
-            1 for row in rows_for_product(product)
+            1 for row in rows_for_product(product, db)
             if row.get("expiry_date") and date.fromisoformat(row["expiry_date"]) <= expiry_cutoff
         )
     return DashboardSummary(
@@ -110,7 +114,7 @@ def dashboard_summary(db: Session = Depends(get_db)) -> DashboardSummary:
         sold_12m=float(sold),
         expiring_batches=expiring,
         low_stock_products=low,
-        expiry_snapshot=SnapshotInfo(**snapshot_info()),
+        expiry_snapshot=SnapshotInfo(**snapshot_info(db)),
     )
 
 
@@ -140,7 +144,7 @@ def alerts(db: Session = Depends(get_db), limit: int = Query(default=300, ge=1, 
     stock = dict(db.execute(select(WarehouseStock.product_id, func.sum(WarehouseStock.quantity)).group_by(WarehouseStock.product_id)).all())
     result: list[AlertRow] = []
     for product in products:
-        for index, row in enumerate(rows_for_product(product)):
+        for index, row in enumerate(rows_for_product(product, db)):
             if not row.get("expiry_date"):
                 continue
             expiry = date.fromisoformat(row["expiry_date"])
@@ -233,6 +237,13 @@ def data_quality(db: Session = Depends(get_db)) -> list[QualityIssue]:
     products = db.scalars(select(AnalyticsProduct).options(selectinload(AnalyticsProduct.project_rel))).all()
     company = {pid: float(qty or 0) for pid, qty in db.execute(select(AnalyticsStockCompany.analytics_product_id, AnalyticsStockCompany.qty)).all()}
     warehouse = {pid: float(qty or 0) for pid, qty in db.execute(select(WarehouseStock.product_id, func.sum(WarehouseStock.quantity)).group_by(WarehouseStock.product_id)).all()}
+    live_payload = _live_payload(db)
+    live_expiry = live_payload is not None
+    covered_stock = {str(pid): float(qty or 0) for pid, qty in db.execute(text("""
+        SELECT product_id, sum(quantity) FROM warehouse_stocks
+        WHERE warehouse_id IN (SELECT warehouse_id FROM smartup_stock_snapshot_warehouses)
+        GROUP BY product_id
+    """)).all()} if live_expiry else {}
     result: list[QualityIssue] = []
     for product in products:
         missing = [label for label, value in (("external code", product.external_id), ("project", product.project_name), ("manufacturer", product.manufacturer_label), ("category", product.catalog_category)) if not value]
@@ -241,13 +252,19 @@ def data_quality(db: Session = Depends(get_db)) -> list[QualityIssue]:
         c, w = company.get(product.id, 0.0), warehouse.get(product.id, 0.0)
         if abs(c - w) > 0.01:
             result.append(QualityIssue(id=f"balance:{product.id}", kind="balance", severity="critical", product_id=str(product.id), product_name=product.name, detail=f"Company {c:g} vs warehouses {w:g}"))
-        expiry_rows = rows_for_product(product)
+        expiry_rows = rows_for_product(product, db)
         expiry_total = sum(float(row.get("quantity") or 0) for row in expiry_rows)
-        if expiry_rows and abs(c - expiry_total) > 0.01:
-            result.append(QualityIssue(id=f"expiry-balance:{product.id}", kind="expiry_balance", severity="critical", product_id=str(product.id), product_name=product.name, detail=f"Company {c:g} vs expiry snapshot {expiry_total:g}"))
+        is_synced = live_expiry and (
+            str(product.external_id or "").strip() in live_payload["synced_product_codes"]
+            or normalize_product_name(product.name) in live_payload["synced_product_names"]
+        )
+        expected = covered_stock.get(str(product.id), 0.0) if is_synced else c
+        if expiry_rows and abs(expected - expiry_total) > 0.01:
+            scope = "Synced warehouses" if is_synced else "Company"
+            result.append(QualityIssue(id=f"expiry-balance:{product.id}", kind="expiry_balance", severity="critical", product_id=str(product.id), product_name=product.name, detail=f"{scope} {expected:g} vs expiry snapshot {expiry_total:g}"))
     product_codes = {str(p.external_id or "").strip() for p in products if p.external_id}
     product_names = {normalize_product_name(p.name) for p in products}
-    by_code, _by_name = indexes()
+    by_code, _by_name = indexes(db)
     for code, rows in by_code.items():
         name = str(rows[0].get("product_name") or "")
         if code not in product_codes and normalize_product_name(name) not in product_names:
@@ -285,7 +302,7 @@ def product_dossier(product_id: str, db: Session = Depends(get_db)) -> ProductDo
         product={"id": str(product.id), "name": product.name, "external_id": product.external_id, "project_name": product.project_name, "manufacturer_label": product.manufacturer_label, "category": product.catalog_category, "strength": product.strength, "dosage_form": product.dosage_form, "country": product.country},
         company_stock=float(company_stock),
         warehouses=[{"name": name, "code": code, "quantity": float(qty)} for name, code, qty in wh_rows],
-        expiries=rows_for_product(product),
+        expiries=rows_for_product(product, db),
         customs=[{"id": str(row.id), "invoice": row.invoice.name, "regime": row.regime, "quantity": float(row.qty), "expiry_date": row.product_expiry, "series": [{"batch": series.batch, "quantity": float(series.qty)} for series in row.series]} for row in custom_rows],
         sales=[{"month": month, "dispatched": float(dispatched.get(month, 0) or 0), "sold": float(sold.get(month, 0) or 0)} for month in months],
         certificates=[{"id": str(cert.id), "number": cert.certificate_number, "valid_until": cert.valid_until, "trade_name": cert.trade_name, "has_document": bool(cert.document_storage_path)} for cert in certs],

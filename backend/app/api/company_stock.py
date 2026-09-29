@@ -254,7 +254,7 @@ def list_company_stock(
     product_by_id = {str(p.id): p for p in products}
     for row in items:
         row.expiry_dates_count = len({
-            expiry.get("expiry_date") for expiry in rows_for_product(product_by_id[row.product_id])
+            expiry.get("expiry_date") for expiry in rows_for_product(product_by_id[row.product_id], db)
             if expiry.get("expiry_date")
         })
 
@@ -286,14 +286,14 @@ def product_expiry_breakdown(product_id: str, db: Session = Depends(get_db)) -> 
     product = db.get(AnalyticsProduct, product_id)
     if product is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Product not found.")
-    source_date = date.fromisoformat(snapshot_info()["imported_at"])
+    source_date = date.fromisoformat(snapshot_info(db)["imported_at"])
     items = [
         ProductExpiryRow(
             expiry_date=date.fromisoformat(row["expiry_date"]) if row.get("expiry_date") else None,
             batch_number=row.get("batch_number"),
             quantity=float(row.get("quantity") or 0),
         )
-        for row in rows_for_product(product)
+        for row in rows_for_product(product, db)
     ]
     items.sort(key=lambda item: (item.expiry_date is None, item.expiry_date or date.max, item.batch_number or ""))
     return ProductExpiryBreakdown(
@@ -401,5 +401,5 @@ def set_company_stock(
         avg_sales=0.0,
         warehouse_qty=0.0,
         coverage_months=None,
-        expiry_dates_count=len({r.get("expiry_date") for r in rows_for_product(product) if r.get("expiry_date")}),
+        expiry_dates_count=len({r.get("expiry_date") for r in rows_for_product(product, db) if r.get("expiry_date")}),
     )
