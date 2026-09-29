@@ -13,6 +13,7 @@ from app.api.conformity_certificates import CertificateInput, _read_pdf
 class ConformityCertificateTests(unittest.TestCase):
     def test_certificate_accepts_multiple_batches_and_requires_product(self) -> None:
         valid = {
+            "certificate_number": "TEST-001",
             "product_lines": [{"name": "Cholready", "batches": [
                 {"batch": "250100", "quantity": "24900 packages"},
                 {"batch": "250700", "quantity": "24850 packages"},
