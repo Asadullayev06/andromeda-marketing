@@ -6,6 +6,7 @@ import {
   FileBadge, PackageCheck, ShoppingCart,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { useClearedNotifications } from './ClearedNotificationsContext';
 import { useLang, type Lang } from './i18n';
 
 type NavLeaf = { to: string; end?: boolean; icon?: ComponentType<{ size?: number }>; key: string };
@@ -74,6 +75,7 @@ function NavGroupItem({ group, onNavigate }: { group: NavGroup; onNavigate: () =
 export default function AppShell() {
   const { user, signOut } = useAuth();
   const { t, lang, setLang } = useLang();
+  const { clearedUnack } = useClearedNotifications();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
 
@@ -112,6 +114,9 @@ export default function AppShell() {
               >
                 <Icon size={20} />
                 <span>{t(n.key)}</span>
+                {n.to === '/cleared' && clearedUnack > 0 && (
+                  <span className="nav-badge">{clearedUnack}</span>
+                )}
               </NavLink>
             );
           })}

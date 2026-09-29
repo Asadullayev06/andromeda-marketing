@@ -149,6 +149,16 @@ button { font-family: inherit; }
 .nav-item:hover { background: var(--sidebar-2); color: #fff; }
 .nav-item.active { background: var(--sidebar-active); color: #fff; box-shadow: 0 8px 18px rgba(47,107,255,.4); }
 .nav-item svg { flex-shrink: 0; }
+/* Unread/pending count badge (e.g. new cleared goods awaiting acceptance). */
+.nav-badge {
+  margin-left: auto;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: #6d5dfc; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1;
+}
+.nav-item.active .nav-badge { background: #fff; color: var(--primary-strong); }
 
 /* Collapsible nav group (Certificate library) */
 .nav-group-toggle {

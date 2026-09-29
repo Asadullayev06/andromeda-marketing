@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
+import { ClearedNotificationsProvider } from './ClearedNotificationsContext';
 import { I18nProvider } from './i18n';
 import AppShell from './AppShell';
 import LoginPage from './pages/LoginPage';
@@ -38,7 +39,7 @@ export default function App() {
             <Route path="/login" element={<RedirectIfAuthed><LoginPage /></RedirectIfAuthed>} />
             <Route
               path="/"
-              element={<RequireAuth><AppShell /></RequireAuth>}
+              element={<RequireAuth><ClearedNotificationsProvider><AppShell /></ClearedNotificationsProvider></RequireAuth>}
             >
               <Route index element={<DashboardPage />} />
               <Route path="company-stock" element={<CompanyStockPage />} />

@@ -3,6 +3,7 @@ import { PackageCheck, Search, Layers, Boxes as BoxesIcon, BellRing, Check, Tras
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { useAuth } from '../AuthContext';
+import { useClearedNotifications } from '../ClearedNotificationsContext';
 import { PageHead, Spinner, EmptyState, Stat, Chip, type ChipTone, fmtNum, fmtDate } from '../components';
 import { SortTh, sortRows, useTableSort } from '../tableSort';
 
@@ -19,6 +20,7 @@ const effectiveStatus = (r: api.ClearedRow): api.ClearedStatus =>
 export default function ClearedProductsPage() {
   const { t } = useLang();
   const { role } = useAuth();
+  const { refreshCleared } = useClearedNotifications();
   const isAdmin = role === 'admin' || role === 'sysadmin';
   const [q, setQ] = useState('');
   const [data, setData] = useState<api.ClearedList | null>(null);
@@ -51,7 +53,7 @@ export default function ClearedProductsPage() {
 
   const acceptAll = async () => {
     setBusy('ack');
-    try { await api.acknowledgeCleared(); await load(); }
+    try { await api.acknowledgeCleared(); await load(); refreshCleared(); }
     catch (e) { window.alert((e as Error).message); }
     finally { setBusy(null); }
   };
@@ -66,7 +68,7 @@ export default function ClearedProductsPage() {
   const removeRow = async (id: string) => {
     if (!window.confirm(t('cleared.confirmDelete'))) return;
     setBusy(id);
-    try { await api.deleteCleared(id); await load(); }
+    try { await api.deleteCleared(id); await load(); refreshCleared(); }
     catch (e) { window.alert((e as Error).message); }
     finally { setBusy(null); }
   };
@@ -133,9 +135,7 @@ export default function ClearedProductsPage() {
                   return (
                     <tr key={r.id} className={isNew ? 'row-new' : ''}>
                       <td>
-                        <div className="cell-strong">
-                          {isNew && <Chip tone="blue">{t('cleared.new')}</Chip>} {r.productName}
-                        </div>
+                        <div className="cell-strong">{r.productName}</div>
                       </td>
                       <td>{r.invoiceName}</td>
                       <td>{r.seriesBatch ? <span className="series-chip">{r.seriesBatch}</span> : '—'}</td>

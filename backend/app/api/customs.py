@@ -12,7 +12,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from datetime import datetime, timezone
@@ -216,6 +216,21 @@ def set_cleared_status(clearance_id: UUID, payload: ClearedStatusInput, request:
         comment=row.comment, cleared_at=row.created_at,
         warehouse_status=row.warehouse_status, acknowledged=row.acknowledged_at is not None,
     )
+
+
+class UnacknowledgedCount(BaseModel):
+    count: int
+
+
+@router.get("/cleared/unacknowledged-count", response_model=UnacknowledgedCount)
+def cleared_unacknowledged_count(db: Session = Depends(get_db)) -> UnacknowledgedCount:
+    """Cheap count for the sidebar badge — clearances not yet accepted."""
+    n = db.scalar(
+        select(func.count())
+        .select_from(CustomsWarehouseClearance)
+        .where(CustomsWarehouseClearance.acknowledged_at.is_(None))
+    )
+    return UnacknowledgedCount(count=int(n or 0))
 
 
 class AcknowledgeResult(BaseModel):

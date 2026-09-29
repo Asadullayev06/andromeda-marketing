@@ -300,6 +300,10 @@ export async function listCleared(params: { q?: string; regime?: string }): Prom
 export async function setClearedStatus(id: string, status: ClearedStatus): Promise<void> {
   await request(`/customs/cleared/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
 }
+export async function clearedUnacknowledgedCount(): Promise<number> {
+  const r = await request<{ count: number }>(`/customs/cleared/unacknowledged-count`);
+  return r.count;
+}
 export async function acknowledgeCleared(): Promise<number> {
   const r = await request<{ acknowledged: number }>(`/customs/cleared/acknowledge`, { method: 'POST' });
   return r.acknowledged;
