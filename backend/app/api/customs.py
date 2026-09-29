@@ -123,6 +123,8 @@ class ClearedRow(BaseModel):
     # 'customs' | 'transit' | 'company'; None falls back to the regime.
     warehouse_status: Optional[str] = None
     acknowledged: bool = False
+    acknowledged_at: Optional[datetime] = None
+    acknowledged_by: Optional[str] = None
 
 
 class ClearedList(BaseModel):
@@ -134,14 +136,37 @@ class ClearedList(BaseModel):
     unacknowledged: int
 
 
+def _cleared_row(r: CustomsWarehouseClearance) -> ClearedRow:
+    return ClearedRow(
+        id=str(r.id),
+        invoice_name=r.invoice_name,
+        product_name=r.product_name,
+        series_batch=r.series_batch,
+        regime=r.regime,
+        qty=float(r.qty),
+        pallets=float(r.pallets) if r.pallets is not None else None,
+        boxes=float(r.boxes) if r.boxes is not None else None,
+        comment=r.comment,
+        cleared_at=r.created_at,
+        warehouse_status=r.warehouse_status,
+        acknowledged=r.acknowledged_at is not None,
+        acknowledged_at=r.acknowledged_at,
+        acknowledged_by=r.acknowledged_by,
+    )
+
+
 @router.get("/cleared", response_model=ClearedList)
 def list_cleared(
     db: Session = Depends(get_db),
     q: Optional[str] = Query(default=None),
     regime: Optional[str] = Query(default=None),
+    view: str = Query(default="pending"),
 ) -> ClearedList:
     """Goods that have been cleared out of the customs warehouse (append-only
-    ledger written by ANDROMEDA), newest first."""
+    ledger written by ANDROMEDA), newest first.
+
+    `view`: 'pending' = not yet accepted (default, the main list), 'archived' =
+    already accepted ("Qabul qilindi"), 'all' = both."""
     stmt = select(CustomsWarehouseClearance).order_by(CustomsWarehouseClearance.created_at.desc())
     if q:
         like = f"%{q.strip()}%"
@@ -152,24 +177,12 @@ def list_cleared(
         )
     if regime:
         stmt = stmt.where(CustomsWarehouseClearance.regime == regime)
+    if view == "pending":
+        stmt = stmt.where(CustomsWarehouseClearance.acknowledged_at.is_(None))
+    elif view == "archived":
+        stmt = stmt.where(CustomsWarehouseClearance.acknowledged_at.is_not(None))
     rows = db.scalars(stmt).all()
-    items = [
-        ClearedRow(
-            id=str(r.id),
-            invoice_name=r.invoice_name,
-            product_name=r.product_name,
-            series_batch=r.series_batch,
-            regime=r.regime,
-            qty=float(r.qty),
-            pallets=float(r.pallets) if r.pallets is not None else None,
-            boxes=float(r.boxes) if r.boxes is not None else None,
-            comment=r.comment,
-            cleared_at=r.created_at,
-            warehouse_status=r.warehouse_status,
-            acknowledged=r.acknowledged_at is not None,
-        )
-        for r in rows
-    ]
+    items = [_cleared_row(r) for r in rows]
     return ClearedList(
         items=items,
         total=len(items),
@@ -208,14 +221,7 @@ def set_cleared_status(clearance_id: UUID, payload: ClearedStatusInput, request:
     db.commit()
     db.refresh(row)
     record_event(actor=actor, action="clearance_status_changed", target=str(row.id), details={"status": payload.status, "product": row.product_name})
-    return ClearedRow(
-        id=str(row.id), invoice_name=row.invoice_name, product_name=row.product_name,
-        series_batch=row.series_batch, regime=row.regime, qty=float(row.qty),
-        pallets=float(row.pallets) if row.pallets is not None else None,
-        boxes=float(row.boxes) if row.boxes is not None else None,
-        comment=row.comment, cleared_at=row.created_at,
-        warehouse_status=row.warehouse_status, acknowledged=row.acknowledged_at is not None,
-    )
+    return _cleared_row(row)
 
 
 class UnacknowledgedCount(BaseModel):
@@ -233,30 +239,26 @@ def cleared_unacknowledged_count(db: Session = Depends(get_db)) -> Unacknowledge
     return UnacknowledgedCount(count=int(n or 0))
 
 
-class AcknowledgeResult(BaseModel):
-    acknowledged: int
-
-
-@router.post("/cleared/acknowledge", response_model=AcknowledgeResult)
-def acknowledge_cleared(request: Request, db: Session = Depends(get_db)) -> AcknowledgeResult:
-    """Mark every not-yet-accepted clearance as received ("Qabul qilindi").
+@router.post("/cleared/{clearance_id}/acknowledge", response_model=ClearedRow)
+def acknowledge_cleared(clearance_id: UUID, request: Request, db: Session = Depends(get_db)) -> ClearedRow:
+    """Accept a single cleared line ("Qabul qilindi"). It then moves to the
+    archived view and out of the pending list.
 
     Open to any signed-in user (guests included) — accepting is a low-risk
     acknowledgement. The read-only guest gate is bypassed for this path in
     main.py's GUEST_WRITABLE_PATHS.
     """
     actor = getattr(request.state, "user_name", "user")
-    rows = db.scalars(
-        select(CustomsWarehouseClearance).where(CustomsWarehouseClearance.acknowledged_at.is_(None))
-    ).all()
-    now = datetime.now(timezone.utc)
-    for r in rows:
-        r.acknowledged_at = now
-        r.acknowledged_by = actor
-    db.commit()
-    if rows:
-        record_event(actor=actor, action="clearances_acknowledged", target="cleared", details={"count": len(rows)})
-    return AcknowledgeResult(acknowledged=len(rows))
+    row = db.get(CustomsWarehouseClearance, clearance_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Clearance not found.")
+    if row.acknowledged_at is None:
+        row.acknowledged_at = datetime.now(timezone.utc)
+        row.acknowledged_by = actor
+        db.commit()
+        db.refresh(row)
+        record_event(actor=actor, action="clearance_acknowledged", target=str(row.id), details={"product": row.product_name})
+    return _cleared_row(row)
 
 
 @router.delete("/cleared/{clearance_id}", status_code=status.HTTP_204_NO_CONTENT)

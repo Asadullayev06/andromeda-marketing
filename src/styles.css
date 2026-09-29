@@ -692,6 +692,15 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 }
 .cleared-del-btn:hover { background: var(--red-soft); border-color: var(--red); }
 .cleared-del-btn:disabled { opacity: .5; cursor: default; }
+.cleared-actions { display: inline-flex; align-items: center; gap: 8px; }
+.cleared-accept-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--green); background: var(--green-soft); color: #12813c;
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.cleared-accept-btn:hover { background: #d7f0e0; }
+.cleared-accept-btn:disabled { opacity: .5; cursor: default; }
 .click-row { cursor: pointer; }
 .click-row:hover td { background: #f5f8ff; }
 .field-label { display: inline-flex; align-items: center; gap: 10px; color: var(--text-soft); font-weight: 700; }

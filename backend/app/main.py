@@ -46,9 +46,13 @@ PUBLIC_PATHS = {
 
 # Write endpoints that guests may call despite the read-only gate. Accepting a
 # clearance ("Qabul qilindi") is a low-risk acknowledgement everyone can do.
-GUEST_WRITABLE_PATHS = {
-    "/customs/cleared/acknowledge",
-}
+def _guest_may_write(method: str, path: str) -> bool:
+    # POST /customs/cleared/{id}/acknowledge
+    return (
+        method == "POST"
+        and path.startswith("/customs/cleared/")
+        and path.endswith("/acknowledge")
+    )
 
 
 @app.get("/debug/status")
@@ -117,7 +121,7 @@ async def auth_gate(request: Request, call_next):
         return JSONResponse({"detail": "Unknown role."}, status_code=403, headers={"Cache-Control": "no-store"})
     # Guests are read-only across the whole app, except a few explicit
     # low-risk acknowledgements.
-    if is_write_method(request.method) and role == "guest" and path not in GUEST_WRITABLE_PATHS:
+    if is_write_method(request.method) and role == "guest" and not _guest_may_write(request.method, path):
         return JSONResponse(
             {"detail": "Read-only account: writes are not permitted."},
             status_code=403,

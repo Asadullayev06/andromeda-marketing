@@ -274,18 +274,20 @@ export async function customsCertificateUrl(invoiceId: string): Promise<string> 
 
 // ── Cleared goods ────────────────────────────────────────────────────────────
 export type ClearedStatus = 'customs' | 'transit' | 'company';
+export type ClearedView = 'pending' | 'archived';
 export interface ClearedRow {
   id: string; invoiceName: string; productName: string; seriesBatch: string | null;
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
   comment: string | null; clearedAt: string;
   warehouseStatus: ClearedStatus | null; acknowledged: boolean;
+  acknowledgedAt: string | null; acknowledgedBy: string | null;
 }
 export interface ClearedList {
   items: ClearedRow[]; total: number; totalQty: number; totalPallets: number; totalBoxes: number;
   unacknowledged: number;
 }
-export async function listCleared(params: { q?: string; regime?: string }): Promise<ClearedList> {
-  const r = await request<any>(`/customs/cleared${qs({ q: params.q, regime: params.regime })}`);
+export async function listCleared(params: { q?: string; regime?: string; view?: ClearedView }): Promise<ClearedList> {
+  const r = await request<any>(`/customs/cleared${qs({ q: params.q, regime: params.regime, view: params.view })}`);
   return {
     total: r.total, totalQty: r.total_qty, totalPallets: r.total_pallets, totalBoxes: r.total_boxes,
     unacknowledged: r.unacknowledged ?? 0,
@@ -294,6 +296,7 @@ export async function listCleared(params: { q?: string; regime?: string }): Prom
       regime: x.regime, qty: x.qty, pallets: x.pallets, boxes: x.boxes,
       comment: x.comment, clearedAt: x.cleared_at,
       warehouseStatus: (x.warehouse_status ?? null) as ClearedStatus | null, acknowledged: !!x.acknowledged,
+      acknowledgedAt: x.acknowledged_at ?? null, acknowledgedBy: x.acknowledged_by ?? null,
     })),
   };
 }
@@ -304,9 +307,8 @@ export async function clearedUnacknowledgedCount(): Promise<number> {
   const r = await request<{ count: number }>(`/customs/cleared/unacknowledged-count`);
   return r.count;
 }
-export async function acknowledgeCleared(): Promise<number> {
-  const r = await request<{ acknowledged: number }>(`/customs/cleared/acknowledge`, { method: 'POST' });
-  return r.acknowledged;
+export async function acknowledgeCleared(id: string): Promise<void> {
+  await request(`/customs/cleared/${id}/acknowledge`, { method: 'POST' });
 }
 export async function deleteCleared(id: string): Promise<void> {
   await request(`/customs/cleared/${id}`, { method: 'DELETE' });
