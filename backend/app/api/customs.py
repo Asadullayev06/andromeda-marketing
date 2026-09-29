@@ -94,6 +94,8 @@ def list_customs_products(
         )
         for p in products
     ]
+    # Drop depleted positions (qty 0) — they are not part of the customs stock.
+    rows = [r for r in rows if r.qty > 0]
     # Incoming ("on the way") rows first, then customs-warehouse rows; each A→Z.
     items = sorted(
         rows,
@@ -101,7 +103,7 @@ def list_customs_products(
     )
     return CustomsProductList(
         items=items,
-        total_invoices=len({p.invoice_id for p in products}),
+        total_invoices=len({i.invoice_id for i in items}),
         total_products=len(items),
         total_qty=sum(i.qty for i in items),
     )
