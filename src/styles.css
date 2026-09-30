@@ -696,10 +696,10 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 .cleared-accept-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 8px;
-  border: 1px solid var(--green); background: var(--green-soft); color: #12813c;
+  border: 1px solid #e8820c; background: #fff4e6; color: #c96a00;
   font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
 }
-.cleared-accept-btn:hover { background: #d7f0e0; }
+.cleared-accept-btn:hover { background: #ffe8cc; }
 .cleared-accept-btn:disabled { opacity: .5; cursor: default; }
 .cleared-done-badge {
   display: inline-flex; align-items: center; gap: 6px;
