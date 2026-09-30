@@ -701,6 +701,12 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 }
 .cleared-accept-btn:hover { background: #d7f0e0; }
 .cleared-accept-btn:disabled { opacity: .5; cursor: default; }
+.cleared-done-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  background: var(--green); color: #fff;
+  font-size: 13px; font-weight: 700; white-space: nowrap;
+}
 .click-row { cursor: pointer; }
 .click-row:hover td { background: #f5f8ff; }
 .field-label { display: inline-flex; align-items: center; gap: 10px; color: var(--text-soft); font-weight: 700; }

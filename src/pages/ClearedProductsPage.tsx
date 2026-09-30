@@ -74,7 +74,7 @@ export default function ClearedProductsPage() {
   };
 
   const isPending = view === 'pending';
-  const hasActions = isPending || isAdmin; // pending: accept (everyone); archive: delete (admin)
+  const hasActions = true; // pending: accept btn; archive: "accepted" badge + delete (admin)
 
   return (
     <>
@@ -122,7 +122,7 @@ export default function ClearedProductsPage() {
                   <SortTh label={t('cleared.boxes')} column="boxes" sort={sort} numeric />
                   <SortTh label={t('cleared.comment')} column="comment" sort={sort} />
                   <SortTh label={t('cleared.date')} column="clearedAt" sort={sort} />
-                  {hasActions && <th>{t('cleared.actions')}</th>}
+                  <th>{t('cleared.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,10 +155,9 @@ export default function ClearedProductsPage() {
                       <td className="num">{r.boxes != null ? fmtNum(r.boxes) : '—'}</td>
                       <td style={{ maxWidth: 260, whiteSpace: 'normal', color: 'var(--text-soft)' }}>{r.comment || '—'}</td>
                       <td>{fmtDate(r.clearedAt)}</td>
-                      {hasActions && (
-                        <td>
+                      <td>
                           <div className="cleared-actions">
-                            {isPending && (
+                            {isPending ? (
                               <button
                                 type="button"
                                 className="cleared-accept-btn"
@@ -167,6 +166,10 @@ export default function ClearedProductsPage() {
                               >
                                 <Check size={14} /> {t('cleared.acknowledge')}
                               </button>
+                            ) : (
+                              <span className="cleared-done-badge">
+                                <Check size={14} /> {t('cleared.acknowledged')}
+                              </span>
                             )}
                             {isAdmin && (
                               <button
@@ -182,7 +185,6 @@ export default function ClearedProductsPage() {
                             )}
                           </div>
                         </td>
-                      )}
                     </tr>
                   );
                 })}
