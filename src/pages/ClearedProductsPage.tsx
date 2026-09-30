@@ -120,7 +120,7 @@ export default function ClearedProductsPage() {
                   <SortTh label={t('cleared.pallets')} column="pallets" sort={sort} numeric />
                   <SortTh label={t('cleared.boxes')} column="boxes" sort={sort} numeric />
                   <SortTh label={t('cleared.comment')} column="comment" sort={sort} />
-                  <SortTh label={t('cleared.date')} column="clearedAt" sort={sort} />
+                  <SortTh label={t('cleared.expiry')} column="productExpiry" sort={sort} />
                   <th>{t('cleared.actions')}</th>
                 </tr>
               </thead>
@@ -153,7 +153,7 @@ export default function ClearedProductsPage() {
                       <td className="num">{r.pallets != null ? fmtNum(r.pallets) : '—'}</td>
                       <td className="num">{r.boxes != null ? fmtNum(r.boxes) : '—'}</td>
                       <td style={{ maxWidth: 260, whiteSpace: 'normal', color: 'var(--text-soft)' }}>{r.comment || '—'}</td>
-                      <td>{fmtDate(r.clearedAt)}</td>
+                      <td>{r.productExpiry ? fmtDate(r.productExpiry) : '—'}</td>
                       <td>
                           <div className="cleared-actions">
                             {isPending ? (

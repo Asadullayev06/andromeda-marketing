@@ -278,7 +278,7 @@ export type ClearedView = 'pending' | 'archived';
 export interface ClearedRow {
   id: string; invoiceName: string; productName: string; seriesBatch: string | null;
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
-  comment: string | null; clearedAt: string;
+  comment: string | null; clearedAt: string; productExpiry: string | null;
   warehouseStatus: ClearedStatus | null; acknowledged: boolean;
   acknowledgedAt: string | null; acknowledgedBy: string | null;
 }
@@ -294,7 +294,7 @@ export async function listCleared(params: { q?: string; regime?: string; view?: 
     items: r.items.map((x: any) => ({
       id: x.id, invoiceName: x.invoice_name, productName: x.product_name, seriesBatch: x.series_batch,
       regime: x.regime, qty: x.qty, pallets: x.pallets, boxes: x.boxes,
-      comment: x.comment, clearedAt: x.cleared_at,
+      comment: x.comment, clearedAt: x.cleared_at, productExpiry: x.product_expiry ?? null,
       warehouseStatus: (x.warehouse_status ?? null) as ClearedStatus | null, acknowledged: !!x.acknowledged,
       acknowledgedAt: x.acknowledged_at ?? null, acknowledgedBy: x.acknowledged_by ?? null,
     })),

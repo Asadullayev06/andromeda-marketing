@@ -120,6 +120,7 @@ class ClearedRow(BaseModel):
     boxes: Optional[float] = None
     comment: Optional[str] = None
     cleared_at: datetime
+    product_expiry: Optional[date] = None
     # 'customs' | 'transit' | 'company'; None falls back to the regime.
     warehouse_status: Optional[str] = None
     acknowledged: bool = False
@@ -136,7 +137,7 @@ class ClearedList(BaseModel):
     unacknowledged: int
 
 
-def _cleared_row(r: CustomsWarehouseClearance) -> ClearedRow:
+def _cleared_row(r: CustomsWarehouseClearance, product_expiry: Optional[date] = None) -> ClearedRow:
     return ClearedRow(
         id=str(r.id),
         invoice_name=r.invoice_name,
@@ -148,6 +149,7 @@ def _cleared_row(r: CustomsWarehouseClearance) -> ClearedRow:
         boxes=float(r.boxes) if r.boxes is not None else None,
         comment=r.comment,
         cleared_at=r.created_at,
+        product_expiry=product_expiry,
         warehouse_status=r.warehouse_status,
         acknowledged=r.acknowledged_at is not None,
         acknowledged_at=r.acknowledged_at,
@@ -167,7 +169,14 @@ def list_cleared(
 
     `view`: 'pending' = not yet accepted (default, the main list), 'archived' =
     already accepted ("Qabul qilindi"), 'all' = both."""
-    stmt = select(CustomsWarehouseClearance).order_by(CustomsWarehouseClearance.created_at.desc())
+    stmt = (
+        select(CustomsWarehouseClearance, CustomsWarehouseProduct.product_expiry)
+        .outerjoin(
+            CustomsWarehouseProduct,
+            CustomsWarehouseClearance.product_id == CustomsWarehouseProduct.id,
+        )
+        .order_by(CustomsWarehouseClearance.created_at.desc())
+    )
     if q:
         like = f"%{q.strip()}%"
         stmt = stmt.where(
@@ -181,8 +190,8 @@ def list_cleared(
         stmt = stmt.where(CustomsWarehouseClearance.acknowledged_at.is_(None))
     elif view == "archived":
         stmt = stmt.where(CustomsWarehouseClearance.acknowledged_at.is_not(None))
-    rows = db.scalars(stmt).all()
-    items = [_cleared_row(r) for r in rows]
+    rows = db.execute(stmt).all()
+    items = [_cleared_row(r[0], product_expiry=r[1]) for r in rows]
     return ClearedList(
         items=items,
         total=len(items),
