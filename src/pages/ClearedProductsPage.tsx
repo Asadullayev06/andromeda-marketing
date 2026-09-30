@@ -74,7 +74,6 @@ export default function ClearedProductsPage() {
   };
 
   const isPending = view === 'pending';
-  const hasActions = true; // pending: accept btn; archive: "accepted" badge + delete (admin)
 
   return (
     <>
