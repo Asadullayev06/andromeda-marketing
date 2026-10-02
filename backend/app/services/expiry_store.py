@@ -58,15 +58,20 @@ def _live_payload(db: Session) -> dict | None:
     if not markers[0]:
         db.info["smartup_expiry_payload"] = None
         return None
-    rows = db.execute(text("""
-        SELECT p.external_id, p.name, b.expiry_date, b.batch_number, b.quantity
+    # Older shared schemas have no card_code yet. Show an unknown card there
+    # rather than presenting Smartup's unrelated batch_number as a card.
+    has_card_code = any(column["name"] == "card_code" for column in
+                        inspect(db.connection()).get_columns("smartup_stock_batch_rows"))
+    card_column = "b.card_code" if has_card_code else "NULL"
+    rows = db.execute(text(f"""
+        SELECT p.external_id, p.name, b.expiry_date, {card_column}, b.quantity
         FROM smartup_stock_batch_rows b
         JOIN analytics_products p ON p.id = b.product_id
         WHERE b.quantity > 0
     """)).all()
     aggregate: defaultdict[tuple[str, str, str | None, str | None], Decimal] = defaultdict(Decimal)
-    for code, name, expiry, batch, quantity in rows:
-        aggregate[(str(code or "").strip(), name, str(expiry)[:10] if expiry else None, batch)] += Decimal(str(quantity))
+    for code, name, expiry, card_code, quantity in rows:
+        aggregate[(str(code or "").strip(), name, str(expiry)[:10] if expiry else None, card_code)] += Decimal(str(quantity))
     synced_products = db.execute(text("""
         SELECT p.external_id, p.name FROM analytics_products p
         WHERE p.project_id IN (
@@ -86,9 +91,11 @@ def _live_payload(db: Session) -> dict | None:
     legacy_items = [row for row in legacy.get("items", [])
                     if str(row.get("product_code") or "").strip() not in synced_codes
                     and normalize_product_name(str(row.get("product_name") or "")) not in synced_names]
+    # Preserve the existing response key used by imported Excel snapshots and
+    # current API clients; for live Smartup rows its value is the card code.
     live_items = [{"product_code": code, "product_name": name, "expiry_date": expiry,
-                   "batch_number": batch, "quantity": float(quantity)}
-                  for (code, name, expiry, batch), quantity in aggregate.items()]
+                   "batch_number": card_code, "quantity": float(quantity)}
+                  for (code, name, expiry, card_code), quantity in aggregate.items()]
     live_date = str(markers[1])[:10]
     oldest_date = str(markers[2])[:10]
     if legacy_items:
