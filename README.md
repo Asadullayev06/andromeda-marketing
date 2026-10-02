@@ -32,6 +32,10 @@ quantities. Existing single-batch records are read in the same editor.
 Company-stock expiry and card details come from applied ANDROMEDA Smartup stock
 snapshots. Marketing has no manual expiry upload. Previously imported legacy
 details remain read-only for projects without a Smartup snapshot.
+Stock quantities in Marketing read the shared warehouse and company balances.
+After ANDROMEDA applies a Smartup snapshot, these balances correspond to
+Smartup's **В наличии** (booked plus free stock), excluding **В пути**. Previously
+synced balances need another Smartup apply to adopt this definition.
 
 ## Architecture
 
