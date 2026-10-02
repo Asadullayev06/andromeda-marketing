@@ -29,6 +29,10 @@ quantities. Existing single-batch records are read in the same editor.
 | `/orders` | Read-only purchase orders and documents | `analytics_orders` |
 | `/operations` | Alerts, purchase planning, quality and audit | shared read models + marketing-owned files |
 
+Company-stock expiry and card details come from applied ANDROMEDA Smartup stock
+snapshots. Marketing has no manual expiry upload. Previously imported legacy
+details remain read-only for projects without a Smartup snapshot.
+
 ## Architecture
 
 - **Frontend**: React 19 + TypeScript + Vite + React Router. A distinct Sales

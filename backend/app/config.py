@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     r2_presigned_ttl_seconds: int = 300
 
     # Marketing-owned operational files. Point this at a persistent volume in
-    # production so expiry imports and audit events survive deployments.
+    # production so legacy snapshot reads and audit events survive deployments.
     marketing_data_dir: str = ""
 
     def __init__(self, **values: object) -> None:

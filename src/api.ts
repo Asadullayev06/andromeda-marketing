@@ -541,12 +541,6 @@ function mapSnapshot(r: any): ExpirySnapshotInfo {
 export async function expirySnapshotStatus(): Promise<ExpirySnapshotInfo> {
   return mapSnapshot(await request<any>('/operations/expiry/status'));
 }
-export async function importExpiryWorkbook(file: File): Promise<ExpirySnapshotInfo> {
-  const body = new FormData();
-  body.append('file', file);
-  return mapSnapshot(await request<any>('/operations/expiry/import', { method: 'POST', body }));
-}
-
 export interface DashboardSummary {
   companyProducts: number; warehouses: number; customsPositions: number;
   dispatched12m: number; sold12m: number; expiringBatches: number; lowStockProducts: number;

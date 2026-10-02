@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date, date as CalendarDate, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
@@ -21,8 +21,8 @@ from ..models import (
     Warehouse,
     WarehouseStock,
 )
-from ..services.audit import recent_events, record_event
-from ..services.expiry_store import _live_payload, import_workbook, indexes, normalize_product_name, rows_for_product, snapshot_info
+from ..services.audit import recent_events
+from ..services.expiry_store import indexes, normalize_product_name, rows_for_product, snapshot_info
 from ..services.order_balance import load_order_balances
 from .company_stock import CUSTOMS_REGIMES, INCOMING_REGIMES, _add_months, _month_first, _series_avg
 
@@ -49,22 +49,6 @@ class SnapshotInfo(BaseModel):
 
 @router.get("/expiry/status", response_model=SnapshotInfo)
 def expiry_status(db: Session = Depends(get_db)) -> SnapshotInfo:
-    return SnapshotInfo(**snapshot_info(db))
-
-
-@router.post("/expiry/import", response_model=SnapshotInfo)
-async def expiry_import(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)) -> SnapshotInfo:
-    actor = _require_admin(request)
-    live = _live_payload(db)
-    if live is not None and not live["has_legacy_items"]:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Expiry details now come from the Smartup stock sync. Preview and apply stock in ANDROMEDA.")
-    content = await file.read()
-    try:
-        result = import_workbook(content, file.filename or "stock-details.xlsx")
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
-    record_event(actor=actor, action="expiry_snapshot.imported", target=file.filename or "workbook", details=result)
-    db.info.pop("smartup_expiry_payload", None)
     return SnapshotInfo(**snapshot_info(db))
 
 

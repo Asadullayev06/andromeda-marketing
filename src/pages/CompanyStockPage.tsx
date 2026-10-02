@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Boxes, Search, Check, Pencil, X, ArrowRight, ChevronDown, ChevronRight, CalendarDays, Upload, FileSearch } from 'lucide-react';
+import { Boxes, Search, Check, Pencil, X, ArrowRight, ChevronDown, ChevronRight, CalendarDays, FileSearch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
 import { useAuth } from '../AuthContext';
@@ -26,7 +26,7 @@ function covTone(months: number | null): 'healthy' | 'risk' | 'none' {
 
 export default function CompanyStockPage() {
   const { t } = useLang();
-  const { canWrite, role } = useAuth();
+  const { canWrite } = useAuth();
   const [q, setQ] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [projectId, setProjectId] = useState('');
@@ -39,21 +39,11 @@ export default function CompanyStockPage() {
   const [lookups, setLookups] = useState<api.Lookups | null>(null);
   const [modalProduct, setModalProduct] = useState<api.CompanyStockRow | null>(null);
   const [snapshot, setSnapshot] = useState<api.ExpirySnapshotInfo | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState('');
   const [openExpiries, setOpenExpiries] = useState<Record<string, boolean>>({});
   const debounce = useRef<number | undefined>(undefined);
-  const fileInput = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => { api.fetchLookups().then(setLookups).catch(() => {}); }, []);
   useEffect(() => { api.expirySnapshotStatus().then(setSnapshot).catch(() => {}); }, []);
-
-  async function importWorkbook(file: File) {
-    setImporting(true); setImportError('');
-    try { setSnapshot(await api.importExpiryWorkbook(file)); await load(); }
-    catch (cause) { setImportError(cause instanceof Error ? cause.message : t('company.expiry.importFailed')); }
-    finally { setImporting(false); if (fileInput.current) fileInput.current.value = ''; }
-  }
 
   const load = useMemo(() => async () => {
     setLoading(true);
@@ -73,9 +63,8 @@ export default function CompanyStockPage() {
 
   return (
     <>
-      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} actions={(role === 'admin' || role === 'sysadmin') && (!snapshot?.source.startsWith('Smartup sync') || snapshot.source.includes('legacy file')) ? <><input ref={fileInput} hidden type="file" accept=".xlsx" onChange={(e) => { const file = e.target.files?.[0]; if (file) void importWorkbook(file); }} /><Button variant="outline" disabled={importing} onClick={() => fileInput.current?.click()}><Upload data-icon="inline-start" />{importing ? t('company.expiry.importing') : t('company.expiry.import')}</Button></> : undefined} />
+      <PageHead icon={<Boxes size={24} />} title={t('company.title')} sub={t('company.sub')} />
       {snapshot && <div className={`snapshot-banner ${snapshot.isStale ? 'stale' : ''}`}><span>{t('ops.snapshot')}: <b>{snapshot.source}</b> · {snapshot.importedAt} · {fmtNum(snapshot.productCount)} {t('wh.products')}</span>{snapshot.isStale && <Chip tone="amber">{t('ops.stale')} · {snapshot.ageDays}d</Chip>}</div>}
-      {importError && <div className="login-error">{importError}</div>}
 
       <div className="filter-row">
         <button className={`pill ${!onlyInStock ? 'active' : ''}`} onClick={() => { setOnlyInStock(false); setPage(1); }}>
