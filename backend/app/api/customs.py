@@ -214,7 +214,10 @@ def list_cleared(
         visible_documents = db.scalars(
             select(CustomsWarehouseClearanceDocument).where(
                 CustomsWarehouseClearanceDocument.clearance_id.in_([row[0].id for row in rows]),
-                CustomsWarehouseClearanceDocument.recipient_user_ids.contains([user.id]),
+                (
+                    CustomsWarehouseClearanceDocument.recipient_user_ids.contains([user.id])
+                    | (func.cardinality(CustomsWarehouseClearanceDocument.recipient_user_ids) == 0)
+                ),
             ).order_by(CustomsWarehouseClearanceDocument.created_at)
         ).all()
         for doc in visible_documents:
@@ -324,7 +327,7 @@ def get_clearance_document_url(
     username = getattr(request.state, "user_name", None)
     user = db.scalar(select(User).where(User.username == username, User.disabled.is_(False))) if username else None
     doc = db.get(CustomsWarehouseClearanceDocument, document_id)
-    if user is None or doc is None or user.id not in doc.recipient_user_ids:
+    if user is None or doc is None or (doc.recipient_user_ids and user.id not in doc.recipient_user_ids):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found.")
     ttl = min(settings.r2_presigned_ttl_seconds, 60)
     try:

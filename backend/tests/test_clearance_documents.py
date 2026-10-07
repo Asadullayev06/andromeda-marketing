@@ -44,3 +44,15 @@ class ClearanceDocumentAccessTests(TestCase):
         with self.assertRaises(HTTPException) as denied:
             get_clearance_document_url(uuid4(), request, _Session(SimpleNamespace(id=uuid4()), None))
         self.assertEqual(denied.exception.status_code, 404)
+
+    def test_everyone_document_allows_any_signed_in_user(self):
+        document = SimpleNamespace(storage_path="private/shared.pdf", recipient_user_ids=[])
+        request = SimpleNamespace(state=SimpleNamespace(user_name="someone"))
+        with patch("app.api.customs.r2.create_download_url", return_value="https://signed.example/shared"):
+            result = get_clearance_document_url(uuid4(), request, _Session(SimpleNamespace(id=uuid4()), document))
+        self.assertEqual(result.url, "https://signed.example/shared")
+
+        request.state.user_name = None
+        with self.assertRaises(HTTPException) as denied:
+            get_clearance_document_url(uuid4(), request, _Session(None, document))
+        self.assertEqual(denied.exception.status_code, 404)
