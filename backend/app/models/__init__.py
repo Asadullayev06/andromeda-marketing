@@ -23,6 +23,7 @@ from .customs_warehouse import (
     CustomsWarehouseProduct,
     CustomsWarehouseSeries,
     CustomsWarehouseClearance,
+    CustomsWarehouseClearanceDocument,
 )
 from .certificate import Certificate, CertificateProductLink
 from .conformity_certificate import ConformityCertificate
@@ -44,6 +45,7 @@ __all__ = [
     "CustomsWarehouseProduct",
     "CustomsWarehouseSeries",
     "CustomsWarehouseClearance",
+    "CustomsWarehouseClearanceDocument",
     "Certificate",
     "CertificateProductLink",
     "ConformityCertificate",

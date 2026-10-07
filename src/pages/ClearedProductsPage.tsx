@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { PackageCheck, Search, Layers, Boxes as BoxesIcon, Check, Trash2 } from 'lucide-react';
+import { PackageCheck, Search, Layers, Boxes as BoxesIcon, Check, Trash2, FileText } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { useAuth } from '../AuthContext';
@@ -73,6 +73,19 @@ export default function ClearedProductsPage() {
     finally { setBusy(null); }
   };
 
+  const openDocument = async (id: string) => {
+    const tab = window.open('about:blank', '_blank');
+    if (tab) tab.opener = null;
+    try {
+      const url = await api.clearanceDocumentUrl(id);
+      if (tab) tab.location.replace(url);
+      else window.location.assign(url);
+    } catch (e) {
+      tab?.close();
+      window.alert((e as Error).message);
+    }
+  };
+
   const isPending = view === 'pending';
 
   return (
@@ -120,6 +133,7 @@ export default function ClearedProductsPage() {
                   <SortTh label={t('cleared.pallets')} column="pallets" sort={sort} numeric />
                   <SortTh label={t('cleared.boxes')} column="boxes" sort={sort} numeric />
                   <SortTh label={t('cleared.comment')} column="comment" sort={sort} />
+                  <th>{t('cleared.documents')}</th>
                   <SortTh label={t('cleared.expiry')} column="productExpiry" sort={sort} />
                   <th>{t('cleared.actions')}</th>
                 </tr>
@@ -153,6 +167,19 @@ export default function ClearedProductsPage() {
                       <td className="num">{r.pallets != null ? fmtNum(r.pallets) : '—'}</td>
                       <td className="num">{r.boxes != null ? fmtNum(r.boxes) : '—'}</td>
                       <td style={{ maxWidth: 260, whiteSpace: 'normal', color: 'var(--text-soft)' }}>{r.comment || '—'}</td>
+                      <td>
+                        {r.documents.length ? r.documents.map((doc) => (
+                          <button
+                            key={doc.id}
+                            type="button"
+                            className="cleared-document-btn"
+                            title={doc.fileName}
+                            onClick={() => openDocument(doc.id)}
+                          >
+                            <FileText size={14} /> {doc.fileName}
+                          </button>
+                        )) : '—'}
+                      </td>
                       <td>{r.productExpiry ? fmtDate(r.productExpiry) : '—'}</td>
                       <td>
                           <div className="cleared-actions">

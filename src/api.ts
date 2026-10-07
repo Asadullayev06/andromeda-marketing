@@ -280,6 +280,7 @@ export interface ClearedRow {
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
   comment: string | null; clearedAt: string; productExpiry: string | null;
   warehouseStatus: ClearedStatus | null; acknowledged: boolean;
+  documents: { id: string; fileName: string; sizeBytes: number }[];
   acknowledgedAt: string | null; acknowledgedBy: string | null;
 }
 export interface ClearedList {
@@ -296,6 +297,9 @@ export async function listCleared(params: { q?: string; regime?: string; view?: 
       regime: x.regime, qty: x.qty, pallets: x.pallets, boxes: x.boxes,
       comment: x.comment, clearedAt: x.cleared_at, productExpiry: x.product_expiry ?? null,
       warehouseStatus: (x.warehouse_status ?? null) as ClearedStatus | null, acknowledged: !!x.acknowledged,
+      documents: (x.documents ?? []).map((doc: any) => ({
+        id: doc.id, fileName: doc.file_name, sizeBytes: doc.size_bytes,
+      })),
       acknowledgedAt: x.acknowledged_at ?? null, acknowledgedBy: x.acknowledged_by ?? null,
     })),
   };
@@ -309,6 +313,11 @@ export async function clearedUnacknowledgedCount(): Promise<number> {
 }
 export async function acknowledgeCleared(id: string): Promise<void> {
   await request(`/customs/cleared/${id}/acknowledge`, { method: 'POST' });
+}
+
+export async function clearanceDocumentUrl(id: string): Promise<string> {
+  const result = await request<{ url: string }>(`/customs/cleared/documents/${id}/url`);
+  return result.url;
 }
 export async function deleteCleared(id: string): Promise<void> {
   await request(`/customs/cleared/${id}`, { method: 'DELETE' });

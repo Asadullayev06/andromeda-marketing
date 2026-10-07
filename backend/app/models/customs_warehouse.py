@@ -10,8 +10,8 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Numeric, Text
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship  # noqa: F401
 
 from .base import Base, TimestampMixin, UUIDPKMixin
@@ -105,3 +105,16 @@ class CustomsWarehouseClearance(UUIDPKMixin, TimestampMixin, Base):
     warehouse_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     acknowledged_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+
+class CustomsWarehouseClearanceDocument(UUIDPKMixin, TimestampMixin, Base):
+    """Read-only view of documents owned by ANDROMEDA's clearance ledger."""
+
+    __tablename__ = "customs_warehouse_clearance_documents"
+
+    clearance_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True))
+    file_name: Mapped[str] = mapped_column(Text)
+    storage_path: Mapped[str] = mapped_column(Text)
+    size_bytes: Mapped[int] = mapped_column(BigInteger)
+    mime_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    recipient_user_ids: Mapped[list[uuid.UUID]] = mapped_column(ARRAY(UUID(as_uuid=True)))
