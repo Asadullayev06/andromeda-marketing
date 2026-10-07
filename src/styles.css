@@ -693,6 +693,12 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 .cleared-del-btn:hover { background: var(--red-soft); border-color: var(--red); }
 .cleared-del-btn:disabled { opacity: .5; cursor: default; }
 .cleared-actions { display: inline-flex; align-items: center; gap: 8px; }
+.cleared-document-btn {
+  display: flex; align-items: center; gap: 5px; max-width: 190px;
+  padding: 3px 0; border: 0; background: none; color: var(--accent, #2563eb);
+  cursor: pointer; text-align: left; overflow-wrap: anywhere;
+}
+.cleared-document-btn:hover { text-decoration: underline; }
 .cleared-accept-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 8px;

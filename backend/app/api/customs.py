@@ -11,7 +11,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -22,9 +22,11 @@ from ..config import settings
 from ..db import get_db
 from ..models import (
     CustomsWarehouseClearance,
+    CustomsWarehouseClearanceDocument,
     CustomsWarehouseInvoice,
     CustomsWarehouseProduct,
     CustomsWarehouseSeries,
+    User,
 )
 from ..services.audit import record_event
 from ..storage import r2
@@ -109,6 +111,12 @@ def list_customs_products(
     )
 
 
+class ClearedDocument(BaseModel):
+    id: str
+    file_name: str
+    size_bytes: int
+
+
 class ClearedRow(BaseModel):
     id: str
     invoice_name: str
@@ -126,6 +134,7 @@ class ClearedRow(BaseModel):
     acknowledged: bool = False
     acknowledged_at: Optional[datetime] = None
     acknowledged_by: Optional[str] = None
+    documents: list[ClearedDocument] = Field(default_factory=list)
 
 
 class ClearedList(BaseModel):
@@ -137,7 +146,11 @@ class ClearedList(BaseModel):
     unacknowledged: int
 
 
-def _cleared_row(r: CustomsWarehouseClearance, product_expiry: Optional[date] = None) -> ClearedRow:
+def _cleared_row(
+    r: CustomsWarehouseClearance,
+    product_expiry: Optional[date] = None,
+    documents: list[CustomsWarehouseClearanceDocument] | None = None,
+) -> ClearedRow:
     return ClearedRow(
         id=str(r.id),
         invoice_name=r.invoice_name,
@@ -154,11 +167,14 @@ def _cleared_row(r: CustomsWarehouseClearance, product_expiry: Optional[date] = 
         acknowledged=r.acknowledged_at is not None,
         acknowledged_at=r.acknowledged_at,
         acknowledged_by=r.acknowledged_by,
+        documents=[ClearedDocument(id=str(doc.id), file_name=doc.file_name,
+                                   size_bytes=doc.size_bytes) for doc in (documents or [])],
     )
 
 
 @router.get("/cleared", response_model=ClearedList)
 def list_cleared(
+    request: Request,
     db: Session = Depends(get_db),
     q: Optional[str] = Query(default=None),
     regime: Optional[str] = Query(default=None),
@@ -191,7 +207,20 @@ def list_cleared(
     elif view == "archived":
         stmt = stmt.where(CustomsWarehouseClearance.acknowledged_at.is_not(None))
     rows = db.execute(stmt).all()
-    items = [_cleared_row(r[0], product_expiry=r[1]) for r in rows]
+    username = getattr(request.state, "user_name", None)
+    user = db.scalar(select(User).where(User.username == username, User.disabled.is_(False))) if username else None
+    documents_by_clearance: dict[UUID, list[CustomsWarehouseClearanceDocument]] = {}
+    if user and rows:
+        visible_documents = db.scalars(
+            select(CustomsWarehouseClearanceDocument).where(
+                CustomsWarehouseClearanceDocument.clearance_id.in_([row[0].id for row in rows]),
+                CustomsWarehouseClearanceDocument.recipient_user_ids.contains([user.id]),
+            ).order_by(CustomsWarehouseClearanceDocument.created_at)
+        ).all()
+        for doc in visible_documents:
+            documents_by_clearance.setdefault(doc.clearance_id, []).append(doc)
+    items = [_cleared_row(r[0], product_expiry=r[1],
+                          documents=documents_by_clearance.get(r[0].id)) for r in rows]
     return ClearedList(
         items=items,
         total=len(items),
@@ -286,6 +315,27 @@ def delete_cleared(clearance_id: UUID, request: Request, db: Session = Depends(g
 class CertificateUrl(BaseModel):
     url: str
     expires_in_seconds: int
+
+
+@router.get("/cleared/documents/{document_id}/url", response_model=CertificateUrl)
+def get_clearance_document_url(
+    document_id: UUID, request: Request, db: Session = Depends(get_db),
+) -> CertificateUrl:
+    username = getattr(request.state, "user_name", None)
+    user = db.scalar(select(User).where(User.username == username, User.disabled.is_(False))) if username else None
+    doc = db.get(CustomsWarehouseClearanceDocument, document_id)
+    if user is None or doc is None or user.id not in doc.recipient_user_ids:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found.")
+    ttl = min(settings.r2_presigned_ttl_seconds, 60)
+    try:
+        url = r2.create_download_url(
+            key=doc.storage_path, ttl_seconds=ttl,
+        )
+    except r2.R2NotConfigured:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Document storage is not configured.")
+    except Exception:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Document storage is temporarily unavailable.")
+    return CertificateUrl(url=url, expires_in_seconds=ttl)
 
 
 @router.get("/invoices/{invoice_id}/certificate-url", response_model=CertificateUrl)
