@@ -176,9 +176,9 @@ export default function ClearedProductsPage() {
                             title={doc.fileName}
                             onClick={() => openDocument(doc.id)}
                           >
-                            <FileText size={14} /> {doc.documentType === 'im40' ? 'IM-40'
-                              : doc.documentType === 'invoice' ? t('cleared.invoice')
-                              : doc.documentType === 'packing_list' ? t('cleared.packingList')
+                            <FileText size={14} /> {doc.documentType === 'im40' || /^(?:im|им)[\s_-]*40/i.test(doc.fileName) ? 'IM-40'
+                              : doc.documentType === 'invoice' || /^(?:invoice|inv[\s_-]|инв)/i.test(doc.fileName) ? t('cleared.invoice')
+                              : doc.documentType === 'packing_list' || /^(?:packing|упаков|пак(?:инг)?)/i.test(doc.fileName) ? t('cleared.packingList')
                               : doc.fileName}
                           </button>
                         )) : '—'}
