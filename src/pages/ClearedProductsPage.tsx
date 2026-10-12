@@ -176,7 +176,10 @@ export default function ClearedProductsPage() {
                             title={doc.fileName}
                             onClick={() => openDocument(doc.id)}
                           >
-                            <FileText size={14} /> {doc.fileName}
+                            <FileText size={14} /> {doc.documentType === 'im40' ? 'IM-40'
+                              : doc.documentType === 'invoice' ? t('cleared.invoice')
+                              : doc.documentType === 'packing_list' ? t('cleared.packingList')
+                              : doc.fileName}
                           </button>
                         )) : '—'}
                       </td>

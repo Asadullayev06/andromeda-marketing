@@ -280,7 +280,7 @@ export interface ClearedRow {
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
   comment: string | null; clearedAt: string; productExpiry: string | null;
   warehouseStatus: ClearedStatus | null; acknowledged: boolean;
-  documents: { id: string; fileName: string; sizeBytes: number }[];
+  documents: { id: string; fileName: string; documentType: string | null; sizeBytes: number }[];
   acknowledgedAt: string | null; acknowledgedBy: string | null;
 }
 export interface ClearedList {
@@ -298,7 +298,7 @@ export async function listCleared(params: { q?: string; regime?: string; view?: 
       comment: x.comment, clearedAt: x.cleared_at, productExpiry: x.product_expiry ?? null,
       warehouseStatus: (x.warehouse_status ?? null) as ClearedStatus | null, acknowledged: !!x.acknowledged,
       documents: (x.documents ?? []).map((doc: any) => ({
-        id: doc.id, fileName: doc.file_name, sizeBytes: doc.size_bytes,
+        id: doc.id, fileName: doc.file_name, documentType: doc.document_type ?? null, sizeBytes: doc.size_bytes,
       })),
       acknowledgedAt: x.acknowledged_at ?? null, acknowledgedBy: x.acknowledged_by ?? null,
     })),

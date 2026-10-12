@@ -114,6 +114,7 @@ class CustomsWarehouseClearanceDocument(UUIDPKMixin, TimestampMixin, Base):
 
     clearance_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True))
     file_name: Mapped[str] = mapped_column(Text)
+    document_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     storage_path: Mapped[str] = mapped_column(Text)
     size_bytes: Mapped[int] = mapped_column(BigInteger)
     mime_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

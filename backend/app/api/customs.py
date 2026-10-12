@@ -114,6 +114,7 @@ def list_customs_products(
 class ClearedDocument(BaseModel):
     id: str
     file_name: str
+    document_type: Optional[str] = None
     size_bytes: int
 
 
@@ -168,6 +169,7 @@ def _cleared_row(
         acknowledged_at=r.acknowledged_at,
         acknowledged_by=r.acknowledged_by,
         documents=[ClearedDocument(id=str(doc.id), file_name=doc.file_name,
+                                   document_type=doc.document_type,
                                    size_bytes=doc.size_bytes) for doc in (documents or [])],
     )
 
