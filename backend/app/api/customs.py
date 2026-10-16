@@ -21,6 +21,7 @@ from uuid import UUID
 from ..config import settings
 from ..db import get_db
 from ..models import (
+    AnalyticsProduct,
     CustomsWarehouseClearance,
     CustomsWarehouseClearanceDocument,
     CustomsWarehouseInvoice,
@@ -122,6 +123,7 @@ class ClearedRow(BaseModel):
     id: str
     invoice_name: str
     product_name: str
+    manufacturer: Optional[str] = None
     series_batch: Optional[str] = None
     regime: Optional[str] = None
     qty: float
@@ -151,11 +153,13 @@ def _cleared_row(
     r: CustomsWarehouseClearance,
     product_expiry: Optional[date] = None,
     documents: list[CustomsWarehouseClearanceDocument] | None = None,
+    manufacturer: Optional[str] = None,
 ) -> ClearedRow:
     return ClearedRow(
         id=str(r.id),
         invoice_name=r.invoice_name,
         product_name=r.product_name,
+        manufacturer=manufacturer,
         series_batch=r.series_batch,
         regime=r.regime,
         qty=float(r.qty),
@@ -188,10 +192,18 @@ def list_cleared(
     `view`: 'pending' = not yet accepted (default, the main list), 'archived' =
     already accepted ("Qabul qilindi"), 'all' = both."""
     stmt = (
-        select(CustomsWarehouseClearance, CustomsWarehouseProduct.product_expiry)
+        select(
+            CustomsWarehouseClearance,
+            CustomsWarehouseProduct.product_expiry,
+            AnalyticsProduct.manufacturer_label,
+        )
         .outerjoin(
             CustomsWarehouseProduct,
             CustomsWarehouseClearance.product_id == CustomsWarehouseProduct.id,
+        )
+        .outerjoin(
+            AnalyticsProduct,
+            func.lower(AnalyticsProduct.name) == func.lower(CustomsWarehouseClearance.product_name),
         )
         .order_by(CustomsWarehouseClearance.created_at.desc())
     )
@@ -225,7 +237,8 @@ def list_cleared(
         for doc in visible_documents:
             documents_by_clearance.setdefault(doc.clearance_id, []).append(doc)
     items = [_cleared_row(r[0], product_expiry=r[1],
-                          documents=documents_by_clearance.get(r[0].id)) for r in rows]
+                          documents=documents_by_clearance.get(r[0].id),
+                          manufacturer=r[2]) for r in rows]
     return ClearedList(
         items=items,
         total=len(items),

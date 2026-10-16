@@ -126,6 +126,7 @@ export default function ClearedProductsPage() {
               <thead>
                 <tr>
                   <SortTh label={t('common.product')} column="productName" sort={sort} />
+                  <SortTh label={t('cleared.manufacturer')} column="manufacturer" sort={sort} />
                   <SortTh label={t('cleared.invoice')} column="invoiceName" sort={sort} />
                   <SortTh label={t('cleared.series')} column="seriesBatch" sort={sort} />
                   <SortTh label={t('customs.regime')} column="regime" sort={sort} />
@@ -145,6 +146,7 @@ export default function ClearedProductsPage() {
                   return (
                     <tr key={r.id}>
                       <td><div className="cell-strong">{r.productName}</div></td>
+                      <td>{r.manufacturer || '—'}</td>
                       <td>{r.invoiceName}</td>
                       <td>{r.seriesBatch ? <span className="series-chip">{r.seriesBatch}</span> : '—'}</td>
                       <td>
