@@ -719,6 +719,14 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
   border: 1px solid rgba(220, 38, 38, .35); background: rgba(220, 38, 38, .08); color: #b91c1c;
   font-size: 11px; font-weight: 700; white-space: nowrap;
 }
+.sellable-badge {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid rgba(22, 163, 74, .4); background: rgba(22, 163, 74, .1); color: #15803d;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.badge-btn { cursor: pointer; font-family: inherit; }
+.badge-btn:hover { filter: brightness(.96); text-decoration: underline; }
 .cleared-release-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 8px;
@@ -728,17 +736,22 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
 .cleared-release-btn:hover { background: rgba(124, 58, 237, .16); }
 /* Release-for-sale modal */
 .release-modal .modal-head h3 { margin: 0; font-size: 19px; font-weight: 800; }
-.release-section { margin-top: 16px; display: grid; gap: 8px; }
+.release-section { margin-top: 16px; display: grid; gap: 12px; }
 .release-label { font-weight: 700; font-size: 13px; color: var(--text-soft); }
+.release-doc-card {
+  display: grid; gap: 10px; padding: 12px;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2);
+}
 .release-doc-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .release-doc-row .field { max-width: 150px; }
+.release-who { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.release-who-label { font-size: 13px; font-weight: 700; color: var(--text-soft); }
+.release-who label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
 .release-add-btn {
   align-self: start; margin-top: 2px; padding: 4px 10px; border-radius: 8px;
   border: 1px dashed var(--border-strong); background: none; color: var(--text-soft);
   font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
 }
-.release-radios { display: flex; gap: 18px; }
-.release-radios label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
 .release-user-list {
   display: grid; gap: 6px; max-height: 180px; overflow-y: auto;
   border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--surface-2);

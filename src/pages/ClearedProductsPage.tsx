@@ -17,6 +17,23 @@ const STATUS_META: Record<api.ClearedStatus, { tone: ChipTone; key: string }> = 
 const effectiveStatus = (r: api.ClearedRow): api.ClearedStatus =>
   r.warehouseStatus ?? ((r.regime || '').toUpperCase().includes('INCOMING') ? 'transit' : 'customs');
 
+// Red "no sale permission" / green "sellable" badge for ND-40 goods. When
+// `onEdit` is set (admin on the awaiting-certificate tab) the badge is a button
+// that opens the release/edit dialog.
+function SaleBadge({ row, onEdit }: { row: api.ClearedRow; onEdit?: () => void }) {
+  const { t } = useLang();
+  if (!row.noSalePermission) return null;
+  const released = row.saleReleased;
+  const cls = released ? 'sellable-badge' : 'no-sale-badge';
+  const inner = released
+    ? <><Check size={12} /> {t('cleared.sellable')}</>
+    : <><ShieldAlert size={12} /> {t('cleared.noSale')}</>;
+  if (onEdit) {
+    return <button type="button" className={`${cls} badge-btn`} onClick={onEdit} title={t('cleared.editRelease')}>{inner}</button>;
+  }
+  return <span className={cls} title={released ? t('cleared.sellableHint') : t('cleared.noSaleHint')}>{inner}</span>;
+}
+
 export default function ClearedProductsPage() {
   const { t } = useLang();
   const { role } = useAuth();
@@ -154,11 +171,7 @@ export default function ClearedProductsPage() {
                     <tr key={r.id}>
                       <td>
                         <div className="cell-strong">{r.productName}</div>
-                        {r.noSalePermission && (
-                          <span className="no-sale-badge" title={t('cleared.noSaleHint')}>
-                            <ShieldAlert size={12} /> {t('cleared.noSale')}
-                          </span>
-                        )}
+                        <SaleBadge row={r} onEdit={isAwaiting && isAdmin ? () => setReleaseRow(r) : undefined} />
                       </td>
                       <td>{r.manufacturer || '—'}</td>
                       <td>{r.invoiceName}</td>
@@ -212,20 +225,16 @@ export default function ClearedProductsPage() {
                                 <Check size={14} /> {t('cleared.acknowledge')}
                               </button>
                             ) : isAwaiting ? (
-                              r.saleReleased ? (
-                                <span className="cleared-done-badge" title={t('cleared.movingToArchive')}>
-                                  <Check size={14} /> {t('cleared.released')}
-                                </span>
-                              ) : isAdmin ? (
+                              isAdmin ? (
                                 <button
                                   type="button"
                                   className="cleared-release-btn"
                                   onClick={() => setReleaseRow(r)}
                                 >
-                                  <Upload size={14} /> {t('cleared.release')}
+                                  <Upload size={14} /> {r.saleReleased ? t('cleared.editDocs') : t('cleared.release')}
                                 </button>
                               ) : (
-                                <span className="no-sale-badge"><ShieldAlert size={12} /> {t('cleared.noSale')}</span>
+                                <SaleBadge row={r} />
                               )
                             ) : (
                               <span className="cleared-done-badge">
@@ -265,32 +274,39 @@ export default function ClearedProductsPage() {
   );
 }
 
-type DocDraft = { id: number; file: File | null; documentType: string };
+type DocDraft = {
+  id: number;
+  file: File | null;
+  documentType: string;
+  mode: 'everyone' | 'specific';
+  selected: Set<string>;
+};
+
+const newDoc = (id: number, documentType: string): DocDraft =>
+  ({ id, file: null, documentType, mode: 'everyone', selected: new Set() });
 
 function ReleaseModal({ row, onClose, onDone }: { row: api.ClearedRow; onClose: () => void; onDone: () => void }) {
   const { t } = useLang();
-  const [docs, setDocs] = useState<DocDraft[]>([{ id: 1, file: null, documentType: 'im40' }]);
-  const [recipientsMode, setRecipientsMode] = useState<'everyone' | 'specific'>('everyone');
+  const [docs, setDocs] = useState<DocDraft[]>([newDoc(1, 'certificate'), newDoc(2, 'im40')]);
   const [recipients, setRecipients] = useState<api.DocumentRecipient[]>([]);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
-  const nextId = useRef(2);
+  const nextId = useRef(3);
 
   useEffect(() => {
     api.clearedDocumentRecipients().then(setRecipients).catch(() => setRecipients([]));
   }, []);
 
-  const addDoc = () => setDocs((d) => [...d, { id: nextId.current++, file: null, documentType: 'other' }]);
+  const addDoc = () => setDocs((d) => [...d, newDoc(nextId.current++, 'other')]);
   const removeDoc = (id: number) => setDocs((d) => (d.length > 1 ? d.filter((x) => x.id !== id) : d));
-  const setDocFile = (id: number, file: File | null) => setDocs((d) => d.map((x) => (x.id === id ? { ...x, file } : x)));
-  const setDocType = (id: number, documentType: string) => setDocs((d) => d.map((x) => (x.id === id ? { ...x, documentType } : x)));
-  const toggleUser = (uid: string) => setSelected((s) => {
-    const next = new Set(s);
+  const patch = (id: number, p: Partial<DocDraft>) => setDocs((d) => d.map((x) => (x.id === id ? { ...x, ...p } : x)));
+  const toggleUser = (id: number, uid: string) => setDocs((d) => d.map((x) => {
+    if (x.id !== id) return x;
+    const next = new Set(x.selected);
     if (next.has(uid)) next.delete(uid); else next.add(uid);
-    return next;
-  });
+    return { ...x, selected: next };
+  }));
 
-  const ready = docs.every((d) => d.file) && (recipientsMode === 'everyone' || selected.size > 0);
+  const ready = docs.every((d) => d.file && (d.mode === 'everyone' || d.selected.size > 0));
 
   const submit = async () => {
     if (!ready) return;
@@ -299,7 +315,7 @@ function ReleaseModal({ row, onClose, onDone }: { row: api.ClearedRow; onClose: 
       await api.releaseClearedSale(row.id, docs.map((d) => ({
         file: d.file as File,
         documentType: d.documentType,
-        recipients: recipientsMode === 'everyone' ? 'everyone' : Array.from(selected),
+        recipients: d.mode === 'everyone' ? 'everyone' : Array.from(d.selected),
       })));
       onDone();
     } catch (e) {
@@ -318,42 +334,41 @@ function ReleaseModal({ row, onClose, onDone }: { row: api.ClearedRow; onClose: 
         <p className="modal-sub">{row.productName} · {row.invoiceName}</p>
 
         <div className="release-section">
-          <label className="release-label">{t('cleared.documents')}</label>
           {docs.map((d) => (
-            <div key={d.id} className="release-doc-row">
-              <select className="field" value={d.documentType} onChange={(e) => setDocType(d.id, e.target.value)}>
-                <option value="im40">IM-40</option>
-                <option value="certificate">{t('cleared.docCertificate')}</option>
-                <option value="other">{t('cleared.docOther')}</option>
-              </select>
-              <input type="file" onChange={(e) => setDocFile(d.id, e.target.files?.[0] ?? null)} />
-              {docs.length > 1 && (
-                <button type="button" className="cleared-del-btn" onClick={() => removeDoc(d.id)} aria-label={t('cleared.delete')}>
-                  <X size={14} />
-                </button>
+            <div key={d.id} className="release-doc-card">
+              <div className="release-doc-row">
+                <select className="field" value={d.documentType} onChange={(e) => patch(d.id, { documentType: e.target.value })}>
+                  <option value="im40">IM-40</option>
+                  <option value="certificate">{t('cleared.docCertificate')}</option>
+                  <option value="invoice">{t('cleared.docInvoice')}</option>
+                  <option value="other">{t('cleared.docOther')}</option>
+                </select>
+                <input type="file" onChange={(e) => patch(d.id, { file: e.target.files?.[0] ?? null })} />
+                {docs.length > 1 && (
+                  <button type="button" className="cleared-del-btn" onClick={() => removeDoc(d.id)} aria-label={t('cleared.delete')}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="release-who">
+                <span className="release-who-label">{t('cleared.whoCanSee')}:</span>
+                <label><input type="radio" checked={d.mode === 'everyone'} onChange={() => patch(d.id, { mode: 'everyone' })} /> {t('cleared.everyone')}</label>
+                <label><input type="radio" checked={d.mode === 'specific'} onChange={() => patch(d.id, { mode: 'specific' })} /> {t('cleared.specificUsers')}</label>
+              </div>
+              {d.mode === 'specific' && (
+                <div className="release-user-list">
+                  {recipients.map((u) => (
+                    <label key={u.id} className="release-user">
+                      <input type="checkbox" checked={d.selected.has(u.id)} onChange={() => toggleUser(d.id, u.id)} />
+                      {u.displayName}
+                    </label>
+                  ))}
+                  {recipients.length === 0 && <span className="modal-sub">—</span>}
+                </div>
               )}
             </div>
           ))}
           <button type="button" className="release-add-btn" onClick={addDoc}>+ {t('cleared.addDocument')}</button>
-        </div>
-
-        <div className="release-section">
-          <label className="release-label">{t('cleared.whoCanSee')}</label>
-          <div className="release-radios">
-            <label><input type="radio" checked={recipientsMode === 'everyone'} onChange={() => setRecipientsMode('everyone')} /> {t('cleared.everyone')}</label>
-            <label><input type="radio" checked={recipientsMode === 'specific'} onChange={() => setRecipientsMode('specific')} /> {t('cleared.specificUsers')}</label>
-          </div>
-          {recipientsMode === 'specific' && (
-            <div className="release-user-list">
-              {recipients.map((u) => (
-                <label key={u.id} className="release-user">
-                  <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggleUser(u.id)} />
-                  {u.displayName}
-                </label>
-              ))}
-              {recipients.length === 0 && <span className="modal-sub">—</span>}
-            </div>
-          )}
         </div>
 
         <div className="modal-actions">
