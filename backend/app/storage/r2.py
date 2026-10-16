@@ -72,3 +72,25 @@ def create_download_url(*, key: str, ttl_seconds: int = 300) -> str:
         )
     except (BotoCoreError, ClientError) as exc:
         raise R2Error(f"R2 presign failed: {type(exc).__name__}") from exc
+
+
+def upload_document(*, key: str, body, content_type: str = "application/octet-stream") -> None:
+    """Upload a file object to R2 under `key`. Used when a Sales admin attaches
+    the certificate / IM-40 for a released ND-40 clearance."""
+    try:
+        _client().put_object(
+            Bucket=settings.r2_bucket,
+            Key=key,
+            Body=body,
+            ContentType=content_type,
+        )
+    except (BotoCoreError, ClientError) as exc:
+        raise R2Error(f"R2 upload failed: {type(exc).__name__}") from exc
+
+
+def delete_document(*, key: str) -> None:
+    """Delete an object previously uploaded by this app."""
+    try:
+        _client().delete_object(Bucket=settings.r2_bucket, Key=key)
+    except (BotoCoreError, ClientError) as exc:
+        raise R2Error(f"R2 delete failed: {type(exc).__name__}") from exc

@@ -274,7 +274,7 @@ export async function customsCertificateUrl(invoiceId: string): Promise<string> 
 
 // ── Cleared goods ────────────────────────────────────────────────────────────
 export type ClearedStatus = 'customs' | 'transit' | 'company';
-export type ClearedView = 'pending' | 'archived';
+export type ClearedView = 'pending' | 'awaiting_cert' | 'archived';
 export interface ClearedRow {
   id: string; invoiceName: string; productName: string; manufacturer: string | null; seriesBatch: string | null;
   regime: string | null; qty: number; pallets: number | null; boxes: number | null;
@@ -282,7 +282,10 @@ export interface ClearedRow {
   warehouseStatus: ClearedStatus | null; acknowledged: boolean;
   documents: { id: string; fileName: string; documentType: string | null; sizeBytes: number }[];
   acknowledgedAt: string | null; acknowledgedBy: string | null;
+  noSalePermission: boolean; saleReleased: boolean;
+  saleReleasedAt: string | null; saleReleasedBy: string | null;
 }
+export interface DocumentRecipient { id: string; username: string; displayName: string; }
 export interface ClearedList {
   items: ClearedRow[]; total: number; totalQty: number; totalPallets: number; totalBoxes: number;
   unacknowledged: number;
@@ -301,8 +304,26 @@ export async function listCleared(params: { q?: string; regime?: string; view?: 
         id: doc.id, fileName: doc.file_name, documentType: doc.document_type ?? null, sizeBytes: doc.size_bytes,
       })),
       acknowledgedAt: x.acknowledged_at ?? null, acknowledgedBy: x.acknowledged_by ?? null,
+      noSalePermission: !!x.no_sale_permission, saleReleased: !!x.sale_released,
+      saleReleasedAt: x.sale_released_at ?? null, saleReleasedBy: x.sale_released_by ?? null,
     })),
   };
+}
+export async function clearedDocumentRecipients(): Promise<DocumentRecipient[]> {
+  const r = await request<any[]>(`/customs/cleared/document-recipients`);
+  return r.map((u) => ({ id: u.id, username: u.username, displayName: u.display_name }));
+}
+export async function releaseClearedSale(
+  id: string,
+  docs: { file: File; documentType: string | null; recipients: string[] | 'everyone' }[],
+): Promise<void> {
+  const form = new FormData();
+  const recipientGroups = docs.map((d) => (d.recipients === 'everyone' ? { everyone: true } : d.recipients));
+  const docTypes = docs.map((d) => d.documentType);
+  for (const d of docs) form.append('files', d.file, d.file.name);
+  form.append('document_recipients_json', JSON.stringify(recipientGroups));
+  form.append('document_types_json', JSON.stringify(docTypes));
+  await request(`/customs/cleared/${id}/release`, { method: 'POST', body: form });
 }
 export async function setClearedStatus(id: string, status: ClearedStatus): Promise<void> {
   await request(`/customs/cleared/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });

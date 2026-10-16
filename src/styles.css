@@ -713,6 +713,38 @@ table.data.matrix tbody tr:hover td.sticky-col { background: var(--surface-2); }
   background: var(--green); color: #fff;
   font-size: 13px; font-weight: 700; white-space: nowrap;
 }
+.no-sale-badge {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid rgba(220, 38, 38, .35); background: rgba(220, 38, 38, .08); color: #b91c1c;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.cleared-release-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid #7c3aed; background: rgba(124, 58, 237, .08); color: #6d28d9;
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.cleared-release-btn:hover { background: rgba(124, 58, 237, .16); }
+/* Release-for-sale modal */
+.release-modal .modal-head h3 { margin: 0; font-size: 19px; font-weight: 800; }
+.release-section { margin-top: 16px; display: grid; gap: 8px; }
+.release-label { font-weight: 700; font-size: 13px; color: var(--text-soft); }
+.release-doc-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.release-doc-row .field { max-width: 150px; }
+.release-add-btn {
+  align-self: start; margin-top: 2px; padding: 4px 10px; border-radius: 8px;
+  border: 1px dashed var(--border-strong); background: none; color: var(--text-soft);
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.release-radios { display: flex; gap: 18px; }
+.release-radios label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+.release-user-list {
+  display: grid; gap: 6px; max-height: 180px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--surface-2);
+}
+.release-user { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 .click-row { cursor: pointer; }
 .click-row:hover td { background: #f5f8ff; }
 .field-label { display: inline-flex; align-items: center; gap: 10px; color: var(--text-soft); font-weight: 700; }

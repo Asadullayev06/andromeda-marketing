@@ -105,6 +105,9 @@ class CustomsWarehouseClearance(UUIDPKMixin, TimestampMixin, Base):
     warehouse_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     acknowledged_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Sale-permission release for ND-40 goods (ANDROMEDA migration 0121).
+    sale_released_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    sale_released_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
 class CustomsWarehouseClearanceDocument(UUIDPKMixin, TimestampMixin, Base):

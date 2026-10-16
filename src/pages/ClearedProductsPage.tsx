@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { PackageCheck, Search, Layers, Boxes as BoxesIcon, Check, Trash2, FileText } from 'lucide-react';
+import { PackageCheck, Search, Layers, Boxes as BoxesIcon, Check, Trash2, FileText, ShieldAlert, Upload, X } from 'lucide-react';
 import * as api from '../api';
 import { useLang } from '../i18n';
 import { useAuth } from '../AuthContext';
@@ -86,7 +86,11 @@ export default function ClearedProductsPage() {
     }
   };
 
+  const [releaseRow, setReleaseRow] = useState<api.ClearedRow | null>(null);
+  const onReleased = () => { setReleaseRow(null); load(); refreshCleared(); };
+
   const isPending = view === 'pending';
+  const isAwaiting = view === 'awaiting_cert';
 
   return (
     <>
@@ -96,7 +100,10 @@ export default function ClearedProductsPage() {
         <button type="button" className={`pill ${isPending ? 'active' : ''}`} onClick={() => setView('pending')}>
           {t('cleared.tabPending')}
         </button>
-        <button type="button" className={`pill ${!isPending ? 'active' : ''}`} onClick={() => setView('archived')}>
+        <button type="button" className={`pill ${isAwaiting ? 'active' : ''}`} onClick={() => setView('awaiting_cert')}>
+          {t('cleared.tabAwaitingCert')}
+        </button>
+        <button type="button" className={`pill ${view === 'archived' ? 'active' : ''}`} onClick={() => setView('archived')}>
           {t('cleared.tabArchived')}
         </button>
       </div>
@@ -118,7 +125,7 @@ export default function ClearedProductsPage() {
       {loading && !data ? (
         <Spinner label={t('common.loading')} />
       ) : data && data.items.length === 0 ? (
-        <div className="table-wrap"><EmptyState title={isPending ? t('cleared.emptyPending') : t('cleared.emptyArchived')} /></div>
+        <div className="table-wrap"><EmptyState title={isPending ? t('cleared.emptyPending') : isAwaiting ? t('cleared.emptyAwaitingCert') : t('cleared.emptyArchived')} /></div>
       ) : (
         <div className="table-wrap">
           <div className="table-scroll frozen">
@@ -145,7 +152,14 @@ export default function ClearedProductsPage() {
                   const meta = STATUS_META[st];
                   return (
                     <tr key={r.id}>
-                      <td><div className="cell-strong">{r.productName}</div></td>
+                      <td>
+                        <div className="cell-strong">{r.productName}</div>
+                        {r.noSalePermission && (
+                          <span className="no-sale-badge" title={t('cleared.noSaleHint')}>
+                            <ShieldAlert size={12} /> {t('cleared.noSale')}
+                          </span>
+                        )}
+                      </td>
                       <td>{r.manufacturer || '—'}</td>
                       <td>{r.invoiceName}</td>
                       <td>{r.seriesBatch ? <span className="series-chip">{r.seriesBatch}</span> : '—'}</td>
@@ -197,6 +211,22 @@ export default function ClearedProductsPage() {
                               >
                                 <Check size={14} /> {t('cleared.acknowledge')}
                               </button>
+                            ) : isAwaiting ? (
+                              r.saleReleased ? (
+                                <span className="cleared-done-badge" title={t('cleared.movingToArchive')}>
+                                  <Check size={14} /> {t('cleared.released')}
+                                </span>
+                              ) : isAdmin ? (
+                                <button
+                                  type="button"
+                                  className="cleared-release-btn"
+                                  onClick={() => setReleaseRow(r)}
+                                >
+                                  <Upload size={14} /> {t('cleared.release')}
+                                </button>
+                              ) : (
+                                <span className="no-sale-badge"><ShieldAlert size={12} /> {t('cleared.noSale')}</span>
+                              )
                             ) : (
                               <span className="cleared-done-badge">
                                 <Check size={14} /> {t('cleared.acknowledged')}
@@ -227,6 +257,112 @@ export default function ClearedProductsPage() {
           </div>
         </div>
       )}
+
+      {releaseRow && (
+        <ReleaseModal row={releaseRow} onClose={() => setReleaseRow(null)} onDone={onReleased} />
+      )}
     </>
+  );
+}
+
+type DocDraft = { id: number; file: File | null; documentType: string };
+
+function ReleaseModal({ row, onClose, onDone }: { row: api.ClearedRow; onClose: () => void; onDone: () => void }) {
+  const { t } = useLang();
+  const [docs, setDocs] = useState<DocDraft[]>([{ id: 1, file: null, documentType: 'im40' }]);
+  const [recipientsMode, setRecipientsMode] = useState<'everyone' | 'specific'>('everyone');
+  const [recipients, setRecipients] = useState<api.DocumentRecipient[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
+  const nextId = useRef(2);
+
+  useEffect(() => {
+    api.clearedDocumentRecipients().then(setRecipients).catch(() => setRecipients([]));
+  }, []);
+
+  const addDoc = () => setDocs((d) => [...d, { id: nextId.current++, file: null, documentType: 'other' }]);
+  const removeDoc = (id: number) => setDocs((d) => (d.length > 1 ? d.filter((x) => x.id !== id) : d));
+  const setDocFile = (id: number, file: File | null) => setDocs((d) => d.map((x) => (x.id === id ? { ...x, file } : x)));
+  const setDocType = (id: number, documentType: string) => setDocs((d) => d.map((x) => (x.id === id ? { ...x, documentType } : x)));
+  const toggleUser = (uid: string) => setSelected((s) => {
+    const next = new Set(s);
+    if (next.has(uid)) next.delete(uid); else next.add(uid);
+    return next;
+  });
+
+  const ready = docs.every((d) => d.file) && (recipientsMode === 'everyone' || selected.size > 0);
+
+  const submit = async () => {
+    if (!ready) return;
+    setSubmitting(true);
+    try {
+      await api.releaseClearedSale(row.id, docs.map((d) => ({
+        file: d.file as File,
+        documentType: d.documentType,
+        recipients: recipientsMode === 'everyone' ? 'everyone' : Array.from(selected),
+      })));
+      onDone();
+    } catch (e) {
+      window.alert((e as Error).message);
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal release-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h3>{t('cleared.releaseTitle')}</h3>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t('action.close')}><X size={18} /></button>
+        </div>
+        <p className="modal-sub">{row.productName} · {row.invoiceName}</p>
+
+        <div className="release-section">
+          <label className="release-label">{t('cleared.documents')}</label>
+          {docs.map((d) => (
+            <div key={d.id} className="release-doc-row">
+              <select className="field" value={d.documentType} onChange={(e) => setDocType(d.id, e.target.value)}>
+                <option value="im40">IM-40</option>
+                <option value="certificate">{t('cleared.docCertificate')}</option>
+                <option value="other">{t('cleared.docOther')}</option>
+              </select>
+              <input type="file" onChange={(e) => setDocFile(d.id, e.target.files?.[0] ?? null)} />
+              {docs.length > 1 && (
+                <button type="button" className="cleared-del-btn" onClick={() => removeDoc(d.id)} aria-label={t('cleared.delete')}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+          <button type="button" className="release-add-btn" onClick={addDoc}>+ {t('cleared.addDocument')}</button>
+        </div>
+
+        <div className="release-section">
+          <label className="release-label">{t('cleared.whoCanSee')}</label>
+          <div className="release-radios">
+            <label><input type="radio" checked={recipientsMode === 'everyone'} onChange={() => setRecipientsMode('everyone')} /> {t('cleared.everyone')}</label>
+            <label><input type="radio" checked={recipientsMode === 'specific'} onChange={() => setRecipientsMode('specific')} /> {t('cleared.specificUsers')}</label>
+          </div>
+          {recipientsMode === 'specific' && (
+            <div className="release-user-list">
+              {recipients.map((u) => (
+                <label key={u.id} className="release-user">
+                  <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggleUser(u.id)} />
+                  {u.displayName}
+                </label>
+              ))}
+              {recipients.length === 0 && <span className="modal-sub">—</span>}
+            </div>
+          )}
+        </div>
+
+        <div className="modal-actions">
+          <button type="button" className="btn-ghost" onClick={onClose}>{t('action.cancel')}</button>
+          <button type="button" className="cleared-accept-btn" disabled={!ready || submitting} onClick={submit}>
+            <Check size={14} /> {submitting ? t('common.loading') : t('cleared.release')}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
